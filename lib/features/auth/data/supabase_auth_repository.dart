@@ -1,8 +1,4 @@
-// Plobby · Acceso con Google REAL (Supabase Auth). NO COMPILADO NI EJECUTADO.
-// Cópialo a lib/features/auth/data/supabase_auth_repository.dart cuando actives `supabase_flutter` en pubspec.yaml
-// y sustituye authRepositoryProvider en main.dart:
-//   await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabasePublishableKey);   // Env: lib/core/config/env.dart
-//   ProviderScope(overrides: [authRepositoryProvider.overrideWithValue(SupabaseAuthRepository(Supabase.instance.client))], child: …)
+// Plobby · Acceso con Google REAL (Supabase Auth). Se activa en lib/core/supabase/supabase_bootstrap.dart cuando hay credenciales.
 // SOLO se usa la clave anon (pública, protegida por RLS). NUNCA pongas la service_role key en la app.
 //
 // CONFIGURACIÓN EXTERNA PENDIENTE (no se puede hacer desde código):

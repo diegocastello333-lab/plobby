@@ -484,12 +484,30 @@ language sql stable security definer set search_path = public as $$
   limit 50;
 $$;
 
+-- ── Feed: jugadores y sets de los partidos que aparecen en MI feed. `matches` solo es legible por sus participantes,
+--    así que una tarjeta de partido de un amigo no podría mostrar rivales ni marcador sin esta función.
+--    Solo devuelve partidos CONFIRMADOS que tengan una publicación visible para quien llama (can_view_user del autor).
+create or replace function public.feed_match_summaries(p_match_ids uuid[])
+returns table (match_id uuid, league_name text, venue text, players jsonb, sets jsonb)
+language sql stable security definer set search_path = public as $$
+  select m.id, l.name, coalesce(m.club, ''),
+         (select coalesce(jsonb_agg(jsonb_build_object('id', p.id, 'name', p.display_name, 'username', p.username, 'avatar_url', p.avatar_url, 'team', mp.team, 'elo_delta', mp.elo_delta)), '[]'::jsonb)
+            from public.match_players mp join public.profiles p on p.id = mp.user_id where mp.match_id = m.id),
+         (select coalesce(jsonb_agg(jsonb_build_array(s.team1_games, s.team2_games) order by s.set_no), '[]'::jsonb) from public.match_sets s where s.match_id = m.id)
+  from public.matches m
+  left join public.leagues l on l.id = m.league_id
+  where m.id = any (coalesce(p_match_ids, '{}'::uuid[])) and m.status = 'confirmed'
+    and exists (select 1 from public.feed_posts fp where fp.related_match_id = m.id and public.can_view_user(fp.user_id))
+  limit 100;
+$$;
+
 -- ── Permisos de ejecución (misma política que 20261119_hardening)
 do $$ declare f record; begin
   for f in select p.oid::regprocedure as sig from pg_proc p join pg_namespace n on n.oid = p.pronamespace
             where n.nspname = 'public' and p.proname in ('set_habitual_partner','get_player_history','league_role','is_league_manager','can_view_league',
               '_can_view_league_match','league_status','_league_notify','create_league','invite_to_league','join_league','join_league_by_code',
-              'league_invite_code','respond_join_request','leave_league','remove_league_member','update_league','league_standings','my_leagues','discover_leagues','_validate_sets') loop
+              'league_invite_code','respond_join_request','leave_league','remove_league_member','update_league','league_standings','my_leagues','discover_leagues','_validate_sets',
+              'feed_match_summaries') loop
     execute format('revoke execute on function %s from public, anon', f.sig);
   end loop;
 end $$;
@@ -500,7 +518,7 @@ grant execute on function public.set_habitual_partner(uuid), public.get_player_h
   public.create_league(text, text, text, text, text, text, text, date, date, int, int, text, int, int, boolean, boolean, uuid[]),
   public.invite_to_league(uuid, uuid[]), public.join_league(uuid, text, text), public.join_league_by_code(text), public.league_invite_code(uuid),
   public.respond_join_request(uuid, boolean), public.leave_league(uuid), public.remove_league_member(uuid, uuid), public.update_league(uuid, jsonb),
-  public.league_standings(uuid), public.my_leagues(), public.discover_leagues(text) to authenticated;
+  public.league_standings(uuid), public.my_leagues(), public.discover_leagues(text), public.feed_match_summaries(uuid[]) to authenticated;
 
 -- ── Realtime: la clasificación y las solicitudes se refrescan en vivo (RLS se aplica también al canal).
 do $$ declare t text; begin

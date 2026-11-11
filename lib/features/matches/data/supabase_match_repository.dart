@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../lib/features/matches/data/match_repository.dart';
-import '../../lib/features/matches/domain/match_models.dart';
+import 'match_repository.dart';
+import '../domain/match_models.dart';
 
 /// Integración Supabase (SIN verificar contra una base real). Mover a lib/features/matches/data/.
 class SupabaseMatchRepository implements MatchRepository {
