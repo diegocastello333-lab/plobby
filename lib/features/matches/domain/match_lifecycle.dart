@@ -92,9 +92,13 @@ SetsCheck validateSets(List<SetScore> raw) {
   if (raw.length < 2) return const SetsCheck.err('Introduce al menos dos sets.');
   if (raw.length > 3) return const SetsCheck.err('Como máximo tres sets.');
   for (var i = 0; i < raw.length; i++) { if (!isValidSet(raw[i].a, raw[i].b)) return SetsCheck.err('Set ${i + 1} no válido. Ejemplos: 6-3, 7-5, 7-6.'); }
-  final a = raw.where((s) => s.a > s.b).length, b = raw.length - a;
-  if ((a == 2 && b == 0) || (a == 0 && b == 2)) { if (raw.length > 2) return const SetsCheck.err('Con 2-0 el partido termina: quita el tercer set.'); }
-  else if (raw.length < 3) return const SetsCheck.err('Con 1-1 hay que jugar el tercer set.');
+  // El partido termina en cuanto una pareja gana 2 sets: no puede haber sets después (6-4 6-3 3-6 no es válido).
+  var a = 0, b = 0;
+  for (var i = 0; i < raw.length; i++) {
+    if (a == 2 || b == 2) return const SetsCheck.err('Con 2-0 el partido termina: quita el tercer set.');
+    raw[i].a > raw[i].b ? a++ : b++;
+  }
+  if (a < 2 && b < 2) return const SetsCheck.err('Con 1-1 hay que jugar el tercer set.');
   return SetsCheck.ok(raw, a > b ? 1 : 2);
 }
 

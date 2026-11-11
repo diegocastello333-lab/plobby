@@ -45,6 +45,7 @@ final requestsProvider = AsyncNotifierProvider<RequestsNotifier, FriendRequests>
 final addFriendsQueryProvider = StateProvider<String>((ref) => '');
 final addFriendsSearchProvider = FutureProvider<List<SearchHit>>((ref) async {
   final q = ref.watch(addFriendsQueryProvider);
-  return q.trim().isEmpty ? <SearchHit>[] : ref.read(socialRepositoryProvider).search(q);
+  if (q.trim().isEmpty) return <SearchHit>[];
+  return ref.read(socialRepositoryProvider).search(q);
 });
 final suggestionsProvider = FutureProvider<List<SearchHit>>((ref) => ref.read(socialRepositoryProvider).suggestions());

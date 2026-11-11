@@ -22,7 +22,7 @@ class UpcomingMatchesSection extends ConsumerWidget {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       if (showTitle) const Padding(padding: EdgeInsets.only(bottom: 12), child: Text('Próximos partidos', style: TextStyle(fontFamily: 'Unbounded', fontWeight: FontWeight.w600, fontSize: 16))),
       async.when(
-        loading: () => const Column(children: [for (var i = 0; i < 2; i++) Padding(padding: EdgeInsets.only(bottom: 12), child: MatchCardSkeleton())]),
+        loading: () => Column(children: [for (var i = 0; i < 2; i++) const Padding(padding: EdgeInsets.only(bottom: 12), child: MatchCardSkeleton())]),
         error: (_, __) => Card(child: ListTile(leading: const Icon(Icons.wifi_off), title: const Text('No se pudieron cargar tus partidos'), trailing: TextButton(onPressed: () => ref.invalidate(upcomingMatchesProvider), child: const Text('Reintentar')))),
         data: (l) {
           if (l.isEmpty) return const _Empty();

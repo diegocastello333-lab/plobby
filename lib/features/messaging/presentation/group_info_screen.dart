@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../social/application/social_providers.dart';
 import '../../social/domain/social_models.dart';
 import '../application/messaging_providers.dart';
+import '../data/messaging_repository.dart';
 import '../domain/messaging_models.dart';
 import 'group_avatar.dart';
 
