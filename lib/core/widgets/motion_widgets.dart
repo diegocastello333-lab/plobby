@@ -235,7 +235,8 @@ class SlidingTabs extends StatelessWidget {
               borderRadius: AppRadius.rMd, onTap: () => onChanged(i),
               child: Center(child: TweenAnimationBuilder<Color?>(
                   tween: ColorTween(end: i == index ? AppColors.brandInk : AppColors.textMuted), duration: d,
-                  builder: (_, col, __) => Text(labels[i], maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: col)))))))]),
+                  builder: (_, col, __) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, // etiquetas largas: se reducen en vez de cortarse
+                      child: Text(labels[i], maxLines: 1, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: col)))))))))]),
         ]));
       });
 }
