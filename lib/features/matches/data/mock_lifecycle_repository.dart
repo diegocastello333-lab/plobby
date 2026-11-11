@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../domain/match_lifecycle.dart';
 import '../domain/match_models.dart';
+import '../../rating/domain/elo_calculator.dart';
 import 'lifecycle_repository.dart';
 
 /// MOCK en memoria que aplica las MISMAS reglas que las funciones SQL (para tests y desarrollo sin backend).
@@ -89,7 +90,9 @@ class MockLifecycleRepository implements LifecycleRepository {
     if (m.status == MatchStatus.confirmed) return m;
     appliedRating.add(m.id);
     final w = m.winnerTeam!;
-    return _ev(m.copyWith(status: MatchStatus.confirmed, eloDelta: {for (final p in m.players) p.id: p.team == w ? 12 : -12}), 'confirmed', 'resultado confirmado por los dos capitanes');
+    // Misma fórmula que apply_match_rating (servidor). Sin ELO conocido se usa 1200, el valor inicial de player_ratings.
+    final d = const EloCalculator().deltas(team1: {for (final p in m.team(1)) p.id: p.elo == 0 ? 1200 : p.elo}, team2: {for (final p in m.team(2)) p.id: p.elo == 0 ? 1200 : p.elo}, winnerTeam: w);
+    return _ev(m.copyWith(status: MatchStatus.confirmed, eloDelta: d), 'confirmed', 'resultado confirmado por los dos capitanes');
   }
   @override
   Future<void> update(String id, EditMatch e) async {

@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../application/lifecycle_providers.dart';
 import '../data/lifecycle_repository.dart';
 import '../domain/match_lifecycle.dart';
+import '../../rating/domain/elo_calculator.dart';
 import '../domain/match_models.dart';
 import 'edit_match_sheet.dart';
 import 'match_widgets.dart';
@@ -143,6 +144,7 @@ class _ConfirmationCard extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(dis ? 'RESULTADO EN DISPUTA' : 'CONFIRMACIÓN DE CAPITANES · VERSIÓN ${m.resultVersion}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.textMuted)),
           const SizedBox(height: 10), ScoreBoard(match: m), const SizedBox(height: 8),
+          if (!dis) _EloEstimate(m: m, uid: perms.uid),
           if (dis) Text('Un capitán rechazó el resultado${m.rejectionReason != null ? ': «${m.rejectionReason}»' : ''}. Corregidlo y se volverá a pedir la confirmación a los dos capitanes.') else ...[row(1), row(2)],
           const SizedBox(height: 8),
           if (perms.canConfirm) Row(children: [
@@ -159,5 +161,20 @@ class _ConfirmationCard extends StatelessWidget {
     final ok = await showDialog<bool>(context: context, builder: (_) => AlertDialog(title: const Text('Rechazar resultado'), content: TextField(controller: ctl, maxLength: 200, decoration: const InputDecoration(labelText: 'Motivo (opcional)')),
         actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Rechazar', style: TextStyle(color: AppColors.danger)))]));
     if (ok == true) await run(() async { await act.respond(m.id, m.resultVersion, accept: false, reason: ctl.text); });
+  }
+}
+
+/// Estimación del cambio de ELO si se confirma la versión vigente (misma fórmula que el servidor, [EloCalculator]).
+/// Solo informativa: el ELO real lo escribe `apply_match_rating` al confirmar.
+class _EloEstimate extends StatelessWidget {
+  const _EloEstimate({required this.m, required this.uid});
+  final LifecycleMatch m; final String uid;
+  @override
+  Widget build(BuildContext context) {
+    final me = m.player(uid);
+    if (me == null || m.winnerTeam == null || m.players.any((p) => p.elo <= 0)) return const SizedBox.shrink();
+    final d = const EloCalculator().deltas(team1: {for (final p in m.team(1)) p.id: p.elo}, team2: {for (final p in m.team(2)) p.id: p.elo}, winnerTeam: m.winnerTeam)[uid] ?? 0;
+    return Padding(padding: const EdgeInsets.only(bottom: 4), child: Text('Si se confirma: ${d > 0 ? '+' : ''}$d ELO para ti (estimación)',
+        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: d >= 0 ? AppColors.success : AppColors.danger)));
   }
 }
