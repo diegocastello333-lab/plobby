@@ -52,17 +52,14 @@ Las migraciones están en `supabase/migrations` y se aplican en orden de nombre:
 | Migración | Contenido | Estado en el proyecto remoto |
 |---|---|---|
 | `20261110_core_schema` … `20261119_hardening` | perfiles, amistades, partidos, ciclo de vida, feed, notificaciones, mensajes y grupos, ELO, RLS, Storage | aplicadas |
-| `20261120_leagues_profile` | ligas completas (roles, invitaciones, solicitudes, clasificación, descubrir), RLS de partidos de liga, historial de perfil, `bio`, `feed_match_summaries`, corrección de `_validate_sets` | **pendiente de aplicar** |
+| `20261120_leagues_profile` | ligas completas (roles, invitaciones, solicitudes, clasificación, descubrir), RLS de partidos de liga, historial de perfil, `bio`, `feed_match_summaries`, corrección de `_validate_sets` | aplicada (11 nov 2026) |
 
-La última se ha validado contra el proyecto remoto dentro de una transacción con `ROLLBACK` (13 comprobaciones de
-permisos y reglas), pero **no se ha aplicado**: revísala y aplícala tú pegando el fichero en **SQL Editor** del panel
-(o con la herramienta `apply_migration` del MCP de Supabase, que la registra en el historial).
+Todas están aplicadas en el proyecto remoto. La última se validó antes en una transacción con `ROLLBACK`
+(13 comprobaciones de permisos y reglas) y se aplicó con `apply_migration`, que la registra en el historial.
 
 > No uses `supabase db push` sin antes alinear el historial: las versiones remotas (`20261111212251`, …) no coinciden
-> con los nombres locales (`20261110_…`) y la CLI intentaría reaplicar migraciones que ya existen.
-
-Hasta que esté aplicada, las pantallas de **Ligas**, el historial del perfil y las tarjetas de partido de amigos en el
-feed devolverán error con Supabase (en modo demo funcionan).
+> con los nombres locales (`20261110_…`) y la CLI intentaría reaplicar migraciones que ya existen. Para cambios
+> nuevos, añade un fichero a `supabase/migrations` y aplícalo desde el SQL Editor o con `apply_migration`.
 
 ### 5. Configuración del panel de Supabase (no se puede hacer desde código)
 
