@@ -47,7 +47,7 @@ void main() {
     expect(authRedirect(signedIn: false, onboardingDone: false, location: '/feed'), '/welcome');
     expect(authRedirect(signedIn: false, onboardingDone: false, location: '/welcome'), isNull);
     expect(authRedirect(signedIn: true, onboardingDone: false, location: '/feed'), '/onboarding');
-    expect(authRedirect(signedIn: true, onboardingDone: true, location: '/welcome'), '/feed');
+    expect(authRedirect(signedIn: true, onboardingDone: true, location: '/welcome'), '/home');
     expect(authRedirect(signedIn: true, onboardingDone: true, location: '/profile'), isNull);
   });
   test('onboarding reanudable: carga lo guardado y salta pasos completos', () async {

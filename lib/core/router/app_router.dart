@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/application/auth_providers.dart';
 import '../../features/feed/presentation/feed_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
+import '../../features/leagues/presentation/create_league_screen.dart';
+import '../../features/leagues/presentation/discover_leagues_screen.dart';
+import '../../features/leagues/presentation/league_detail_screen.dart';
+import '../../features/leagues/presentation/leagues_screen.dart';
+import '../../features/leagues/presentation/manage_league_screen.dart';
+import 'app_shell.dart';
 import '../../features/feed/presentation/notifications_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/auth/presentation/welcome_screen.dart';
@@ -22,12 +30,49 @@ import '../../features/share_stats/presentation/share_stats_screen.dart';
 import '../../features/social/presentation/add_friends_screen.dart';
 import '../../features/social/presentation/friends_screen.dart';
 
-/// Si el proyecto ya tiene un GoRouter, añade solo estas rutas (no sustituyas el existente).
-final appRouter = GoRouter(initialLocation: '/feed', routes: [
-  GoRoute(path: '/feed', builder: (_, __) => const FeedScreen()),
+/// true cuando la app usa Supabase (lo activa `SupabaseBootstrap.overrides`): sin sesión → /welcome, sin onboarding → /onboarding.
+/// En modo demo (mocks) se entra directamente al Inicio.
+final authGuardEnabledProvider = Provider<bool>((ref) => false);
+
+/// Estado de acceso para la guardia: sesión + onboarding completado (RPC get_my_profile vía AuthRepository.loadOnboarding).
+final sessionGateProvider = FutureProvider<({bool signedIn, bool onboarded})>((ref) async {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return (signedIn: false, onboarded: false);
+  final d = await ref.read(authRepositoryProvider).loadOnboarding();
+  return (signedIn: true, onboarded: d.completed);
+});
+
+/// Router único. Las 4 pestañas (Inicio, Feed, Ligas, Perfil) viven en un `StatefulShellRoute` con la barra inferior;
+/// el resto de pantallas se abren a pantalla completa por encima.
+final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = ValueNotifier(0);
+  ref.listen(sessionGateProvider, (_, __) => refresh.value++);
+  ref.onDispose(refresh.dispose);
+  return GoRouter(
+    initialLocation: '/home',
+    refreshListenable: refresh,
+    redirect: (_, state) {
+      if (!ref.read(authGuardEnabledProvider)) return null;
+      final gate = ref.read(sessionGateProvider);
+      if (!gate.hasValue) return null;                    // cargando: se re-evalúa al llegar el valor
+      return authRedirect(signedIn: gate.value!.signedIn, onboardingDone: gate.value!.onboarded, location: state.matchedLocation);
+    },
+    routes: appRoutes,
+  );
+});
+
+final appRoutes = <RouteBase>[
+  StatefulShellRoute.indexedStack(
+    builder: (_, __, shell) => AppShell(shell: shell),
+    branches: [
+      StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (_, __) => const HomeScreen())]),
+      StatefulShellBranch(routes: [GoRoute(path: '/feed', builder: (_, __) => const FeedScreen())]),
+      StatefulShellBranch(routes: [GoRoute(path: '/leagues', builder: (_, __) => const LeaguesScreen())]),
+      StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen(),
+          routes: [GoRoute(path: 'share', builder: (_, __) => const ShareStatsScreen())])]),
+    ],
+  ),
   GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
-  GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen(),
-      routes: [GoRoute(path: 'share', builder: (_, __) => const ShareStatsScreen())]),
   GoRoute(path: '/player/:id', builder: (_, s) => ProfileScreen(playerId: s.pathParameters['id']!)),
   GoRoute(path: '/friends', builder: (_, __) => const FriendsScreen(), routes: [
     GoRoute(path: 'add', builder: (_, __) => const AddFriendsScreen()),
@@ -43,7 +88,10 @@ final appRouter = GoRouter(initialLocation: '/feed', routes: [
     GoRoute(path: 'share', builder: (_, s) => ShareMatchScreen(matchId: s.pathParameters['id']!)),
   ]),
   GoRoute(path: '/welcome', builder: (_, __) => const WelcomeScreen()),
-  GoRoute(path: '/onboarding', builder: (c, __) => OnboardingScreen(onDone: () => GoRouter.of(c).go('/feed'))),
+  GoRoute(path: '/onboarding', builder: (c, __) => OnboardingScreen(onDone: () {
+    ProviderScope.containerOf(c, listen: false).invalidate(sessionGateProvider);   // la guardia vuelve a leer el perfil ya completo
+    GoRouter.of(c).go('/home');
+  })),
   GoRoute(path: '/rating', builder: (_, __) => const EloDetailScreen()),
   GoRoute(path: '/messages', builder: (_, __) => const ConversationsScreen(), routes: [
     // abre (o crea) la conversación con un amigo; el backend rechaza si no sois amigos aceptados
@@ -54,8 +102,33 @@ final appRouter = GoRouter(initialLocation: '/feed', routes: [
       GoRoute(path: 'info', builder: (_, s) => GroupInfoScreen(conversationId: s.pathParameters['conversationId']!)),
     ]),
   ]),
-  // '/leagues/:id': pantalla existente del proyecto; conecta aquí su ruta.
-]);
+  // Ligas (literales ANTES que ':id')
+  GoRoute(path: '/leagues/new', builder: (_, __) => const CreateLeagueScreen()),
+  GoRoute(path: '/leagues/discover', builder: (_, __) => const DiscoverLeaguesScreen()),
+  GoRoute(path: '/leagues/join', builder: (c, s) => _JoinByCodeRoute(code: s.uri.queryParameters['code'])),
+  GoRoute(path: '/leagues/:id', builder: (_, s) => LeagueDetailScreen(leagueId: s.pathParameters['id']!,
+      initialTab: LeagueTab.values.asNameMap()[s.uri.queryParameters['tab']] ?? LeagueTab.rank), routes: [
+    GoRoute(path: 'created', builder: (_, s) => LeagueCreatedScreen(leagueId: s.pathParameters['id']!, code: s.uri.queryParameters['code'])),
+    GoRoute(path: 'manage', builder: (_, s) => ManageLeagueScreen(leagueId: s.pathParameters['id']!)),
+  ]),
+];
+
+/// Enlace de invitación `/leagues/join?code=XXXX`: abre Ligas con la hoja «Unirme con código» rellena.
+class _JoinByCodeRoute extends StatefulWidget {
+  const _JoinByCodeRoute({this.code});
+  final String? code;
+  @override
+  State<_JoinByCodeRoute> createState() => _JoinByCodeRouteState();
+}
+class _JoinByCodeRouteState extends State<_JoinByCodeRoute> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async { await showJoinByCodeSheet(context, initial: widget.code); if (mounted) context.pop(); });
+  }
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: SizedBox.shrink());
+}
 
 class _OpenChat extends ConsumerWidget {
   const _OpenChat({required this.friendId, required this.invite});
@@ -77,6 +150,6 @@ String? authRedirect({required bool signedIn, required bool onboardingDone, requ
   final onAuth = location == '/welcome', onOnb = location == '/onboarding';
   if (!signedIn) return onAuth ? null : '/welcome';
   if (!onboardingDone) return onOnb ? null : '/onboarding';
-  if (onAuth || onOnb) return '/feed';
+  if (onAuth || onOnb) return '/home';
   return null;
 }
