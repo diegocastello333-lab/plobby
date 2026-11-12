@@ -70,8 +70,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _section(0, 'Nivel de juego', EloCard(view: v)),
         _section(null, 'Rendimiento', StatsGrid(view: v)),
         // «Próximos partidos»: MISMA fuente que el Home (upcomingMatchesProvider), antes del historial.
+        // La pestaña «Partidos» salta a la PRIMERA sección de partidos. Cada GlobalKey solo puede usarse una vez:
+        // repetir _keys[1] en las dos secciones dejaba el perfil propio en blanco («Duplicate keys»).
         if (own) _section(1, 'Próximos partidos', const UpcomingMatchesSection(max: null, showTitle: false)),
-        _section(1, 'Últimos partidos', Column(children: [
+        _section(own ? null : 1, 'Últimos partidos', Column(children: [
           if (own) for (final m in v.pending) MatchCard(match: m, me: me, onTap: () => _matchDetail(m)),
           if (recent.isEmpty) const Text('Aún no hay partidos confirmados.', style: TextStyle(color: PlobbyColors.mute)),
           for (final m in recent) MatchCard(match: m, me: me, onTap: () => _matchDetail(m), onShare: own && m.confirmed ? () => context.push('/match/${m.id}/share') : null),

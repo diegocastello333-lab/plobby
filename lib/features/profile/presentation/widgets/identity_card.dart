@@ -31,10 +31,14 @@ class IdentityCard extends ConsumerWidget {
     }
     rows.add(_Row(icon: Icons.sports_tennis, label: 'LADO DE JUEGO', title: profile.side == PlaySide.right ? 'Derecha' : 'Izquierda',
         onEdit: isOwner ? () => n.setSide(profile.side == PlaySide.right ? PlaySide.left : PlaySide.right) : null));
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-      child: Column(children: [for (var i = 0; i < rows.length; i++) ...[if (i > 0) const Divider(height: 1), rows[i]]]),
+    // Material (no DecoratedBox) como fondo blanco: los ListTile pintan su efecto de pulsación en el Material más
+    // cercano y un DecoratedBox con color lo ocultaba. Mismo aspecto: blanco, radio 14.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Material(
+        color: Colors.white, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
+        child: Column(children: [for (var i = 0; i < rows.length; i++) ...[if (i > 0) const Divider(height: 1), rows[i]]]),
+      ),
     );
   }
 
