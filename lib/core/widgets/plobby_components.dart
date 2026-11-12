@@ -22,6 +22,8 @@ enum PlobbyButtonKind {
   smallOutline,
   /// Botón oscuro (tinta) con texto blanco (p. ej. «Editar perfil»).
   dark,
+  /// `.dbtn` — rojo suave `#FDE7E7` con texto `#C4282E`, 48 px, radio 14 (eliminar, rechazar).
+  danger,
 }
 
 class PlobbyButton extends StatelessWidget {
@@ -43,9 +45,10 @@ class PlobbyButton extends StatelessWidget {
     final bg = switch (kind) {
       PlobbyButtonKind.primary || PlobbyButtonKind.small => AppColors.brand,
       PlobbyButtonKind.dark => AppColors.inverse,
+      PlobbyButtonKind.danger => AppColors.dangerSoft,
       _ => Colors.transparent,
     };
-    final fg = kind == PlobbyButtonKind.dark ? AppColors.surface : AppColors.text;
+    final fg = switch (kind) { PlobbyButtonKind.dark => AppColors.surface, PlobbyButtonKind.danger => AppColors.danger, _ => AppColors.text };
     final radius = _small ? AppRadius.rSm : AppRadius.rMd;
     final h = _small ? 36.0 : 48.0;
     final style = (_small ? PlobbyText.buttonSmall : PlobbyText.button).copyWith(color: fg);
@@ -63,12 +66,12 @@ class PlobbyButton extends StatelessWidget {
         child: InkWell(
           borderRadius: radius,
           onTap: enabled ? () { HapticFeedback.selectionClick(); onPressed!(); } : null,
-          child: SizedBox(height: h, child: Padding(padding: EdgeInsets.symmetric(horizontal: _small ? 14 : 20), child: Center(widthFactor: 1, child: content))),
+          child: SizedBox(height: h, child: Padding(padding: EdgeInsets.symmetric(horizontal: _small ? 14 : 12), child: Center(widthFactor: 1, child: content))),
         ),
       ),
     );
     final full = expand ?? !_small;
-    return Semantics(button: true, enabled: enabled, label: label, excludeSemantics: true,
+    return Semantics(container: true, button: true, enabled: enabled, label: label, excludeSemantics: true,
         child: Pressable(enabled: enabled, child: full ? SizedBox(width: double.infinity, child: btn) : btn));
   }
 }
@@ -321,3 +324,85 @@ class MiniAction extends StatelessWidget {
         ))),
       );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cabecera de pantalla secundaria · `.hdr2` (padding 16 20 0; ibtn 40 · título Unbounded 18/600 · ibtn o hueco 40)
+// ─────────────────────────────────────────────────────────────────────────────
+class PlobbyHeaderBar extends StatelessWidget {
+  const PlobbyHeaderBar({super.key, required this.title, this.onBack, this.trailing});
+  final String title;
+  /// Por defecto `Navigator.maybePop`.
+  final VoidCallback? onBack;
+  /// Botón de la derecha (p. ej. «Más opciones»); si es null se deja un hueco de 40 px para centrar el título.
+  final Widget? trailing;
+  static const titleStyle = TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, height: 22 / 18, fontWeight: FontWeight.w600, letterSpacing: -0.36, color: AppColors.text);
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 16, 20, 0),
+        child: Row(children: [
+          IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: onBack ?? () => Navigator.of(context).maybePop()),
+          const SizedBox(width: 12),
+          Expanded(child: Semantics(header: true, child: Text(title, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle))),
+          const SizedBox(width: 12),
+          trailing ?? const SizedBox(width: 40),
+        ]),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cabecera de hoja inferior · `.hr` (título `.t2` + subtítulo opcional + botón cerrar)
+// ─────────────────────────────────────────────────────────────────────────────
+class SheetHeader extends StatelessWidget {
+  const SheetHeader({super.key, required this.title, this.subtitle});
+  final String title;
+  final String? subtitle;
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Semantics(header: true, child: Text(title, style: PlobbyText.t2)),
+            if (subtitle != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(subtitle!, style: PlobbyText.sub)),
+          ])),
+          const SizedBox(width: 12),
+          IconSquareButton(icon: PlobbyIcons.close, tooltip: 'Cerrar', onPressed: () => Navigator.of(context).pop()),
+        ]),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fila de lista en hojas · `.li` (54 px, borde superior .1, icono 34 radio 9 sobre tinte; `.red` en rojo)
+// ─────────────────────────────────────────────────────────────────────────────
+class SheetListItem extends StatelessWidget {
+  const SheetListItem({super.key, required this.icon, required this.label, required this.onTap, this.danger = false});
+  final PlobbyIcons icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool danger;
+  @override
+  Widget build(BuildContext context) {
+    final fg = danger ? AppColors.danger : AppColors.text;
+    return Semantics(button: true, label: label, excludeSemantics: true, child: InkWell(onTap: onTap, child: Container(
+      height: 54,
+      decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+      child: Row(children: [
+        Container(width: 34, height: 34, decoration: BoxDecoration(color: danger ? AppColors.dangerSoft : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)),
+            child: Center(child: PlobbyIcon(icon, size: 18, color: fg))),
+        const SizedBox(width: 14),
+        Expanded(child: Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0, color: fg))),
+      ]),
+    )));
+  }
+}
+
+/// Hoja inferior con el aspecto del prototipo (`.sheet`: radio 22 arriba, asa 40×4, padding 20) y el contenido dado.
+Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => showModalBottomSheet<T>(
+      context: context, isScrollControlled: true, showDragHandle: false, backgroundColor: AppColors.bg,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Center(child: Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 14), decoration: BoxDecoration(color: const Color(0x33171C19), borderRadius: BorderRadius.circular(2)))),
+          builder(ctx),
+        ]))),
+      ),
+    );

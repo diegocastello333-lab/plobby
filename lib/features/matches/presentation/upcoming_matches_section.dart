@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/widgets/motion_widgets.dart';
-import '../../auth/presentation/avatar_catalog.dart';
 import '../application/lifecycle_providers.dart';
 import '../domain/match_lifecycle.dart';
 import '../domain/match_models.dart';

@@ -38,14 +38,15 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Referencia visual: el prototipo HTML (Plobby (4).html = Plobby (3).html, idénticos). Medir con getComputedStyle en
   Playwright, no a ojo. Comparar cada pantalla con capturas 390×844 lado a lado antes de darla por terminada.
 - Puntos de restauración en GitHub (ramas, el proxy no deja subir tags): `backup/v0-original-antes-rediseno`,
-  `backup/v1-sistema-de-diseno`, `backup/v2-inicio`. Crear `backup/vN-…` tras cada fase estable (MCP create_branch).
+  `backup/v1-sistema-de-diseno`, `backup/v2-inicio`, `backup/v3-navegacion`, `backup/v4-perfil`, `backup/v5-partidos`. Crear `backup/vN-…` tras cada fase estable (MCP create_branch).
 - Hecho: P0 (perfil en blanco; fuentes Inter/Unbounded empaquetadas en assets/fonts, sin google_fonts),
   V1 sistema de diseño (`PlobbyText`, `PlobbyIcon` con los 50 iconos del HTML vía flutter_svg, `plobby_components.dart`,
-  `SilhouetteAvatar`), V2 Inicio.
+  `SilhouetteAvatar`), V2 Inicio, V3 navegación, V4 perfil (+ Editar perfil), V5 partidos (menú «+», crear, detalle,
+  resultado, final, editar; hojas con `showPlobbySheet`/`SheetHeader`/`SheetListItem`, `PlobbyHeaderBar`, `MatchCtaButton`).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Siguiente: V3 navegación (barra inferior: activa en negrita sin punto, iconos del HTML), V4 perfil, V5 partidos,
-  V6 ligas («torneos» en la app = ligas), feed, mensajes. Diferencias pendientes: estado «VIVO»/panel en directo de
+- Tests: 165/165. Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Siguiente: V6 ligas («torneos» en la app = ligas), feed, mensajes. Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
 
 ## Entorno de nube
