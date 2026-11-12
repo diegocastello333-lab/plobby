@@ -11,7 +11,7 @@ class SupabaseProfileRepository implements ProfileRepository {
   String get _uid => _db.auth.currentUser!.id;
   String _resolve(String id) => id == 'me' ? _uid : id;
 
-  static const _cols = 'id, display_name, username, avatar_url, city, bio, self_declared_level, court_side, dominant_hand, habitual_club, habitual_partner_id';
+  static const _cols = 'id, display_name, username, avatar_url, avatar_id, city, bio, self_declared_level, court_side, dominant_hand, habitual_club, habitual_partner_id';
   static const _levels = {
     'beginner': ('Iniciación', 2.0), 'intermediate': ('Intermedio', 3.0),
     'upper_intermediate': ('Intermedio alto', 4.0), 'advanced': ('Avanzado', 5.0),
@@ -47,7 +47,7 @@ class SupabaseProfileRepository implements ProfileRepository {
     final club = (p['habitual_club'] as String?)?.trim();
     final profile = PlayerProfile(
       id: playerId, fullName: (p['display_name'] ?? '') as String, username: (p['username'] ?? '') as String, location: (p['city'] ?? '') as String,
-      avatarUrl: p['avatar_url'] as String?, bio: (p['bio'] ?? '') as String,
+      avatarUrl: p['avatar_url'] as String?, avatarId: p['avatar_id'] as String?, bio: (p['bio'] ?? '') as String,
       declaredLevel: level?.$1 ?? 'Sin declarar', declaredLevelValue: level?.$2 ?? 0,
       side: p['court_side'] == 'left' ? PlaySide.left : PlaySide.right,
       dominantHand: p['dominant_hand'] == 'left' ? 'Izquierda' : 'Derecha',

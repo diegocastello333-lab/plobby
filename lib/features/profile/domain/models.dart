@@ -22,12 +22,14 @@ class PartnerLink {
 class PlayerProfile {
   const PlayerProfile({
     required this.id, required this.fullName, required this.username, required this.location,
-    this.avatarUrl, this.verified = false, this.bio = '', required this.declaredLevel,
+    this.avatarUrl, this.avatarId, this.verified = false, this.bio = '', required this.declaredLevel,
     required this.declaredLevelValue, required this.side, required this.dominantHand,
     this.club, this.partner, this.leaguesPlayed = 0,
   });
   final String id, fullName, username, location, bio, declaredLevel;
   final String? avatarUrl;
+  /// Avatar predefinido (`a1`…`a12`) cuando no hay [avatarUrl] (perfiles antiguos que solo guardaron el id).
+  final String? avatarId;
   final bool verified;
   final double declaredLevelValue;
   final PlaySide side;
@@ -38,7 +40,7 @@ class PlayerProfile {
 
   PlayerProfile copyWith({PlaySide? side, ClubRef? club, bool clearClub = false, PartnerLink? partner, bool clearPartner = false, String? bio}) =>
       PlayerProfile(
-        id: id, fullName: fullName, username: username, location: location, avatarUrl: avatarUrl,
+        id: id, fullName: fullName, username: username, location: location, avatarUrl: avatarUrl, avatarId: avatarId,
         verified: verified, bio: bio ?? this.bio, declaredLevel: declaredLevel, declaredLevelValue: declaredLevelValue,
         side: side ?? this.side, dominantHand: dominantHand,
         club: clearClub ? null : (club ?? this.club),

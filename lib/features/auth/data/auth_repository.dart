@@ -12,6 +12,9 @@ abstract class AuthRepository {
   Future<bool> isUsernameAvailable(String username);   // RPC is_username_available
   Future<void> saveStep(int step, OnboardingData data);// RPC save_onboarding_step (valida en servidor)
   Future<String> uploadAvatar(List<int> bytes, String mime); // Storage `avatars/<uid>/…`; devuelve la URL pública
+  /// Borra de Storage las imágenes de `avatars/<uid>/` salvo la de [keepUrl] (la vigente). Se llama tras cambiar o
+  /// quitar la foto para no dejar ficheros huérfanos. Nunca lanza: si falla, el perfil ya está guardado.
+  Future<void> deleteAvatarFiles({String? keepUrl});
   Future<void> completeOnboarding();
 }
 

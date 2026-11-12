@@ -13,4 +13,7 @@ abstract class SocialRepository {
   Future<void> cancelRequest(String requestId);
   Future<void> respondRequest(String requestId, {required bool accept}); // RPC respond_friend_request
   Future<void> removeFriend(String userId);             // RPC remove_friend
+  /// Avisa cuando cambian las solicitudes o notificaciones del usuario en el servidor (Supabase Realtime), para que
+  /// los dos usuarios vean al momento una solicitud nueva, aceptada o rechazada.
+  Stream<void> changes();
 }

@@ -8,6 +8,8 @@ import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
 import '../application/lifecycle_providers.dart';
 import '../application/match_providers.dart';
+import '../../social/application/social_providers.dart' show friendsProvider;
+import '../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
 import '../domain/match_models.dart';
 
 /// Formulario ÚNICO de creación de partido — hoja «Crear partido» del prototipo HTML (aquí como pantalla, misma ruta). `type` decide si pide liga (liga) o no (amistoso).
@@ -23,6 +25,8 @@ class CreateMatchScreen extends ConsumerStatefulWidget {
 
 class _S extends ConsumerState<CreateMatchScreen> {
   String? _league, _partner, _r1, _r2, _club;
+  /// Nombres de los jugadores elegidos (vienen del selector de Amigos) para pintarlos en los huecos.
+  final _names = <String, String>{};
   /// Club escrito a mano cuando la tabla `clubs` está vacía o no se pudo leer (antes: `clubs.first` sobre una lista
   /// vacía lanzaba «Bad state: No element» al construir la pantalla → pantalla gris/negra en la APK).
   final _clubText = TextEditingController();
@@ -67,7 +71,9 @@ class _S extends ConsumerState<CreateMatchScreen> {
   @override
   Widget build(BuildContext context) {
     final leagues = ref.watch(myLeaguesProvider);
-    final pool = _friendly ? ref.watch(friendOptionsProvider) : (_league == null ? const AsyncData<List<PlayerOption>>([]) : ref.watch(leagueMembersProvider(_league!)));
+    // Misma fuente que el selector: amigos (amistoso) o miembros de la liga.
+    final pool = _friendly ? ref.watch(friendsProvider).whenData((l) => [for (final f in l) PlayerOption(f.player.id, f.player.name)])
+        : (_league == null ? const AsyncData<List<PlayerOption>>([]) : ref.watch(leagueMembersProvider(_league!)));
     final clubsAsync = ref.watch(clubsProvider);
     final clubs = clubsAsync.valueOrNull ?? const <String>[];
     final hasSets = _scores.isNotEmpty;
@@ -93,9 +99,14 @@ class _S extends ConsumerState<CreateMatchScreen> {
               : _Field(label: 'Liga', child: _Select<String>(
                   value: _league, hint: 'Elige una de tus ligas',
                   items: [for (final x in l) DropdownMenuItem(value: x.id, child: Text(x.name, overflow: TextOverflow.ellipsis))],
-                  onChanged: (v) => setState(() { _league = v; _partner = _r1 = _r2 = null; }),
+                  onChanged: (v) => setState(() { _league = v; _partner = _r1 = _r2 = null; }),   // otra liga → otros miembros
                 )),
         ),
+        // «Añadir jugadores»: abre Amigos (o los miembros de la liga) en modo selección; hasta 3, en orden:
+        // compañero, rival 1, rival 2. Cada hueco se puede cambiar o vaciar después.
+        PlobbyButton(label: _slots.every((x) => x == null) ? 'Añadir jugadores' : 'Cambiar jugadores', icon: PlobbyIcons.userplus, kind: PlobbyButtonKind.outline,
+            onPressed: _friendly || _league != null ? _pickAll : null),
+        const SizedBox(height: 12),
         _Team('Pareja 1', [
           Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [
             Container(width: 30, height: 30, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.inverse),
@@ -103,16 +114,16 @@ class _S extends ConsumerState<CreateMatchScreen> {
             const SizedBox(width: 10),
             const Text('Tú', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
           ])),
-          _pick('Tu compañero', _partner, pool, (v) => _partner = v),
+          _slot(0, 'Tu compañero'),
         ]),
         const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Center(child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.2, color: AppColors.textMuted)))),
-        _Team('Pareja 2', [_pick('Rival 1', _r1, pool, (v) => _r1 = v), _pick('Rival 2', _r2, pool, (v) => _r2 = v)]),
+        _Team('Pareja 2', [_slot(1, 'Rival 1'), _slot(2, 'Rival 2')]),
         // Estado de la lista de jugadores (antes, un error o una lista vacía dejaba los desplegables vacíos sin explicación).
         if (_friendly || _league != null) pool.when(
           loading: () => Padding(padding: const EdgeInsets.only(top: 8), child: Text('Cargando jugadores…', style: PlobbyText.help.copyWith(fontSize: 12))),
           error: (_, __) => Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [
             Expanded(child: Text('No se pudieron cargar los jugadores.', style: PlobbyText.help.copyWith(fontSize: 12, color: AppColors.danger))),
-            PlobbyButton(label: 'Reintentar', kind: PlobbyButtonKind.smallOutline, onPressed: () => ref.invalidate(_friendly ? friendOptionsProvider : leagueMembersProvider(_league!))),
+            PlobbyButton(label: 'Reintentar', kind: PlobbyButtonKind.smallOutline, onPressed: () => _friendly ? ref.invalidate(friendsProvider) : ref.invalidate(leagueMembersProvider(_league!))),
           ])),
           data: (l) => l.length >= 3 ? const SizedBox.shrink() : Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [
             Expanded(child: Text(_friendly
@@ -177,11 +188,62 @@ class _S extends ConsumerState<CreateMatchScreen> {
     );
   }
 
-  Widget _pick(String label, String? value, AsyncValue<List<PlayerOption>> pool, ValueChanged<String?> set) => _Field(label: label, child: _Select<String>(
-        value: value, hint: 'Elige un jugador',
-        items: [for (final p in pool.valueOrNull ?? const <PlayerOption>[]) DropdownMenuItem(value: p.id, child: Text(p.name, overflow: TextOverflow.ellipsis))],
-        onChanged: pool.valueOrNull?.isEmpty ?? true ? null : (v) => setState(() => set(v)),
-      ));
+  List<String?> get _slots => [_partner, _r1, _r2];
+  void _setSlot(int i, PlayerOption? p) {
+    if (p != null) _names[p.id] = p.name;
+    switch (i) { case 0: _partner = p?.id; case 1: _r1 = p?.id; default: _r2 = p?.id; }
+  }
+  PlayerOption? _opt(String? id) => id == null ? null : PlayerOption(id, _names[id] ?? '');
+
+  /// Selección múltiple (hasta 3) desde Amigos; el orden marcado reparte los huecos.
+  Future<void> _pickAll() async {
+    final r = await pickFriends(context, FriendPick(
+      title: _friendly ? 'Elige jugadores' : 'Jugadores de la liga', max: 3, confirmLabel: 'Añadir al partido', leagueId: _friendly ? null : _league,
+      selected: [for (final id in _slots) if (id != null) _opt(id)!],
+    ));
+    if (r == null || !mounted) return;
+    setState(() { for (var i = 0; i < 3; i++) { _setSlot(i, i < r.length ? r[i] : null); } _error = null; });
+  }
+
+  /// Elegir un solo jugador para un hueco; los que ya están en otros huecos no se pueden repetir.
+  Future<void> _pickSlot(int i, String label) async {
+    final others = {for (var k = 0; k < 3; k++) if (k != i && _slots[k] != null) _slots[k]!};
+    final r = await pickFriends(context, FriendPick(
+      title: label, max: 1, confirmLabel: 'Elegir', leagueId: _friendly ? null : _league, blocked: others,
+      selected: [if (_slots[i] != null) _opt(_slots[i])!],
+    ));
+    if (r == null || r.isEmpty || !mounted) return;
+    setState(() { _setSlot(i, r.first); _error = null; });
+  }
+
+  /// Hueco de jugador: vacío → «Añadir»; con jugador → avatar, nombre, cambiar y quitar.
+  Widget _slot(int i, String label) {
+    final id = _slots[i];
+    final enabled = _friendly || _league != null;
+    return _Field(label: label, child: id == null
+        ? Semantics(button: true, enabled: enabled, label: 'Añadir $label', excludeSemantics: true, child: Opacity(opacity: enabled ? 1 : .5, child: Material(
+            color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
+            child: InkWell(borderRadius: AppRadius.rMd, onTap: enabled ? () => _pickSlot(i, label) : null, child: const SizedBox(height: 48, child: Padding(padding: EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
+              PlobbyIcon(PlobbyIcons.plus, size: 16, strokeWidth: 2.2, color: AppColors.textMuted), SizedBox(width: 8),
+              Expanded(child: Text('Elegir un amigo', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, letterSpacing: 0, color: AppColors.textMuted))),
+            ])))),
+          )))
+        : Container(
+            height: 52, padding: const EdgeInsets.only(left: 10, right: 4),
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, border: Border.all(color: AppColors.text, width: 1.5)),
+            child: Row(children: [
+              ClipOval(child: Container(width: 32, height: 32, color: AppColors.inverse, alignment: Alignment.center,
+                  child: Text(_initials(_names[id] ?? '?'), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brand)))),
+              const SizedBox(width: 10),
+              Expanded(child: Text(_names[id] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+              TextButton(onPressed: () => _pickSlot(i, label), child: const Text('Cambiar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+              Tooltip(message: 'Quitar a ${_names[id]}', child: Semantics(button: true, label: 'Quitar a ${_names[id]}', excludeSemantics: true, child: InkResponse(radius: 20,
+                  onTap: () => setState(() => _setSlot(i, null)), child: const SizedBox(width: 36, height: 44, child: Center(child: PlobbyIcon(PlobbyIcons.close, size: 16, color: AppColors.textMuted)))))),
+            ]),
+          ));
+  }
+
+  static String _initials(String n) => n.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
 }
 
 /// `.mtag`: pastilla lima suave 26 px con el tipo de partido.

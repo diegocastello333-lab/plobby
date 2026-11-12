@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:plobby/core/router/app_router.dart';
 import 'package:plobby/core/theme/plobby_theme.dart';
+import 'package:plobby/core/widgets/plobby_components.dart';
 import 'package:plobby/features/auth/application/auth_providers.dart';
 import 'package:plobby/features/auth/data/mock_auth_repository.dart';
 import 'package:plobby/features/auth/domain/auth_models.dart';
@@ -14,15 +15,30 @@ import 'package:plobby/features/matches/data/match_repository.dart';
 import 'package:plobby/features/matches/domain/match_models.dart';
 import 'package:plobby/features/matches/presentation/create_match_screen.dart';
 import 'package:plobby/features/profile/presentation/profile_screen.dart';
+import 'package:plobby/features/social/application/social_providers.dart';
+import 'package:plobby/features/social/data/mock_social_repository.dart';
+import 'package:plobby/features/social/domain/social_models.dart';
+
+/// Amigos del selector («Añadir jugadores» abre Amigos en modo selección).
+class _Social extends MockSocialRepository {
+  _Social({this.count = 3});
+  final int count;
+  @override
+  Future<List<Friend>> friends() async => const [
+        Friend(PlayerSummary(id: 'a', name: 'Ana R.', username: 'ana', elo: 1200, level: 'Intermedio'), FriendActivity()),
+        Friend(PlayerSummary(id: 'b', name: 'Bea S.', username: 'bea', elo: 1200, level: 'Intermedio'), FriendActivity()),
+        Friend(PlayerSummary(id: 'c', name: 'Carla N.', username: 'carla', elo: 1200, level: 'Intermedio'), FriendActivity()),
+      ].take(count).toList();
+}
 
 Future<void> _settle(WidgetTester t, [int n = 6]) async { for (var i = 0; i < n; i++) { await t.pump(const Duration(milliseconds: 250)); } }
 
-Future<GoRouter> _app(WidgetTester t, {List<Override> overrides = const []}) async {
+Future<GoRouter> _app(WidgetTester t, {List<Override> overrides = const [], MockSocialRepository? social}) async {
   t.view.physicalSize = const Size(390, 844);
   t.view.devicePixelRatio = 1;
   addTearDown(t.view.reset);
   late GoRouter r;
-  await t.pumpWidget(ProviderScope(overrides: overrides, child: Consumer(builder: (_, ref, __) { r = ref.watch(routerProvider); return MaterialApp.router(theme: buildPlobbyTheme(), routerConfig: r); })));
+  await t.pumpWidget(ProviderScope(overrides: [socialRepositoryProvider.overrideWithValue(social ?? _Social()), ...overrides], child: Consumer(builder: (_, ref, __) { r = ref.watch(routerProvider); return MaterialApp.router(theme: buildPlobbyTheme(), routerConfig: r); })));
   await _settle(t, 6);
   return r;
 }
@@ -74,19 +90,23 @@ Future<void> _openFriendlyForm(WidgetTester t) async {
 }
 
 Future<void> _pickPlayers(WidgetTester t) async {
-  for (final (i, name) in [(0, 'Ana R.'), (1, 'Bea S.'), (2, 'Carla N.')]) {
-    final dd = find.byType(DropdownButtonFormField<String>).at(i);   // compañero, rival 1, rival 2
-    await t.ensureVisible(dd);
-    await t.tap(dd);
-    await _settle(t, 2);
+  // «Añadir jugadores» → Amigos en modo selección: el orden marcado es compañero, rival 1, rival 2.
+  await t.ensureVisible(find.text('Añadir jugadores'));
+  await t.tap(find.text('Añadir jugadores'));
+  await _settle(t);
+  for (final name in ['Ana R.', 'Bea S.', 'Carla N.']) {
     await t.tap(find.text(name).last);
     await _settle(t, 2);
   }
+  await t.tap(find.text('Añadir al partido (3)'));
+  await _settle(t);
 }
 
 Future<void> _tapCreate(WidgetTester t) async {
-  await t.ensureVisible(find.bySemanticsLabel('Crear partido').last);
-  await t.tap(find.bySemanticsLabel('Crear partido').last);
+  // El formulario es una lista perezosa: tras volver del selector puede que el botón aún no esté construido.
+  final btn = find.widgetWithText(PlobbyButton, 'Crear partido');
+  await t.scrollUntilVisible(btn, 200, scrollable: find.byType(Scrollable).first);
+  await t.tap(btn);
   await _settle(t, 6);
 }
 
@@ -214,7 +234,7 @@ void main() {
 
     testWidgets('si falla la lectura de clubes se puede escribir el club; sin amigos se explica qué falta', (t) async {
       final repo = _Repo(clubsError: true, friendList: const [PlayerOption('a', 'Ana R.')]);
-      await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)]);
+      await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)], social: _Social(count: 1));
       await _openFriendlyForm(t);
       expect(find.widgetWithText(TextFormField, 'p. ej. Club La Moraleja'), findsOneWidget);
       expect(find.textContaining('necesitas tres amigos'), findsOneWidget);

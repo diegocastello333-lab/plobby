@@ -1,26 +1,20 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/social_models.dart';
 import 'social_repository.dart';
 
-/// Integración Supabase (NO verificada contra una base real). Usa solo la anon key + sesión del usuario;
-/// la service role key NUNCA está en la app. Las vistas/RPCs están en `supabase/migrations/20261112_home_social.sql`.
+/// Datos sociales contra Supabase (verificado con la base real y dos cuentas, 12 nov 2026). Usa solo la clave publicable
+/// + sesión del usuario. Vistas/RPCs en `supabase/migrations/20261112_home_social.sql`.
 class SupabaseSocialRepository implements SocialRepository {
   SupabaseSocialRepository(this._db);
   final SupabaseClient _db;
   @override
   String get meId => _db.auth.currentUser!.id;
 
-  PlayerSummary _player(Map<String, dynamic> j) => PlayerSummary(
-        id: j['user_id'] as String,
-        name: j['display_name'] as String,
-        username: j['username'] as String,
-        avatarUrl: j['avatar_url'] as String?,
-        elo: (j['elo'] as num).toInt(),
-        level: j['level'] as String,
-        city: j['city'] as String?,
-        club: j['club'] as String?,
-        mutualFriends: (j['mutual_friends'] as num?)?.toInt() ?? 0,
-      );
+  /// Fila de vista/RPC → [PlayerSummary]. La RLS de `player_ratings` solo deja ver el ELO propio y el de los amigos:
+  /// en una solicitud de alguien que aún no es amigo `elo` llega null. Antes `(j['elo'] as num)` lanzaba y TODA la
+  /// lista de solicitudes fallaba (el destinatario no veía ni podía aceptar la solicitud). 0 = ELO no visible.
+  PlayerSummary _player(Map<String, dynamic> j) => playerSummaryFromRow(j);
 
   @override
   Future<List<Friend>> friends() async {
@@ -65,4 +59,41 @@ class SupabaseSocialRepository implements SocialRepository {
       _db.rpc('respond_friend_request', params: {'req': requestId, 'accept': accept});
   @override
   Future<void> removeFriend(String userId) => _db.rpc('remove_friend', params: {'target': userId});
+
+  /// Realtime: solicitudes enviadas o recibidas por mí y mis notificaciones (las dos tablas están en la publicación
+  /// `supabase_realtime`; la RLS de cada una solo deja pasar mis filas).
+  @override
+  Stream<void> changes() {
+    late final StreamController<void> out;
+    RealtimeChannel? ch;
+    out = StreamController<void>.broadcast(
+      onListen: () {
+        final me = meId;
+        void ping(PostgresChangePayload _) { if (!out.isClosed) out.add(null); }
+        ch = _db.channel('social:$me')
+          ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'friend_requests',
+              filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'receiver_id', value: me), callback: ping)
+          ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'friend_requests',
+              filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'sender_id', value: me), callback: ping)
+          ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'notifications',
+              filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'recipient_user_id', value: me), callback: ping)
+          ..subscribe();
+      },
+      onCancel: () async { final c = ch; ch = null; if (c != null) await _db.removeChannel(c); },
+    );
+    return out.stream;
+  }
 }
+
+/// Ver [SupabaseSocialRepository._player]. Pública para los tests (función pura).
+PlayerSummary playerSummaryFromRow(Map<String, dynamic> j) => PlayerSummary(
+        id: j['user_id'] as String,
+        name: (j['display_name'] as String?) ?? '',
+        username: (j['username'] as String?) ?? '',
+        avatarUrl: j['avatar_url'] as String?,
+        elo: (j['elo'] as num?)?.toInt() ?? 0,
+        level: (j['level'] as String?) ?? '',
+        city: j['city'] as String?,
+        club: j['club'] as String?,
+        mutualFriends: (j['mutual_friends'] as num?)?.toInt() ?? 0,
+      );

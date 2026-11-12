@@ -85,6 +85,18 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> deleteAvatarFiles({String? keepUrl}) async {
+    final uid = _c.auth.currentUser?.id;
+    if (uid == null) return;
+    try {
+      final bucket = _c.storage.from('avatars');
+      final files = await bucket.list(path: uid);
+      final stale = [for (final f in files) if (f.name.isNotEmpty && bucket.getPublicUrl('$uid/${f.name}') != keepUrl) '$uid/${f.name}'];
+      if (stale.isNotEmpty) await bucket.remove(stale);   // política de Storage: solo se puede borrar en la carpeta propia
+    } catch (_) {/* limpieza best-effort: el registro del perfil ya no apunta a esos ficheros */}
+  }
+
+  @override
   Future<void> completeOnboarding() async {
     try { await _c.rpc('complete_onboarding'); } on sb.PostgrestException { throw AuthException('onboarding_incomplete'); }
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/social/application/social_providers.dart' show socialChangesProvider, refreshSocial;
 import '../../features/home/presentation/home_wiring.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/plobby_icon.dart';
@@ -11,7 +13,7 @@ import '../widgets/plobby_icon.dart';
 /// Pestaña: 56 px, padding-top 2, separación 4, icono 24 (trazo 1.8), etiqueta Inter 12; activa tinta 700, inactiva
 /// gris 400 (sin punto ni fondo). Centro: botón «+» lima de 60 px, subido 30 px, aro blanco de 6 px y sombra.
 /// El «+» abre el menú de nuevo partido (misma acción que antes).
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.shell});
   final StatefulNavigationShell shell;
 
@@ -20,7 +22,9 @@ class AppShell extends StatelessWidget {
   void _go(int i) => shell.goBranch(i, initialLocation: i == shell.currentIndex);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Solicitudes/notificaciones en vivo (Supabase Realtime): el otro usuario ve la solicitud o la amistad al momento.
+    ref.listen(socialChangesProvider, (_, __) => refreshSocial(ref));
     // 92 px en el HTML = 10 (padding) + 56 (pestaña) + 26 de aire inferior. En móviles con barra de gestos se usa el
     // inset del sistema si es mayor.
     final bottom = MediaQuery.paddingOf(context).bottom;

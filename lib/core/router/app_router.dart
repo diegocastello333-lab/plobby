@@ -85,6 +85,8 @@ final appRoutes = <RouteBase>[
   GoRoute(path: '/player/:id', builder: (_, s) => ProfileScreen(playerId: s.pathParameters['id']!)),
   GoRoute(path: '/friends', builder: (_, __) => const FriendsScreen(), routes: [
     GoRoute(path: 'add', builder: (_, __) => const AddFriendsScreen()),
+    // Amigos como selector (jugadores de un partido, pareja habitual). Devuelve List<PlayerOption> con `pop`.
+    GoRoute(path: 'pick', builder: (_, s) => FriendsScreen(pick: s.extra is FriendPick ? s.extra as FriendPick : const FriendPick(title: 'Elige amigos'))),
   ]),
   // Formulario único de partido: /match/new?type=league|friendly (+ leagueId&result=1 desde una liga). Declarar antes de '/match/:id'.
   GoRoute(path: '/match/new', builder: (_, s) => CreateMatchScreen(

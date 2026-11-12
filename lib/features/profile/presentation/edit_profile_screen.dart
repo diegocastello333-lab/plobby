@@ -12,6 +12,8 @@ import '../../../core/widgets/state_views.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/auth_models.dart';
+import '../../auth/presentation/avatar_catalog.dart';
+import 'widgets/avatar_gallery_sheet.dart';
 import '../application/profile_providers.dart';
 import '../domain/models.dart';
 
@@ -43,7 +45,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Hand _hand = Hand.right;
   Map<String, String> _errors = const {};
   bool _busy = false, _uploading = false;
-  String? _loadError, _avatarUrl;
+  String? _loadError, _avatarUrl, _avatarId;
 
   @override
   void initState() { super.initState(); _load(); }
@@ -67,26 +69,68 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _level = d.selfLevel ?? SelfLevel.values.firstWhere((l) => l.label == p.declaredLevel, orElse: () => SelfLevel.intermediate);
       _hand = d.hand ?? (p.dominantHand == 'Izquierda' ? Hand.left : Hand.right);
       _avatarUrl = d.avatarUrl ?? p.avatarUrl;
+      _avatarId = isValidAvatarId(d.avatarId) ? d.avatarId : (isValidAvatarId(p.avatarId) ? p.avatarId : null);
       setState(() { _data = d; _profile = p; });
     } catch (_) {
       if (mounted) setState(() => _loadError = 'No se pudo cargar tu perfil.');
     }
   }
 
+  bool get _hasImage => (_avatarUrl != null && _avatarUrl!.isNotEmpty) || _avatarId != null;
+
+  /// Hoja «Foto de perfil»: subir de la galería, elegir un avatar (siempre disponible, aunque ya haya foto) o eliminar.
+  Future<void> _openPhotoSheet() async {
+    final r = await showPlobbySheet<String>(context, (ctx) => AvatarGallerySheet(
+        selectedId: (_avatarUrl == null || _avatarUrl!.isEmpty || _avatarId != null) ? _avatarId : null, canRemove: _hasImage));
+    if (r == null || !mounted) return;
+    if (r == kPhotoFromGallery) return _pickPhoto();
+    if (r == kPhotoRemove) return _removePhoto();
+    return _chooseAvatar(r);
+  }
+
+  /// Guarda la imagen vigente (paso 3 de save_onboarding_step: `avatar_url` + `avatar_id`, vacío ⇒ NULL), refresca el
+  /// perfil y borra de Storage las imágenes anteriores para no dejar ficheros sin referencia.
+  Future<void> _commitImage({String? url, String? avatarId, required String ok}) async {
+    final repo = ref.read(authRepositoryProvider);
+    final base = _data ?? const OnboardingData();
+    await repo.saveStep(3, base.copyWith(avatarUrl: url, avatarId: avatarId, clearAvatarUrl: url == null, clearAvatarId: avatarId == null));
+    _data = base.copyWith(avatarUrl: url, avatarId: avatarId, clearAvatarUrl: url == null, clearAvatarId: avatarId == null);
+    ref.invalidate(profileProvider('me'));
+    await repo.deleteAvatarFiles(keepUrl: url);
+    if (mounted) { setState(() { _avatarUrl = url; _avatarId = avatarId; _uploading = false; }); showPlobbySnack(context, ok); }
+  }
+
+  Future<void> _run(Future<void> Function() job, String fail) async {
+    setState(() => _uploading = true);
+    try { await job(); }
+    catch (_) { if (mounted) { setState(() => _uploading = false); showPlobbySnack(context, fail, error: true); } }
+  }
+
   Future<void> _pickPhoto() async {
     final x = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 768, imageQuality: 85);
     if (x == null || !mounted) return;
     final mime = x.mimeType ?? (x.name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg');
-    setState(() => _uploading = true);
-    try {
-      final repo = ref.read(authRepositoryProvider);
-      final url = await repo.uploadAvatar(await x.readAsBytes(), mime);
-      await repo.saveStep(3, (_data ?? const OnboardingData()).copyWith(avatarUrl: url, clearAvatarId: true));
-      ref.invalidate(profileProvider('me'));
-      if (mounted) setState(() { _avatarUrl = url; _uploading = false; });
-    } catch (_) {
-      if (mounted) { setState(() => _uploading = false); showPlobbySnack(context, 'No se pudo subir la foto. Inténtalo de nuevo.', error: true); }
-    }
+    const fail = 'No se pudo subir la foto. Inténtalo de nuevo.';
+    await _run(() async {
+      final url = await ref.read(authRepositoryProvider).uploadAvatar(await x.readAsBytes(), mime);
+      await _commitImage(url: url, ok: 'Foto actualizada');
+    }, fail);
+  }
+
+  /// El avatar elegido se sube como PNG para que lo vean igual el resto de usuarios (listas, feed y chats leen
+  /// `avatar_url`); `avatar_id` guarda cuál es para marcarlo en la galería.
+  Future<void> _chooseAvatar(String id) async {
+    const fail = 'No se pudo guardar el avatar. Inténtalo de nuevo.';
+    await _run(() async {
+      final png = await renderAvatarPng(id);
+      final url = await ref.read(authRepositoryProvider).uploadAvatar(png, 'image/png');
+      await _commitImage(url: url, avatarId: id, ok: 'Avatar actualizado');
+    }, fail);
+  }
+
+  Future<void> _removePhoto() async {
+    const fail = 'No se pudo eliminar la foto. Inténtalo de nuevo.';
+    await _run(() => _commitImage(ok: 'Foto eliminada'), fail);
   }
 
   Future<void> _save() async {
@@ -136,11 +180,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ? const Center(child: CircularProgressIndicator(color: AppColors.text))
                 : ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), children: [
                     Center(child: SizedBox(width: 98, height: 96, child: Stack(clipBehavior: Clip.none, children: [
-                      ClipOval(child: SizedBox(width: 92, height: 92, child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                          ? Image.network(_avatarUrl!, fit: BoxFit.cover, cacheWidth: 276, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: p.id, size: 92))
-                          : SilhouetteAvatar(seed: p.id, size: 92))),
+                      Semantics(button: true, label: 'Foto de perfil', excludeSemantics: true, child: GestureDetector(onTap: _uploading ? null : _openPhotoSheet,
+                          child: ClipOval(child: SizedBox(width: 92, height: 92, child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                              ? Image.network(_avatarUrl!, fit: BoxFit.cover, cacheWidth: 276, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: p.id, size: 92))
+                              : _avatarId != null ? PlobbyAvatar(id: _avatarId!, size: 92) : SilhouetteAvatar(seed: p.id, size: 92))))),
                       if (_uploading) const Positioned.fill(right: 6, bottom: 4, child: Center(child: CircularProgressIndicator(color: AppColors.lime300))),
-                      Positioned(right: 0, bottom: 0, child: IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Cambiar foto', size: 34, onPressed: _uploading ? null : _pickPhoto)),
+                      Positioned(right: 0, bottom: 0, child: IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Cambiar foto o avatar', size: 34, onPressed: _uploading ? null : _openPhotoSheet)),
                     ]))),
                     const SizedBox(height: 18),
                     LabeledField(label: 'Nombre', controller: _first, maxLength: 40, error: _errors['first'], textCapitalization: TextCapitalization.words),

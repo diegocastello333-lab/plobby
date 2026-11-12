@@ -7,6 +7,9 @@ import '../../../../core/theme/plobby_theme.dart';
 import '../../application/profile_providers.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/models.dart';
+import '../../../../core/widgets/state_views.dart';
+import '../../../matches/domain/match_models.dart' show PlayerOption;
+import '../../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
 
 /// Club base (opcional), pareja habitual (requiere aceptación) y lado de juego.
 class IdentityCard extends ConsumerWidget {
@@ -14,7 +17,9 @@ class IdentityCard extends ConsumerWidget {
   final PlayerProfile profile; final bool isOwner;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final n = ref.read(profileProvider(profile.id).notifier);
+    // Perfil propio = familia 'me' (la que pinta la pantalla). Con Supabase profile.id es el UUID: usar ese id
+    // refrescaba otra instancia y la pareja/club/lado guardados no aparecían hasta recargar.
+    final n = ref.read(profileProvider(isOwner ? 'me' : profile.id).notifier);
     final rows = <Widget>[];
     if (profile.club != null) {
       rows.add(_Row(icon: PlobbyIcons.building, label: 'CLUB BASE', title: profile.club!.name, sub: profile.club!.city,
@@ -24,12 +29,14 @@ class IdentityCard extends ConsumerWidget {
     }
     final pa = profile.partner;
     if (pa != null && (pa.status == PartnerStatus.accepted || isOwner)) {
+      // Propietario: tocar la fila cambia la pareja (selector de Amigos) y la «×» la quita. Resto: abre su perfil.
       rows.add(_Row(icon: PlobbyIcons.user, avatar: SilhouetteAvatar(seed: pa.userId, size: 34), avatarUrl: pa.avatarUrl, label: 'PAREJA HABITUAL', title: pa.name,
-          sub: '@${pa.username}${pa.status == PartnerStatus.pending ? ' · Pendiente de aceptación' : ''}',
-          onTap: () => context.push('/player/${pa.userId}'),
-          onEdit: isOwner ? () => n.removePartner() : null, editIcon: PlobbyIcons.close));
+          sub: isOwner ? '@${pa.username} · Toca para cambiarla' : '@${pa.username}',
+          onTap: isOwner ? () => _pickPartner(context, n, pa) : () => context.push('/player/${pa.userId}'),
+          onEdit: isOwner ? () => _removePartner(context, n) : null, editIcon: PlobbyIcons.close));
     } else if (isOwner) {
-      rows.add(_Add('Elegir pareja habitual', () => n.requestPartner('lucia')));
+      // Antes llamaba a requestPartner('lucia') (id fijo de prueba): con Supabase siempre fallaba (no es un UUID ni un amigo).
+      rows.add(_Add('Añadir pareja habitual', () => _pickPartner(context, n, null)));
     }
     rows.add(_Row(icon: PlobbyIcons.swords, label: 'LADO DE JUEGO', title: profile.side == PlaySide.right ? 'Derecha' : 'Izquierda',
         onEdit: isOwner ? () => n.setSide(profile.side == PlaySide.right ? PlaySide.left : PlaySide.right) : null));
@@ -101,4 +108,28 @@ class _ClubSearchState extends State<_ClubSearch> {
         if (widget.hasClub) ListTile(leading: const Icon(Icons.delete_outline, color: PlobbyColors.loss), title: const Text('Quitar club'),
             onTap: () => Navigator.pop(context, const ClubRef(id: '_remove', name: '', city: ''))),
       ]));
+}
+
+/// Elige la pareja habitual SOLO entre los amigos (pantalla de Amigos en modo elección única) y la guarda en Supabase
+/// (RPC `set_habitual_partner`, que también exige que sea amigo).
+Future<void> _pickPartner(BuildContext context, ProfileNotifier n, PartnerLink? current) async {
+  final r = await pickFriends(context, FriendPick(title: 'Pareja habitual', confirmLabel: 'Elegir pareja',
+      selected: [if (current != null) PlayerOption(current.userId, current.name)]));
+  if (r == null || r.isEmpty || !context.mounted) return;
+  if (r.first.id == current?.userId) return;
+  try {
+    await n.requestPartner(r.first.id);
+    if (context.mounted) showPlobbySnack(context, '${r.first.name} es tu pareja habitual');
+  } catch (_) {
+    if (context.mounted) showPlobbySnack(context, 'No se pudo guardar la pareja habitual. Inténtalo de nuevo.', error: true);
+  }
+}
+
+Future<void> _removePartner(BuildContext context, ProfileNotifier n) async {
+  try {
+    await n.removePartner();
+    if (context.mounted) showPlobbySnack(context, 'Pareja habitual quitada');
+  } catch (_) {
+    if (context.mounted) showPlobbySnack(context, 'No se pudo quitar la pareja habitual. Inténtalo de nuevo.', error: true);
+  }
 }

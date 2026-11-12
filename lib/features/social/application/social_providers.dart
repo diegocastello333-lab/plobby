@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/mock_social_repository.dart';
 import '../data/social_repository.dart';
 import '../domain/social_models.dart';
+import '../../feed/application/feed_providers.dart' show notificationsProvider;
 
 final socialRepositoryProvider = Provider<SocialRepository>((ref) => MockSocialRepository());
 
@@ -36,6 +37,7 @@ class RequestsNotifier extends AsyncNotifier<FriendRequests> {
   Future<void> respond(String reqId, bool accept) async {
     await _repo.respondRequest(reqId, accept: accept);
     ref.invalidate(friendsProvider);
+    ref.invalidate(notificationsProvider);   // la RPC marca leída la notificación de la solicitud
     await _refresh();
   }
   Future<void> _refresh() async { ref.invalidateSelf(); ref.invalidate(addFriendsSearchProvider); ref.invalidate(suggestionsProvider); await future; }
@@ -49,3 +51,16 @@ final addFriendsSearchProvider = FutureProvider<List<SearchHit>>((ref) async {
   return ref.read(socialRepositoryProvider).search(q);
 });
 final suggestionsProvider = FutureProvider<List<SearchHit>>((ref) => ref.read(socialRepositoryProvider).suggestions());
+
+/// Cambios en vivo de solicitudes/notificaciones (Supabase Realtime). Quien lo escucha (la barra inferior, siempre
+/// montada) refresca amigos, solicitudes y notificaciones: así el otro usuario ve la solicitud o la amistad al momento.
+final socialChangesProvider = StreamProvider<void>((ref) => ref.watch(socialRepositoryProvider).changes());
+
+/// Refresca todo lo social tras un cambio hecho aquí o en el otro dispositivo.
+void refreshSocial(WidgetRef ref) {
+  ref.invalidate(friendsProvider);
+  ref.invalidate(requestsProvider);
+  ref.invalidate(suggestionsProvider);
+  ref.invalidate(addFriendsSearchProvider);
+  ref.invalidate(notificationsProvider);
+}

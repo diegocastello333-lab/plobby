@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../social/application/social_providers.dart' show friendsProvider, requestsProvider;
 import '../data/feed_repository.dart';
 import '../data/mock_feed_repository.dart';
 import '../domain/feed_models.dart';
@@ -118,7 +119,17 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
   @override
   Future<List<AppNotification>> build() => _repo.notifications();
   Future<void> markRead([String? id]) async { await _repo.markRead(id); ref.invalidateSelf(); }
-  Future<void> respond(String id, bool accept) async { await _repo.respond(id, accept); ref.invalidateSelf(); }
+  /// Acepta/rechaza (solicitud de amistad o invitación a liga). Refresca también amigos y solicitudes: antes, al aceptar
+  /// desde aquí, la lista de amigos seguía vacía hasta reiniciar la app.
+  Future<void> respond(String id, bool accept) async {
+    try {
+      await _repo.respond(id, accept);
+    } finally {
+      ref.invalidateSelf();
+      ref.invalidate(friendsProvider);
+      ref.invalidate(requestsProvider);
+    }
+  }
 }
 
 final notificationsProvider = AsyncNotifierProvider<NotificationsNotifier, List<AppNotification>>(NotificationsNotifier.new);

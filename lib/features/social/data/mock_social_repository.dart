@@ -6,6 +6,8 @@ import 'social_repository.dart';
 class MockSocialRepository implements SocialRepository {
   @override
   String get meId => 'me';
+  @override
+  Stream<void> changes() => const Stream.empty();
   static const _a = PlayerSummary(id: 'marcos', name: 'Marcos R.', username: 'marcos.r', elo: 1455, level: 'Intermedio alto', online: true, city: 'Madrid', club: 'La Moraleja');
   static const _b = PlayerSummary(id: 'laura', name: 'Laura G.', username: 'laura.g', elo: 1545, level: 'Avanzado');
   late final List<Friend> _friends = [

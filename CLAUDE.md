@@ -51,7 +51,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   V9 Mi rating, Compartir mis stats, Share Match, Bienvenida y Onboarding. Rediseño completo (V0–V9).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Tests: 202/202. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Tests: 208/208. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
 - Pendiente: probar en móvil real con Supabase; build web/APK tras el rediseño. Mocks de amigos y mensajes no
   comparten la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
@@ -67,3 +67,19 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 ## Entorno de nube
 - Entorno personal «plobby» (red limitada): `niwognkvoifrvlizcdvb.supabase.co`, `dl.google.com`, `services.gradle.org`, `plugins.gradle.org`, `storage.googleapis.com` + gestores de paquetes.
 - El SDK de Flutter y el de Android se instalaron a mano en el scratchpad (no persisten entre contenedores); `flutter create` ya no hace falta (plataformas en el repo).
+
+## Amigos, jugadores, pareja y avatares (12 nov 2026)
+- Causa del fallo de solicitudes: `v_my_friend_requests` devuelve `elo` null para quien aún no es amigo (RLS de
+  `player_ratings`) y `(j['elo'] as num)` lanzaba → la lista entera fallaba en silencio. Ahora `playerSummaryFromRow`
+  es null-safe; Amigos muestra «Solicitudes pendientes» (Aceptar/Rechazar), «Enviadas» (Cancelar) y tarjeta de error.
+- Sincronización: `SocialRepository.changes()` (Realtime de `friend_requests` y `notifications` filtrado por usuario)
+  → `socialChangesProvider`, escuchado en `AppShell` (`refreshSocial`). Aceptar desde notificaciones refresca amigos.
+- Selector de amigos: ruta `/friends/pick` con `FriendPick` (`pickFriends(context, pick)` devuelve `List<PlayerOption>`).
+  Crear partido: «Añadir jugadores» (hasta 3, el orden reparte huecos) o hueco a hueco, sin duplicados.
+  Pareja habitual: elegir/cambiar desde Amigos y quitar con «×» (RPC `set_habitual_partner`, exige amistad).
+  `IdentityCard` usa `profileProvider('me')` para el propio perfil (con UUID no se refrescaba).
+- Foto/avatar (Editar perfil → hoja `AvatarGallerySheet`): subir foto, elegir avatar (PNG renderizado con
+  `renderAvatarPng` y subido, `avatar_id` guarda cuál) o eliminar (url e id a NULL). Tras cada cambio
+  `AuthRepository.deleteAvatarFiles(keepUrl:)` borra las imágenes anteriores de `avatars/<uid>/`.
+- Sin cambios de esquema ni de RLS. Verificado entre diego.c y antocuesta con RPC reales en transacción con ROLLBACK.
+
