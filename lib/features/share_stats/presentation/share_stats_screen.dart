@@ -1,15 +1,21 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/plobby_theme.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/plobby_text.dart';
+import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/plobby_icon.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../profile/application/profile_providers.dart';
 import '../../profile/domain/models.dart';
 import '../../profile/domain/stats_calculator.dart';
 import '../application/share_card_painter.dart';
 import '../application/share_service.dart';
 
+/// «Compartir mis stats» — `scShare` del prototipo HTML: vista previa de la imagen y opciones en botones-filtro
+/// (plantilla, periodo, formato y qué mostrar). La imagen la pinta [ShareCardPainter].
 class ShareStatsScreen extends ConsumerStatefulWidget {
   const ShareStatsScreen({super.key});
   @override
@@ -45,9 +51,9 @@ class _State extends ConsumerState<ShareStatsScreen> {
     setState(() => busy = true);
     try {
       await action(await _png(d));
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ok)));
+      if (mounted) showPlobbySnack(context, ok);
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo generar la imagen')));
+      if (mounted) showPlobbySnack(context, 'No se pudo generar la imagen', error: true);
     } finally {
       if (mounted) setState(() => busy = false);
     }
@@ -56,39 +62,46 @@ class _State extends ConsumerState<ShareStatsScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(profileProvider('me'));
+    Widget group<T>(String label, List<(T, String)> opts, T sel, ValueChanged<T> on) => Padding(padding: const EdgeInsets.only(bottom: 14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(label, style: PlobbyText.label), const SizedBox(height: 8),
+          Wrap(spacing: 8, runSpacing: 8, children: [for (final o in opts) PlobbyFilterChip(label: o.$2, selected: sel == o.$1, onTap: () => on(o.$1))]),
+        ]));
     return Scaffold(
-      appBar: AppBar(title: const Text('Compartir mis stats'), backgroundColor: PlobbyColors.ivory),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => const Center(child: Text('No se pudieron cargar tus datos')),
-        data: (d) {
-          final size = fmt.size;
-          return ListView(padding: const EdgeInsets.all(20), children: [
-            Center(child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 420),
-              child: AspectRatio(aspectRatio: size.width / size.height,
-                child: ClipRRect(borderRadius: BorderRadius.circular(10), child: FittedBox(child: SizedBox.fromSize(size: size,
-                    child: CustomPaint(painter: ShareCardPainter(_data(d), tpl)))))))),
-            const SizedBox(height: 18),
-            SegmentedButton<ShareTemplate>(showSelectedIcon: false, selected: {tpl}, onSelectionChanged: (s) => setState(() => tpl = s.first),
-                segments: const [ButtonSegment(value: ShareTemplate.performance, label: Text('Rendimiento')), ButtonSegment(value: ShareTemplate.streak, label: Text('Racha'))]),
-            const SizedBox(height: 10),
-            SegmentedButton<StatsPeriod>(showSelectedIcon: false, selected: {period}, onSelectionChanged: (s) => setState(() => period = s.first),
-                segments: const [ButtonSegment(value: StatsPeriod.d30, label: Text('30 días')), ButtonSegment(value: StatsPeriod.d90, label: Text('3 meses')), ButtonSegment(value: StatsPeriod.all, label: Text('Todo'))]),
-            const SizedBox(height: 10),
-            SegmentedButton<ShareFormat>(showSelectedIcon: false, selected: {fmt}, onSelectionChanged: (s) => setState(() => fmt = s.first),
-                segments: const [ButtonSegment(value: ShareFormat.story, label: Text('Story 9:16')), ButtonSegment(value: ShareFormat.post, label: Text('Post 4:5'))]),
-            SwitchListTile(title: const Text('Mostrar club'), value: showClub && d.profile.club != null, onChanged: d.profile.club == null ? null : (v) => setState(() => showClub = v)),
-            SwitchListTile(title: const Text('Mostrar pareja habitual'), value: showPartner && d.profile.partner?.status == PartnerStatus.accepted,
-                onChanged: d.profile.partner?.status == PartnerStatus.accepted ? (v) => setState(() => showPartner = v) : null),
-            const SizedBox(height: 8),
-            Row(children: [
-              Expanded(child: OutlinedButton(onPressed: busy ? null : () => _run(d, (b) => _service.saveToGallery(b, 'plobby-stats-${DateTime.now().millisecondsSinceEpoch}'), 'Imagen guardada'), child: busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Guardar PNG'))),
-              const SizedBox(width: 10),
-              Expanded(child: FilledButton(onPressed: busy ? null : () => _run(d, (b) => _service.share(b, 'plobby-stats'), 'Compartido'), child: const Text('Compartir'))),
-            ]),
-          ]);
-        },
-      ),
+      body: Column(children: [
+        PlobbyHeaderBar(title: 'Compartir mis stats', onBack: () => context.pop()),
+        Expanded(child: async.when(
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(title: 'No se pudieron cargar tus datos', onRetry: () => ref.invalidate(profileProvider('me')))),
+          data: (d) {
+            final size = fmt.size;
+            final hasClub = d.profile.club != null, hasPartner = d.profile.partner?.status == PartnerStatus.accepted;
+            return ListView(padding: EdgeInsets.fromLTRB(20, 16, 20, 40 + MediaQuery.paddingOf(context).bottom), children: [
+              Center(child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 420),
+                child: AspectRatio(aspectRatio: size.width / size.height,
+                  child: Semantics(label: 'Vista previa de la imagen a compartir', image: true, child: DecoratedBox(
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), boxShadow: AppShadows.pop),
+                    child: ClipRRect(borderRadius: BorderRadius.circular(12), child: FittedBox(child: SizedBox.fromSize(size: size,
+                        child: CustomPaint(painter: ShareCardPainter(_data(d), tpl)))))))))),
+              const SizedBox(height: 20),
+              group('Plantilla', const [(ShareTemplate.performance, 'Rendimiento'), (ShareTemplate.streak, 'Racha')], tpl, (v) => setState(() => tpl = v)),
+              group('Periodo', const [(StatsPeriod.d30, '30 días'), (StatsPeriod.d90, '3 meses'), (StatsPeriod.all, 'Todo')], period, (v) => setState(() => period = v)),
+              group('Formato', const [(ShareFormat.story, 'Story 9:16'), (ShareFormat.post, 'Post 4:5')], fmt, (v) => setState(() => fmt = v)),
+              const Text('Mostrar', style: PlobbyText.label), const SizedBox(height: 8),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                Opacity(opacity: hasClub ? 1 : .45, child: PlobbyFilterChip(label: 'Club', selected: showClub && hasClub, onTap: hasClub ? () => setState(() => showClub = !showClub) : () {})),
+                Opacity(opacity: hasPartner ? 1 : .45, child: PlobbyFilterChip(label: 'Pareja habitual', selected: showPartner && hasPartner, onTap: hasPartner ? () => setState(() => showPartner = !showPartner) : () {})),
+              ]),
+              const SizedBox(height: 20),
+              Row(children: [
+                Expanded(child: PlobbyButton(label: 'Guardar PNG', kind: PlobbyButtonKind.outline, busy: busy, icon: PlobbyIcons.arrdn,
+                    onPressed: () => _run(d, (b) => _service.saveToGallery(b, 'plobby-stats-${DateTime.now().millisecondsSinceEpoch}'), 'Imagen guardada'))),
+                const SizedBox(width: 10),
+                Expanded(child: PlobbyButton(label: 'Compartir', icon: PlobbyIcons.share, onPressed: busy ? null : () => _run(d, (b) => _service.share(b, 'plobby-stats'), 'Compartido'))),
+              ]),
+            ]);
+          },
+        )),
+      ]),
     );
   }
 }

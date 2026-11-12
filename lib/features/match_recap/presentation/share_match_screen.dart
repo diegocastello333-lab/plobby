@@ -2,6 +2,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/plobby_icon.dart';
+import '../../../core/theme/plobby_text.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -65,9 +69,10 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
     final async = ref.watch(recapDataProvider(widget.matchId));
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(title: const Text('Share Match'), centerTitle: true),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+      body: Column(children: [
+        PlobbyHeaderBar(title: 'Share Match', onBack: () => context.pop()),
+        Expanded(child: async.when(
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
         error: (e, _) => _Blocked(reason: e is RecapException ? e.reason : null),
         data: (d) {
           _ensureImages(d);
@@ -84,24 +89,25 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
             _Toggle('Mostrar club', opts.showClub, (v) => setState(() => opts = opts.copyWith(showClub: v))),
             const SizedBox(height: AppSpacing.s3),
             Row(children: [
-              Expanded(child: _Act(Icons.camera_alt_outlined, 'INSTAGRAM STORY', busy, () => _run(d, RecapFormat.story, (s, b, n) => s.shareNative(b, n)))),
+              Expanded(child: _Act(PlobbyIcons.image, 'INSTAGRAM STORY', busy, () => _run(d, RecapFormat.story, (s, b, n) => s.shareNative(b, n)))),
               const SizedBox(width: AppSpacing.s2),
-              Expanded(child: _Act(Icons.ios_share, 'MORE', busy, () => _run(d, fmt, (s, b, n) => s.shareNative(b, n)))),
+              Expanded(child: _Act(PlobbyIcons.share, 'MORE', busy, () => _run(d, fmt, (s, b, n) => s.shareNative(b, n)))),
             ]),
             const SizedBox(height: AppSpacing.s2),
             Row(children: [
-              Expanded(child: _Act(Icons.download_outlined, 'SAVE IMAGE', busy, () => _run(d, fmt, (s, b, n) => s.save(b, n)))),
+              Expanded(child: _Act(PlobbyIcons.arrdn, 'SAVE IMAGE', busy, () => _run(d, fmt, (s, b, n) => s.save(b, n)))),
               const SizedBox(width: AppSpacing.s2),
-              Expanded(child: _Act(Icons.copy_outlined, 'COPY IMAGE', busy, () => _run(d, fmt, (s, b, _) => s.copy(b)))),
+              Expanded(child: _Act(PlobbyIcons.copy, 'COPY IMAGE', busy, () => _run(d, fmt, (s, b, _) => s.copy(b)))),
             ]),
             AnimatedSwitcher(duration: AppAnimations.scaled(context, AppAnimations.appear), child: done == null ? const SizedBox(key: ValueKey('n'), height: 0)
                 : Padding(key: ValueKey(done), padding: const EdgeInsets.only(top: AppSpacing.s3), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(done!.startsWith('No') || done!.startsWith('Tu') ? Icons.info_outline : Icons.check_circle, size: 18, color: done!.startsWith('No') || done!.startsWith('Tu') ? AppColors.warning : AppColors.success),
-                    const SizedBox(width: 8), Flexible(child: Text(done!, style: const TextStyle(fontWeight: FontWeight.w600))),
+                    PlobbyIcon(done!.startsWith('No') || done!.startsWith('Tu') ? PlobbyIcons.info : PlobbyIcons.check, size: 18, color: done!.startsWith('No') || done!.startsWith('Tu') ? AppColors.warning : AppColors.success),
+                    const SizedBox(width: 8), Flexible(child: Text(done!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
                   ]))),
           ]);
         },
-      ),
+      )),
+      ]),
     );
   }
 }
@@ -130,9 +136,7 @@ class _Carousel extends StatelessWidget {
   final RecapTemplate tpl; final PageController controller; final ValueChanged<RecapTemplate> onChanged;
   @override
   Widget build(BuildContext context) => ListView(scrollDirection: Axis.horizontal, children: [
-        for (final t in RecapTemplate.values) Padding(padding: const EdgeInsets.only(right: AppSpacing.s2), child: Pressable(child: ChoiceChip(
-            label: Text(t.label), selected: t == tpl, onSelected: (_) => onChanged(t), showCheckmark: false,
-            selectedColor: AppColors.brand, labelStyle: TextStyle(fontWeight: FontWeight.w700, color: t == tpl ? AppColors.brandInk : AppColors.textMuted)))),
+        for (final t in RecapTemplate.values) Padding(padding: const EdgeInsets.only(right: AppSpacing.s2), child: Center(child: PlobbyFilterChip(label: t.label, selected: t == tpl, onTap: () => onChanged(t)))),
       ]);
 }
 
@@ -140,28 +144,28 @@ class _Toggle extends StatelessWidget {
   const _Toggle(this.label, this.value, this.onChanged);
   final String label; final bool value; final ValueChanged<bool>? onChanged;
   @override
-  Widget build(BuildContext context) => SwitchListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(label), value: value, onChanged: onChanged);
+  Widget build(BuildContext context) => Opacity(opacity: onChanged == null ? .45 : 1, child: MergeSemantics(child: SwitchListTile(
+      dense: true, contentPadding: EdgeInsets.zero, value: value, onChanged: onChanged, activeThumbColor: AppColors.brand, activeTrackColor: AppColors.inverse,
+      title: Text(label, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)))));
 }
 
 class _Act extends StatelessWidget {
   const _Act(this.icon, this.label, this.busy, this.onTap);
-  final IconData icon; final String label; final bool busy; final VoidCallback onTap;
+  final PlobbyIcons icon; final String label; final bool busy; final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => Pressable(enabled: !busy, child: OutlinedButton.icon(
-      onPressed: busy ? null : onTap, icon: Icon(icon, size: 18), label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, letterSpacing: .4)),
-      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(AppLayout.buttonHeight))));
+  Widget build(BuildContext context) => PlobbyButton(label: label, icon: icon, kind: PlobbyButtonKind.outline, onPressed: busy ? null : onTap);
 }
 
 class _Blocked extends StatelessWidget {
   const _Blocked({this.reason});
   final RecapRefusal? reason;
   @override
-  Widget build(BuildContext context) => Center(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.lock_outline, size: 36, color: AppColors.textMuted), const SizedBox(height: 12),
+  Widget build(BuildContext context) => Align(alignment: Alignment.topCenter, child: Padding(padding: const EdgeInsets.fromLTRB(32, 48, 32, 32), child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const PlobbyIcon(PlobbyIcons.lock, size: 28, color: AppColors.textMuted), const SizedBox(height: 14),
         Text(switch (reason) {
           RecapRefusal.notConfirmed => 'Solo se puede compartir un resultado confirmado por los dos capitanes.',
           RecapRefusal.notParticipant => 'Solo los jugadores del partido pueden compartirlo.',
           _ => 'Este partido todavía no tiene un resultado que compartir.',
-        }, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600)),
+        }, textAlign: TextAlign.center, style: PlobbyText.sub.copyWith(fontWeight: FontWeight.w600)),
       ])));
 }

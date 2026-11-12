@@ -38,7 +38,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Referencia visual: el prototipo HTML (Plobby (4).html = Plobby (3).html, idénticos). Medir con getComputedStyle en
   Playwright, no a ojo. Comparar cada pantalla con capturas 390×844 lado a lado antes de darla por terminada.
 - Puntos de restauración en GitHub (ramas, el proxy no deja subir tags): `backup/v0-original-antes-rediseno`,
-  `backup/v1-sistema-de-diseno`, `backup/v2-inicio`, `backup/v3-navegacion`, `backup/v4-perfil`, `backup/v5-partidos`, `backup/v6-ligas`, `backup/v7-feed`, `backup/v8-mensajes-amigos`. Crear `backup/vN-…` tras cada fase estable (MCP create_branch).
+  `backup/v1-sistema-de-diseno`, `backup/v2-inicio`, `backup/v3-navegacion`, `backup/v4-perfil`, `backup/v5-partidos`, `backup/v6-ligas`, `backup/v7-feed`, `backup/v8-mensajes-amigos`, `backup/v9-elo-compartir-acceso`. Crear `backup/vN-…` tras cada fase estable (MCP create_branch).
 - Hecho: P0 (perfil en blanco; fuentes Inter/Unbounded empaquetadas en assets/fonts, sin google_fonts),
   V1 sistema de diseño (`PlobbyText`, `PlobbyIcon` con los 50 iconos del HTML vía flutter_svg, `plobby_components.dart`,
   `SilhouetteAvatar`), V2 Inicio, V3 navegación, V4 perfil (+ Editar perfil), V5 partidos (menú «+», crear, detalle,
@@ -47,12 +47,13 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   ids de BD intactos: waves→arcs, diagonal→diag), V7 feed (cabecera, burbujas, filtros fijos, tarjetas, reacciones,
   comentarios). `showPlobbySheet` usa el navegador raíz: las hojas tapan la barra inferior como en el HTML.
   V8 mensajes (lista, chat, nuevo grupo, info del grupo, selector de partidos), notificaciones, amigos y añadir
-  amigos (`PersonRow`, `PlayerAvatar` con paleta del HTML; imágenes de grupo p1–p8 = `GPRE` del HTML).
+  amigos (`PersonRow`, `PlayerAvatar` con paleta del HTML; imágenes de grupo p1–p8 = `GPRE` del HTML),
+  V9 Mi rating, Compartir mis stats, Share Match, Bienvenida y Onboarding. Rediseño completo (V0–V9).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Tests: 186/186. (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
-- Siguiente: V9 ELO, compartir (perfil/partido), bienvenida y onboarding. Mocks de amigos y mensajes no comparten
-  la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
+- Tests: 190/190. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Pendiente: probar en móvil real con Supabase; build web/APK tras el rediseño. Mocks de amigos y mensajes no
+  comparten la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
 
 ## Entorno de nube
