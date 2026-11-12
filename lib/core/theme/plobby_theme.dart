@@ -53,7 +53,16 @@ class AppCardStyles {
 /// registra como «Unbounded_700»: por eso `TextStyle(fontFamily: 'Unbounded')` caía en la fuente del sistema, y sin
 /// red en el primer arranque toda la app salía sin sus fuentes.
 TextTheme _textTheme(TextTheme base) {
-  final inter = base.apply(fontFamily: AppTypography.sansFamily, bodyColor: AppColors.text, displayColor: AppColors.text);
+  // letterSpacing 0 explícito: si queda en null, Theme.of mezcla la geometría de Material (+0.25/+0.5 px) y el texto
+  // sale más espaciado que en el CSS (que no aplica espaciado salvo en .eb/.lab/titulares).
+  TextStyle? z(TextStyle? x) => x?.copyWith(letterSpacing: 0);
+  final b0 = base.apply(fontFamily: AppTypography.sansFamily, bodyColor: AppColors.text, displayColor: AppColors.text);
+  final inter = b0.copyWith(
+    displayLarge: z(b0.displayLarge), displayMedium: z(b0.displayMedium), displaySmall: z(b0.displaySmall),
+    headlineLarge: z(b0.headlineLarge), headlineMedium: z(b0.headlineMedium), headlineSmall: z(b0.headlineSmall),
+    titleLarge: z(b0.titleLarge), titleMedium: z(b0.titleMedium), titleSmall: z(b0.titleSmall),
+    bodyLarge: z(b0.bodyLarge), bodyMedium: z(b0.bodyMedium), bodySmall: z(b0.bodySmall),
+    labelLarge: z(b0.labelLarge), labelMedium: z(b0.labelMedium), labelSmall: z(b0.labelSmall));
   TextStyle uni(TextStyle? s, double size, double lh, FontWeight w, [double ls = -0.02]) =>
       (s ?? const TextStyle()).copyWith(fontFamily: AppTypography.displayFamily, fontSize: size, height: lh / size, fontWeight: w, letterSpacing: size * ls, color: AppColors.text);
   return inter.copyWith(
@@ -78,7 +87,8 @@ ThemeData buildPlobbyTheme() {
     error: AppColors.danger, onError: Colors.white, errorContainer: AppColors.dangerSoft, onErrorContainer: AppColors.danger,
   );
   final base = ThemeData(useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: AppColors.bg, fontFamily: AppTypography.sansFamily);
-  OutlineInputBorder ob(Color c, [double w = 1.5]) => OutlineInputBorder(borderRadius: AppRadius.rMd, borderSide: BorderSide(color: c, width: w));
+  // `.inp`: borde 1 px #8A938D, radio 14.
+  OutlineInputBorder ob(Color c, [double w = 1]) => OutlineInputBorder(borderRadius: AppRadius.rMd, borderSide: BorderSide(color: c, width: w));
   return base.copyWith(
     pageTransitionsTheme: AppTransitions.theme, // solo la animación; GoRouter y rutas intactos
     textTheme: _textTheme(base.textTheme),
@@ -96,7 +106,7 @@ ThemeData buildPlobbyTheme() {
     floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: AppColors.brand, foregroundColor: AppColors.brandInk, elevation: 2, shape: CircleBorder()),
     inputDecorationTheme: InputDecorationTheme(
       filled: true, fillColor: AppColors.surface, contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      hintStyle: const TextStyle(color: AppColors.textMuted), border: ob(AppColors.borderStrong), enabledBorder: ob(AppColors.borderStrong),
+      hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 16), labelStyle: const TextStyle(color: AppColors.textMuted), border: ob(AppColors.borderStrong), enabledBorder: ob(AppColors.borderStrong),
       focusedBorder: ob(AppColors.focus, 2), errorBorder: ob(AppColors.danger), focusedErrorBorder: ob(AppColors.danger, 2),
     ),
     searchBarTheme: SearchBarThemeData(
@@ -106,15 +116,19 @@ ThemeData buildPlobbyTheme() {
       padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 14)),
     ),
     cardTheme: CardThemeData(color: AppColors.surface, elevation: 0, margin: EdgeInsets.zero, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd), shadowColor: const Color(0x14171C19)),
+    // `.fc` del prototipo: 34 px, radio 8, Inter 13/600, sin ✓; activo lima, inactivo blanco con borde 1 px .12.
     chipTheme: ChipThemeData(
-      backgroundColor: AppColors.surface, selectedColor: AppColors.brand, side: const BorderSide(color: AppColors.border, width: 1.5),
-      shape: const StadiumBorder(), labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.text), checkmarkColor: AppColors.brandInk,
+      backgroundColor: AppColors.surface, selectedColor: AppColors.brand, side: const BorderSide(color: Color(0x1F171C19)),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.rSm), showCheckmark: false,
+      labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.text),
+      padding: const EdgeInsets.symmetric(horizontal: 6), labelPadding: const EdgeInsets.symmetric(horizontal: 8),
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(style: ButtonStyle(
-      backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.brand : AppColors.surface),
-      foregroundColor: const WidgetStatePropertyAll(AppColors.brandInk),
-      side: const WidgetStatePropertyAll(BorderSide(color: AppColors.border, width: 1.5)),
-      shape: const WidgetStatePropertyAll(StadiumBorder()), textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+      // `.seg`: fondo hundido, sin bordes, activa en lima; Inter 12.5/600.
+      backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.brand : AppColors.surfaceSunken),
+      foregroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.brandInk : AppColors.textMuted),
+      side: const WidgetStatePropertyAll(BorderSide(color: AppColors.surfaceSunken, width: 3)),
+      shape: const WidgetStatePropertyAll(StadiumBorder()), textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
     )),
     bottomSheetTheme: const BottomSheetThemeData(backgroundColor: AppColors.surfaceRaised, shape: RoundedRectangleBorder(borderRadius: AppRadius.sheetTop), showDragHandle: true, dragHandleColor: AppColors.border, modalBackgroundColor: AppColors.surfaceRaised),
     dialogTheme: DialogThemeData(backgroundColor: AppColors.surfaceRaised, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rLg), elevation: 8),

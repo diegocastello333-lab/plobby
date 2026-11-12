@@ -57,6 +57,8 @@ class AppShadows {
   AppShadows._();
   static const card = [BoxShadow(color: Color(0x0F171C19), blurRadius: 2, offset: Offset(0, 1)), BoxShadow(color: Color(0x0F171C19), blurRadius: 16, offset: Offset(0, 4))];
   static const pop = [BoxShadow(color: Color(0x29171C19), blurRadius: 32, offset: Offset(0, 8))];
+  /// Tarjetas que solapan el banner de Inicio (`#hb-fr`, `#hb-elo`, `#hb-st`): 0 6 18 −8 .28 + 0 1 0 .04.
+  static const lifted = [BoxShadow(color: Color(0x47171C19), blurRadius: 18, offset: Offset(0, 6), spreadRadius: -8), BoxShadow(color: Color(0x0A171C19), offset: Offset(0, 1))];
 }
 
 /// Unbounded solo en titulares (display-xl, display-l, title); Inter para todo lo demás.

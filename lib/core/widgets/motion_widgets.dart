@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../motion/app_motion.dart';
 import '../theme/design_tokens.dart';
+import '../theme/plobby_text.dart';
 
 /// Pulsación: escala ≈97 % + opacidad. Envuelve cualquier control interactivo SIN cambiar su acción.
 /// Usa un Listener, así que no compite con el gesto del hijo (onTap sigue siendo del hijo).
@@ -37,7 +38,7 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
       padding: padding,
       child: SizedBox(height: AppLayout.headerHeight, child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: style ?? const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
+        Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: style ?? PlobbyText.sec)),  // h2.sec
         if (actionLabel != null) SectionLink(label: actionLabel!, onTap: onAction),
       ])));
 }
@@ -53,7 +54,7 @@ class SectionLink extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: AppLayout.minTap, minWidth: AppLayout.minTap),
           child: Padding(padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s2), child: Align(alignment: Alignment.centerRight, widthFactor: 1,
-              child: Text(label, maxLines: 1, softWrap: false, style: const TextStyle(fontSize: 13, height: 1.2, fontWeight: FontWeight.w600, color: AppColors.brandText))))))));
+              child: Text(label, maxLines: 1, softWrap: false, style: PlobbyText.link)))))));  // [data-a=hseeall]: tinta 13/600
 }
 
 /// Aparición de tarjeta: opacidad 0→1 + 10 px, 260 ms, retraso por índice. Una sola vez por `animationKey`.
@@ -222,21 +223,27 @@ class _BellBadgeState extends State<BellBadge> with SingleTickerProviderStateMix
 /// Selector de pestañas con indicador deslizante y color de texto progresivo. Misma API que un TabBar simple:
 /// el estado (`index`) y `onChanged` siguen siendo del llamador; aquí solo se anima.
 class SlidingTabs extends StatelessWidget {
-  const SlidingTabs({super.key, required this.labels, required this.index, required this.onChanged, this.height = 40});
+  const SlidingTabs({super.key, required this.labels, required this.index, required this.onChanged, this.height = 46});
   final List<String> labels; final int index; final ValueChanged<int> onChanged; final double height;
+  /// `.seg` del prototipo: contenedor hundido `#EEF1EA` en píldora con 3 px de relleno; pestaña activa en lima
+  /// (píldora que se desliza), Inter 12.5/600; inactivas en gris.
   @override
-  Widget build(BuildContext context) => LayoutBuilder(builder: (_, c) {
-        final w = c.maxWidth / labels.length;
-        final d = AppAnimations.scaled(context, AppAnimations.tab);
-        return SizedBox(height: height < AppLayout.minTap ? AppLayout.minTap : height, child: Stack(alignment: Alignment.centerLeft, children: [
-          AnimatedPositioned(duration: d, curve: AppAnimations.standard, left: index * w, width: w, top: 2, bottom: 2,
-              child: DecoratedBox(decoration: BoxDecoration(color: AppColors.brand, borderRadius: AppRadius.rMd))),
-          Row(children: [for (var i = 0; i < labels.length; i++) Expanded(child: Semantics(selected: i == index, button: true, child: InkWell(
-              borderRadius: AppRadius.rMd, onTap: () => onChanged(i),
-              child: Center(child: TweenAnimationBuilder<Color?>(
-                  tween: ColorTween(end: i == index ? AppColors.brandInk : AppColors.textMuted), duration: d,
-                  builder: (_, col, __) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, // etiquetas largas: se reducen en vez de cortarse
-                      child: Text(labels[i], maxLines: 1, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: col)))))))))]),
-        ]));
-      });
+  Widget build(BuildContext context) => Container(
+        height: height < AppLayout.minTap ? AppLayout.minTap : height, padding: const EdgeInsets.all(3),
+        decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rPill),
+        child: LayoutBuilder(builder: (_, c) {
+          final w = c.maxWidth / labels.length;
+          final d = AppAnimations.scaled(context, AppAnimations.tab);
+          return Stack(alignment: Alignment.centerLeft, children: [
+            AnimatedPositioned(duration: d, curve: AppAnimations.standard, left: index * w, width: w, top: 0, bottom: 0,
+                child: const DecoratedBox(decoration: BoxDecoration(color: AppColors.brand, borderRadius: AppRadius.rPill))),
+            Row(children: [for (var i = 0; i < labels.length; i++) Expanded(child: Semantics(selected: i == index, button: true, child: InkWell(
+                borderRadius: AppRadius.rPill, onTap: () => onChanged(i),
+                child: Center(child: TweenAnimationBuilder<Color?>(
+                    tween: ColorTween(end: i == index ? AppColors.brandInk : AppColors.textMuted), duration: d,
+                    builder: (_, col, __) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, // etiquetas largas: se reducen en vez de cortarse
+                        child: Text(labels[i], maxLines: 1, style: PlobbyText.tab.copyWith(color: col)))))))))]),
+          ]);
+        }),
+      );
 }

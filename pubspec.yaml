@@ -12,6 +12,7 @@ dependencies:
   gal: ^2.3.0            # guardar PNG en la galería (pide permisos en iOS/Android)
   image_picker: ^1.1.2   # foto de perfil desde la galería (onboarding / editar perfil)
   supabase_flutter: ^2.5.0   # Auth con Google, RPC, Realtime, Storage (cliente único en main.dart cuando Env.hasSupabase)
+  flutter_svg: ^2.3.4
 dev_dependencies:
   flutter_test: {sdk: flutter}
   flutter_lints: ^4.0.0
