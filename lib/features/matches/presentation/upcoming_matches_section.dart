@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/plobby_icon.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -53,10 +54,12 @@ class UpcomingMatchCard extends ConsumerWidget {
   final LifecycleMatch match;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final m = match;
+    final m = match, uid = ref.watch(currentUserIdProvider);
+    // `.um` del prototipo: borde 1 px + sombra 0 6 18 .05, radio 22, padding 16.
     return Semantics(button: true, label: 'Partido ${formatWhen(m.scheduledAt)}, ${m.club}, ${m.status.label}', child: InkWell(
       borderRadius: AppRadius.rLg, onTap: () => context.push('/match/${m.id}'),
-      child: Ink(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, border: Border.all(color: AppColors.border), boxShadow: AppShadows.card),
+      child: Ink(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, border: Border.all(color: AppColors.border),
+          boxShadow: const [BoxShadow(color: Color(0x0D171C19), blurRadius: 18, offset: Offset(0, 6))]),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -66,24 +69,27 @@ class UpcomingMatchCard extends ConsumerWidget {
             StatusChip(status: m.status),
           ]),
           const SizedBox(height: 14),
-          Row(children: [Expanded(child: _Team(m.team(1))), const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('VS', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted))), Expanded(child: _Team(m.team(2)))]),
+          Row(children: [Expanded(child: _Team(m.team(1), uid: uid)), const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('VS', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted))), Expanded(child: _Team(m.team(2), uid: uid))]),
           const Divider(height: 24),
           Row(children: [
-            Icon(m.type == MatchType.league ? Icons.emoji_events_outlined : Icons.sports_tennis, size: 14, color: m.type == MatchType.league ? AppColors.brandText : AppColors.textMuted), const SizedBox(width: 6),
-            Expanded(child: Text(m.type == MatchType.league ? 'Liga · ${m.leagueName ?? ''}' : 'Amistoso', overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted))),
-            if (m.status == MatchStatus.live) MatchStopwatch(match: m, compact: true),
+            PlobbyIcon(m.type == MatchType.league ? PlobbyIcons.trophy : PlobbyIcons.racket, size: 14, strokeWidth: 2, color: m.type == MatchType.league ? AppColors.brandText : AppColors.textMuted), const SizedBox(width: 6),
+            Expanded(child: Text(m.type == MatchType.league ? 'Liga · ${m.leagueName ?? ''}' : 'Amistoso', overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: m.type == MatchType.league ? AppColors.brandText : AppColors.textMuted))),
+            if (m.status == MatchStatus.live) MatchStopwatch(match: m, compact: true) else const PlobbyIcon(PlobbyIcons.more, size: 18, color: AppColors.textMuted),  // .um-go
           ]),
         ]))));
   }
 }
 
 class _Team extends StatelessWidget {
-  const _Team(this.players);
+  const _Team(this.players, {required this.uid});
   final List<MatchPlayer> players;
+  final String uid;
   @override
   Widget build(BuildContext context) => Column(children: [
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [for (var i = 0; i < players.length; i++) Transform.translate(offset: Offset(i * -9.0, 0), child: PlayerAvatar(player: players[i], size: 34))]),
         const SizedBox(height: 6),
-        Text(players.map((p) => p.name.split(' ').first).join(' y '), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        // «Tú y Marcos»: el usuario actual aparece como «Tú», como en el prototipo.
+        Text(players.map((p) => p.id == uid ? 'Tú' : p.name.split(' ').first).join(' y '), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
       ]);
 }

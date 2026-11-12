@@ -34,6 +34,20 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 3. Cargar datos de `clubs` y `courts`.
 4. Clave de firma propia para publicar el APK; decidir si abrir PR de la rama a `main`.
 
+## Rediseño fiel al HTML (en curso, desde 12 nov 2026)
+- Referencia visual: el prototipo HTML (Plobby (4).html = Plobby (3).html, idénticos). Medir con getComputedStyle en
+  Playwright, no a ojo. Comparar cada pantalla con capturas 390×844 lado a lado antes de darla por terminada.
+- Puntos de restauración en GitHub (ramas, el proxy no deja subir tags): `backup/v0-original-antes-rediseno`,
+  `backup/v1-sistema-de-diseno`, `backup/v2-inicio`. Crear `backup/vN-…` tras cada fase estable (MCP create_branch).
+- Hecho: P0 (perfil en blanco; fuentes Inter/Unbounded empaquetadas en assets/fonts, sin google_fonts),
+  V1 sistema de diseño (`PlobbyText`, `PlobbyIcon` con los 50 iconos del HTML vía flutter_svg, `plobby_components.dart`,
+  `SilhouetteAvatar`), V2 Inicio.
+- Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
+  TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
+- Siguiente: V3 navegación (barra inferior: activa en negrita sin punto, iconos del HTML), V4 perfil, V5 partidos,
+  V6 ligas («torneos» en la app = ligas), feed, mensajes. Diferencias pendientes: estado «VIVO»/panel en directo de
+  amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
+
 ## Entorno de nube
 - Entorno personal «plobby» (red limitada): `niwognkvoifrvlizcdvb.supabase.co`, `dl.google.com`, `services.gradle.org`, `plugins.gradle.org`, `storage.googleapis.com` + gestores de paquetes.
 - El SDK de Flutter y el de Android se instalaron a mano en el scratchpad (no persisten entre contenedores); `flutter create` ya no hace falta (plataformas en el repo).
