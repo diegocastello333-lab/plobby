@@ -51,7 +51,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   V9 Mi rating, Compartir mis stats, Share Match, Bienvenida y Onboarding. Rediseño completo (V0–V9).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Tests: 218/218. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Tests: 225/225. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
 - Pendiente: probar en móvil real con Supabase; build web/APK tras el rediseño. Mocks de amigos y mensajes no
   comparten la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
@@ -96,4 +96,20 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Fuente única: `relationProvider`, `requestWithProvider`, `friendCountOfProvider`; perfil ajeno con botón según relación.
 - Push con la app cerrada: NO implementado (requiere proyecto Firebase/APNs del usuario).
 - Prueba de 14 pasos entre diego.c y antocuesta (+2 usuarios temporales) con ROLLBACK: todo correcto.
+
+## Fase 3: sincronización global y estabilidad (12 nov 2026)
+- Pareja habitual «no se deja»: los logs mostraban `invalid input syntax for type uuid: "lucia"` → un móvil con APK
+  antiguo. Versión visible al final del perfil (`--dart-define=PLOBBY_BUILD=…`, `core/config/build_info.dart`).
+- Migración `20261122_phase3_sync` (aplicada con autorización): triggers `profiles_broadcast` (foto/avatar/nombre →
+  amigos y compañeros de grupo/liga), `conversation_members_broadcast`/`conversations_broadcast` (→ miembros);
+  `conversations`/`conversation_members` fuera de la publicación; políticas Presence `plobby_presence_read/write`
+  (`presence:<uid>`, solo amigos); `profiles.banner_id/banner_url` + RPC `set_home_banner`.
+- `core/supabase/user_channel.dart`: UN canal privado `user:<uid>` (amistades, perfiles, grupos) compartido por los
+  repos (creado en `SupabaseBootstrap.overrides`). `core/live/presence.dart`: Presence, activo solo en primer plano.
+- `core/net/timeout_client.dart` (20 s / 60 s subidas) y `core/errors/app_errors.dart` (errores globales; en release
+  un widget que falla no deja pantalla gris).
+- Banner: `home/presentation/banner_catalog.dart` (9: clásico + 8 SVG) y `banner_editor.dart` (encuadre 6:5,
+  JPEG 1200 px q82 con `package:image` en isolate, `avatars/<uid>/banner_*.jpg`). `deleteAvatarFiles` solo borra `avatar_*`.
+- Crear partido exige 3 amigos distintos (regla del servidor): con 2 cuentas no se puede por diseño.
+- Push con la app cerrada: sigue sin implementar (requiere Firebase del usuario).
 
