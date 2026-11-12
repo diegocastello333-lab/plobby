@@ -54,7 +54,12 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (_, state) {
       if (!ref.read(authGuardEnabledProvider)) return null;
       final gate = ref.read(sessionGateProvider);
-      if (!gate.hasValue) return null;                    // cargando: se re-evalúa al llegar el valor
+      if (!gate.hasValue) {
+        // Mientras se lee el perfil: sin sesión guardada se va directo a /welcome (sin pedir datos protegidos);
+        // con sesión se espera al valor y la guardia se re-evalúa.
+        final signedIn = ref.read(authRepositoryProvider).currentUser != null;
+        return signedIn ? null : authRedirect(signedIn: false, onboardingDone: false, location: state.matchedLocation);
+      }
       return authRedirect(signedIn: gate.value!.signedIn, onboardingDone: gate.value!.onboarded, location: state.matchedLocation);
     },
     routes: appRoutes,

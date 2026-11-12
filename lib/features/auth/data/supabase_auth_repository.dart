@@ -13,6 +13,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import '../domain/auth_models.dart';
 import 'auth_repository.dart';
@@ -33,7 +34,9 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithGoogle() async {
-    final ok = await _c.auth.signInWithOAuth(sb.OAuthProvider.google, redirectTo: kAuthRedirect, authScreenLaunchMode: sb.LaunchMode.externalApplication);
+    // Móvil: vuelve a la app por el esquema io.plobby.app. Web: vuelve a la misma URL de la app (redirect null).
+    final ok = await _c.auth.signInWithOAuth(sb.OAuthProvider.google, redirectTo: kIsWeb ? null : kAuthRedirect,
+        authScreenLaunchMode: kIsWeb ? sb.LaunchMode.platformDefault : sb.LaunchMode.externalApplication);
     if (!ok) throw AuthException('oauth_cancelled');
   }
 
