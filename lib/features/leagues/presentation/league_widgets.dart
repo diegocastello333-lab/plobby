@@ -132,8 +132,9 @@ class MyLeagueCard extends StatelessWidget {
               _Stat(label: 'Jugadores', value: '${l.members}'),
             ]),
             const SizedBox(height: 12),
+            // semanticsValue debe ser numérico (porcentaje); la frase completa va en la etiqueta.
             ClipRRect(borderRadius: AppRadius.rPill, child: LinearProgressIndicator(value: l.progress, minHeight: 6, backgroundColor: AppColors.surfaceSunken, color: AppColors.brand,
-                semanticsLabel: 'Progreso de la temporada', semanticsValue: '${l.matchesDone} de ${l.matchesTotal} partidos')),
+                semanticsLabel: 'Progreso de la temporada: ${l.matchesDone} de ${l.matchesTotal} partidos', semanticsValue: '${(l.progress * 100).round()}')),
             const SizedBox(height: 6),
             Text('${l.matchesDone} de ${l.matchesTotal} partidos · ${l.location.isEmpty ? l.status.label : l.location}', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
           ])),

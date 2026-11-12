@@ -76,7 +76,7 @@ class _Header extends ConsumerWidget {
         ])),
         const Padding(padding: EdgeInsets.fromLTRB(20, 14, 20, 0), child: Text('Feed', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1))),
         const Padding(padding: EdgeInsets.fromLTRB(20, 4, 20, 0), child: Text('Tu comunidad de pádel está jugando.', style: TextStyle(color: PlobbyColors.mute))),
-        SizedBox(height: 96, child: ListView.separated(
+        SizedBox(height: 100, child: ListView.separated(  // 16 + avatar 62 + 6 + nombre 16 = 100 (con 96 se desbordaba 4 px)
           scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 16, 20, 0), itemCount: friends.length, separatorBuilder: (_, __) => const SizedBox(width: 14),
           itemBuilder: (_, i) {
             final p = friends[i];
@@ -116,7 +116,7 @@ class _Skeleton extends StatelessWidget {
   const _Skeleton();
   @override
   Widget build(BuildContext context) => Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 12), padding: const EdgeInsets.all(16), height: 190,
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 12), padding: const EdgeInsets.all(16), height: 196,  // 32 + 164 de contenido (con 190 se desbordaba 6 px)
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [_bone(40, 40, r: 20), const SizedBox(width: 10), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_bone(110, 12), const SizedBox(height: 6), _bone(70, 10)])]),
