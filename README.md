@@ -80,6 +80,18 @@ Todas están aplicadas en el proyecto remoto. La última se validó antes en una
    `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription` (foto de perfil y guardar imágenes).
 5. **Datos iniciales:** `clubs` y `courts` (los clientes solo los leen).
 
+## Estado verificado (12 nov 2026)
+
+| Comprobación | Resultado |
+|---|---|
+| `flutter pub get` / `flutter analyze` | OK · 0 errores (solo avisos informativos) |
+| `flutter test` | 133/133 |
+| `flutter build web --dart-define-from-file=env.json` | OK · arranca contra el proyecto real, sin sesión redirige a `/welcome` |
+| `flutter build apk --release` | **Falla** por `super_clipboard` → `super_native_extensions` 0.9.1 (incompatible con Gradle 9, que exige Flutter 3.50). Sin esa dependencia el APK compila (61,7 MB) |
+| Flujo real en la base de datos (transacción revertida) | 26/26: perfiles por trigger, amistades, crear/empezar/finalizar partido, resultado, disputa, corrección, confirmación de capitanes, ELO ±16, feed, historial, chat + tarjeta de partido, RLS |
+| Migraciones | 11/11 aplicadas; RLS activa en todas las tablas; buckets `avatars` y `group-avatars`; 14 tablas en Realtime |
+| Login con Google | **No activado** en Supabase (solo email): ver «Configuración del panel» |
+
 ## Cómo está conectado
 
 | Feature | Repositorio real | Lecturas | Escrituras (RPC `security definer`) | Tiempo real |
