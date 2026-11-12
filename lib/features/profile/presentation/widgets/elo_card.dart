@@ -24,7 +24,8 @@ class EloCard extends ConsumerWidget {
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('RATING ELO', style: TextStyle(color: Color(0x99F6F8F1), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.6)),
-            Text(formatInt(elo), style: const TextStyle(color: PlobbyColors.lime, fontSize: 54, fontWeight: FontWeight.w800, height: 1.1)),
+            LiveNumber(value: elo, memoryKey: 'profile:elo:${view.data.profile.id}', format: formatInt, glowColor: PlobbyColors.lime,
+                style: const TextStyle(color: PlobbyColors.lime, fontSize: 54, fontWeight: FontWeight.w800, height: 1.1)),
           ])),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Row(children: [

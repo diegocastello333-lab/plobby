@@ -249,3 +249,65 @@ class SlidingTabs extends StatelessWidget {
         }),
       );
 }
+
+/// Número «vivo» (ELO, racha, amigos): recuerda el último valor mostrado en la sesión ([memoryKey]) y, cuando el valor
+/// real cambia, cuenta del anterior al nuevo con un breve destello lima si sube. La primera vez entra con una cuenta
+/// corta desde un 92 % del valor (sensación de carga, sin inventar cifras: siempre termina en el valor real).
+/// Con «reducir movimiento» se muestra el número sin animar.
+class LiveNumber extends StatefulWidget {
+  const LiveNumber({super.key, required this.value, required this.memoryKey, this.style, this.format, this.glowColor});
+  final int value;
+  final String memoryKey;
+  final TextStyle? style;
+  final String Function(int)? format;
+  final Color? glowColor;
+  static final _last = <String, int>{};
+  @override
+  State<LiveNumber> createState() => _LiveNumberState();
+}
+
+class _LiveNumberState extends State<LiveNumber> with SingleTickerProviderStateMixin {
+  late int _from = LiveNumber._last[widget.memoryKey] ?? (widget.value * .92).round();
+  late final AnimationController _glow = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+
+  @override
+  void initState() {
+    super.initState();
+    final prev = LiveNumber._last[widget.memoryKey];
+    if (prev != null && widget.value > prev) _glow.forward(from: 0);   // subió mientras no se veía
+    LiveNumber._last[widget.memoryKey] = widget.value;
+  }
+
+  @override
+  void didUpdateWidget(LiveNumber old) {
+    super.didUpdateWidget(old);
+    if (old.value != widget.value) {
+      _from = old.value;
+      if (widget.value > old.value) _glow.forward(from: 0);
+      LiveNumber._last[widget.memoryKey] = widget.value;
+    }
+  }
+
+  @override
+  void dispose() { _glow.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    String f(int v) => widget.format?.call(v) ?? '$v';
+    if (AppAnimations.reduceMotion(context) || _from == widget.value) return Text(f(widget.value), style: widget.style);
+    final glow = widget.glowColor ?? AppColors.brand;
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(_from),
+      tween: Tween(begin: _from.toDouble(), end: widget.value.toDouble()),
+      duration: const Duration(milliseconds: 700), curve: Curves.easeOutCubic,
+      builder: (_, v, __) => AnimatedBuilder(
+        animation: _glow,
+        builder: (_, child) {
+          final t = _glow.value, g = t == 0 || t == 1 ? 0.0 : (t < .3 ? t / .3 : (1 - t) / .7);
+          return Transform.scale(scale: 1 + .06 * g, alignment: Alignment.centerLeft, child: Text(f(v.round()),
+              style: (widget.style ?? const TextStyle()).copyWith(shadows: g == 0 ? null : [Shadow(color: glow.withValues(alpha: .7 * g), blurRadius: 14 * g)])));
+        },
+      ),
+    );
+  }
+}

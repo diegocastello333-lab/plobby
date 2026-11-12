@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/social/application/social_providers.dart' show socialChangesProvider, refreshSocial;
 import '../../features/home/presentation/home_wiring.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/plobby_icon.dart';
@@ -23,8 +22,8 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Solicitudes/notificaciones en vivo (Supabase Realtime): el otro usuario ve la solicitud o la amistad al momento.
-    ref.listen(socialChangesProvider, (_, __) => refreshSocial(ref));
+    // Las solicitudes/notificaciones en vivo se escuchan en LiveSync (raíz de la app), no aquí: así también funcionan
+    // en pantallas fuera de las pestañas (Amigos, chat, perfil de otro jugador…).
     // 92 px en el HTML = 10 (padding) + 56 (pestaña) + 26 de aire inferior. En móviles con barra de gestos se usa el
     // inset del sistema si es mayor.
     final bottom = MediaQuery.paddingOf(context).bottom;

@@ -101,19 +101,23 @@ enum NotificationType {
   achievement, streak, eloMilestone, ratingChange,
   // ligas
   leagueInvite, leagueStarting, leaguePositionChange,
+  // mensajes (refId = id de la conversación)
+  directMessage, groupMessage, groupAdded,
 }
 
 /// Destino al pulsar una notificación (se resuelve en la UI con GoRouter).
 extension NotificationDestination on NotificationType {
   String route(AppNotification n) => switch (this) {
         NotificationType.reaction || NotificationType.comment => '/feed',
-        NotificationType.friendRequest => '/friends/add',
+        NotificationType.friendRequest => '/friends',   // «Solicitudes pendientes» con Aceptar / Rechazar
         NotificationType.friendAccepted => '/player/${n.actors.first.id}',
         NotificationType.playInvite => '/messages/with/${n.actors.first.id}',
         NotificationType.matchConfirmationRequired || NotificationType.matchConfirmed || NotificationType.matchDisputed || NotificationType.matchEvent => '/match/${n.refId ?? ''}',
         NotificationType.achievement || NotificationType.streak => '/profile',
         NotificationType.eloMilestone || NotificationType.ratingChange => '/rating',
         NotificationType.leagueInvite || NotificationType.leagueStarting || NotificationType.leaguePositionChange => '/leagues/${n.refId ?? ''}',
+        NotificationType.directMessage || NotificationType.groupMessage || NotificationType.groupAdded =>
+            n.refId == null ? '/messages' : '/messages/${n.refId}',
       };
 }
 

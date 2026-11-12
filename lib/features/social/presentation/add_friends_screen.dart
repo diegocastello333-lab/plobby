@@ -84,12 +84,17 @@ class _HitTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = h.player;
-    final Widget trailing = switch (h.relation) {
+    // Relación desde la fuente común (amigos + solicitudes) cuando ya está cargada; si no, la que dio la búsqueda.
+    final loaded = ref.watch(friendsProvider).hasValue && ref.watch(requestsProvider).hasValue;
+    final rel = loaded ? ref.watch(relationProvider(p.id)) : h.relation;
+    final Widget trailing = switch (rel) {
       RelationState.friend => const Pill('Amigos', tone: PillTone.soft, icon: PlobbyIcons.check),
       RelationState.requestSent => const Pill('Solicitud enviada', tone: PillTone.neutral), // deshabilitado: evita duplicados
       RelationState.requestReceived => _act('Aceptar', () async {
-          final r = (await ref.read(requestsProvider.future)).incoming.firstWhere((x) => x.player.id == p.id);
+          final r = (await ref.read(requestsProvider.future)).incoming.where((x) => x.player.id == p.id).firstOrNull;
+          if (r == null) return;
           await ref.read(requestsProvider.notifier).respond(r.id, true);
+          if (context.mounted) showPlobbySnack(context, 'Ahora sois amigos');
         }),
       RelationState.none => _act('Añadir', () async {
           await ref.read(requestsProvider.notifier).send(p.id);

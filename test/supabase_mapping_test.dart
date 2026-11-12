@@ -69,6 +69,23 @@ void main() {
       expect(x.type.route(x), '/leagues/r1');
       expect(x.actionable, isTrue);
     });
-    test('tipos sin pantalla propia (avisos de grupo) se omiten', () => expect(notificationFrom(n('group_added'), actor), isNull));
+    // Antes los avisos de grupo se descartaban y los mensajes privados no tenían aviso: ahora todos llevan al chat.
+    test('mensaje privado: remitente + texto, contador de pendientes y abre la conversación', () {
+      final x = notificationFrom(n('direct_message', body: '¿Jugamos mañana?'), actor)!;
+      expect((x.type, x.text, x.type.route(x)), (NotificationType.directMessage, 'Marcos: ¿Jugamos mañana?', '/messages/r1'));
+      expect(notificationFrom(n('direct_message', body: 'Último', count: 3), actor)!.text, 'Marcos te ha enviado 3 mensajes · Último');
+      expect(x.actionable, isFalse);
+    });
+    test('mensaje de grupo y alta en grupo', () {
+      final g = notificationFrom(n('group_message', title: 'Pádel jueves', body: 'Hola'), actor)!;
+      expect((g.text, g.type.route(g)), ('Marcos en «Pádel jueves»: Hola', '/messages/r1'));
+      final a = notificationFrom(n('group_added', title: 'Te han añadido a un grupo', body: 'Pádel jueves'), actor)!;
+      expect((a.type, a.text), (NotificationType.groupAdded, 'Marcos te añadió al grupo «Pádel jueves»'));
+    });
+    test('solicitud de amistad lleva a Amigos (pendientes con Aceptar/Rechazar)', () {
+      final x = notificationFrom(n('friend_request'), actor)!;
+      expect(x.type.route(x), '/friends');
+    });
+    test('tipos desconocidos se omiten', () => expect(notificationFrom(n('tipo_futuro'), actor), isNull));
   });
 }

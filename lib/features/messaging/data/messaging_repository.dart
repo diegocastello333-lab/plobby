@@ -18,6 +18,8 @@ abstract class MessagingRepository {
   Stream<ChatMessage> watch(String conversationId);
   /// Mensajes entrantes de cualquier conversación (para el contador del Home).
   Stream<ChatMessage> watchIncoming();
+  /// Emite al recuperar la conexión de Realtime: lo ocurrido durante el corte no llega por los flujos anteriores.
+  Stream<void> resyncs();
 
   // ── grupos ──
   Future<String> createGroup({required String name, required List<String> memberIds, String? avatarId, Uint8List? avatarBytes});

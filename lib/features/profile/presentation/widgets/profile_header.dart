@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/plobby_theme.dart';
@@ -7,7 +9,10 @@ import '../../../../core/widgets/motion_widgets.dart';
 import '../../../../core/widgets/plobby_components.dart';
 import '../../../../core/widgets/plobby_icon.dart';
 import '../../../../core/widgets/silhouette_avatar.dart';
+import '../../../../core/widgets/state_views.dart' show showPlobbySnack;
 import '../../domain/models.dart';
+import '../../../social/application/social_providers.dart';
+import '../../../social/domain/social_models.dart' show RelationState;
 import '../../../auth/domain/auth_models.dart' show isValidAvatarId;
 import '../../../auth/presentation/avatar_catalog.dart' show PlobbyAvatar;
 
@@ -15,15 +20,19 @@ import '../../../auth/presentation/avatar_catalog.dart' show PlobbyAvatar;
 /// fila superior «MI PERFIL» (o Volver) + botones de cristal; avatar 84 px con aro lima (padding 3 + anillo 2);
 /// nombre Inter 24/800; usuario y ubicación marfil .72; bio 14/1.5; chips 26 px radio 7; dos botones 44 px radio 11
 /// en proporción 1 : 1.25. Mismas acciones que antes (compartir perfil, editar, añadir amigo, compartir stats).
-class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key, required this.profile, required this.isOwner, this.onFriend});
-  final PlayerProfile profile; final bool isOwner; final VoidCallback? onFriend;
+class ProfileHeader extends ConsumerWidget {
+  const ProfileHeader({super.key, required this.profile, required this.isOwner});
+  final PlayerProfile profile; final bool isOwner;
 
   static const _soft = Color(0xB8F6F8F1);   // rgba(246,248,241,.72)
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = profile;
+    // Estado de amistad y contador: MISMA fuente que Amigos (friendsProvider + requestsProvider), así que cambian solos
+    // al aceptar, cancelar o eliminar (aquí o en el otro dispositivo, vía Realtime).
+    final rel = isOwner ? RelationState.none : ref.watch(relationProvider(p.id));
+    final count = ref.watch(friendCountOfProvider(isOwner ? 'me' : p.id)).valueOrNull;
     return Container(
       color: AppColors.ink900,
       padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 16, 20, 22),
@@ -55,7 +64,16 @@ class ProfileHeader extends StatelessWidget {
                   child: const Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3.2, color: AppColors.ink900))))),
             ]),
             const SizedBox(height: 3),
-            Text('@${p.username}', style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0)),
+            Row(children: [
+              Flexible(child: Text('@${p.username}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0))),
+              if (count != null) Semantics(button: isOwner, label: '$count ${count == 1 ? 'amigo' : 'amigos'}', excludeSemantics: true, child: GestureDetector(
+                onTap: isOwner ? () => context.push('/friends') : null,
+                child: Text.rich(TextSpan(text: '  ·  ', children: [
+                  TextSpan(text: '$count', style: const TextStyle(color: AppColors.lime300, fontWeight: FontWeight.w800)),
+                  TextSpan(text: count == 1 ? ' amigo' : ' amigos'),
+                ]), style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0)),
+              )),
+            ]),
             if (p.location.isNotEmpty) ...[
               const SizedBox(height: 6),
               Row(children: [
@@ -73,14 +91,56 @@ class ProfileHeader extends StatelessWidget {
         ]),
         const SizedBox(height: 18),
         Row(children: [
-          Expanded(flex: 100, child: _Btn(isOwner ? 'Editar perfil' : 'Añadir amigo', isOwner ? PlobbyIcons.edit : PlobbyIcons.userplus, false,
-              isOwner ? () => context.push('/profile/edit') : (onFriend ?? () => context.push('/friends')))),
+          Expanded(flex: 100, child: isOwner
+              ? _Btn('Editar perfil', PlobbyIcons.edit, false, () => context.push('/profile/edit'))
+              : AnimatedSwitcher(duration: const Duration(milliseconds: 220), child: _friendButton(context, ref, rel, p))),
           const SizedBox(width: 10),
-          Expanded(flex: 125, child: _Btn('Compartir mis stats', PlobbyIcons.share, true, () => context.push('/profile/share'))),
+          Expanded(flex: 125, child: isOwner
+              ? _Btn('Compartir mis stats', PlobbyIcons.share, true, () => context.push('/profile/share'))
+              : rel == RelationState.friend
+                  ? _Btn('Enviar mensaje', PlobbyIcons.plane, true, () => context.push('/messages/with/${p.id}'))
+                  : _Btn('Compartir perfil', PlobbyIcons.share, true, () => Share.share('https://plobby.app/@${p.username}'))),
         ]),
       ]),
     );
   }
+}
+
+/// Botón de amistad del perfil ajeno según la relación real. Cada acción llama a la RPC correspondiente y refresca
+/// la fuente común (amigos/solicitudes), así que el botón cambia de estado solo.
+Widget _friendButton(BuildContext context, WidgetRef ref, RelationState rel, PlayerProfile p) {
+  final id = p.id, name = p.fullName;
+  Future<void> run(Future<void> Function() job, String ok, String fail) async {
+    try {
+      await job();
+      HapticFeedback.mediumImpact();
+      if (context.mounted) showPlobbySnack(context, ok);
+    } catch (_) {
+      if (context.mounted) showPlobbySnack(context, fail, error: true);
+    }
+  }
+  final requests = ref.read(requestsProvider.notifier);
+  return switch (rel) {
+    RelationState.friend => _Btn('Amigos', PlobbyIcons.check, false, key: const ValueKey('friend'), () => showPlobbySheet(context, (c) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          SheetHeader(title: name, subtitle: 'Sois amigos en Plobby'),
+          SheetListItem(icon: PlobbyIcons.plane, label: 'Enviar mensaje', onTap: () { Navigator.pop(c); context.push('/messages/with/$id'); }),
+          SheetListItem(icon: PlobbyIcons.racket, label: 'Invitar a jugar', onTap: () { Navigator.pop(c); context.push('/messages/with/$id?invite=1'); }),
+          SheetListItem(icon: PlobbyIcons.trash, label: 'Eliminar amigo', danger: true, onTap: () {
+            Navigator.pop(c);
+            run(() => ref.read(friendsProvider.notifier).remove(id), '$name ya no está en tus amigos', 'No se pudo eliminar. Inténtalo de nuevo.');
+          }),
+        ]))),
+    RelationState.requestSent => _Btn('Solicitud enviada', PlobbyIcons.clock, false, key: const ValueKey('sent'), () {
+        final r = ref.read(requestWithProvider(id));
+        if (r != null) run(() => requests.cancel(r.id), 'Solicitud cancelada', 'No se pudo cancelar. Inténtalo de nuevo.');
+      }),
+    RelationState.requestReceived => _Btn('Aceptar solicitud', PlobbyIcons.userplus, true, key: const ValueKey('received'), () {
+        final r = ref.read(requestWithProvider(id));
+        if (r != null) run(() => requests.respond(r.id, true), 'Ahora sois amigos', 'No se pudo aceptar. Inténtalo de nuevo.');
+      }),
+    RelationState.none => _Btn('Añadir amigo', PlobbyIcons.userplus, false, key: const ValueKey('none'),
+        () => run(() => requests.send(id), 'Solicitud enviada a $name', 'No se pudo enviar la solicitud. Inténtalo de nuevo.')),
+  };
 }
 
 /// `.ph .ch span`: 26 px, radio 7, marfil .12, Inter 12/600 con el valor en lima 800.
@@ -97,7 +157,7 @@ class _Chip extends StatelessWidget {
 
 /// `.ph .acts button`: 44 px, radio 11, Inter 14/700; `.g` marfil .14 · `.l` lima.
 class _Btn extends StatelessWidget {
-  const _Btn(this.t, this.i, this.hi, this.f);
+  const _Btn(this.t, this.i, this.hi, this.f, {super.key});
   final String t; final PlobbyIcons i; final bool hi; final VoidCallback f;
   @override
   Widget build(BuildContext context) {

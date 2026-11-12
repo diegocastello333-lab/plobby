@@ -27,9 +27,17 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _c = TextEditingController();
   final _scroll = ScrollController();
+  /// Mensajes cargados al abrir: esos se muestran sin animar; los que lleguen o se envíen después entran deslizándose.
+  int? _initialCount;
 
   @override
-  void dispose() { _c.dispose(); _scroll.dispose(); super.dispose(); }
+  void initState() { super.initState(); activeConversation.value = widget.conversationId; }
+
+  @override
+  void dispose() {
+    if (activeConversation.value == widget.conversationId) activeConversation.value = null;
+    _c.dispose(); _scroll.dispose(); super.dispose();
+  }
 
   void _toEnd() => WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scroll.hasClients) _scroll.animateTo(_scroll.position.maxScrollExtent, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
@@ -73,7 +81,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         Expanded(child: msgs.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(title: 'No se pudo cargar la conversación', onRetry: () => ref.invalidate(chatProvider(widget.conversationId)))),
-          data: (l) => ListView.builder(controller: _scroll, padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), itemCount: l.length + 1, itemBuilder: (_, i) {
+          data: (l) { _initialCount ??= l.length; return ListView.builder(controller: _scroll, padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), itemCount: l.length + 1, itemBuilder: (_, i) {
                   if (i == 0) {
                     return Column(children: [
                       Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(isGroup ? 'GRUPO' : 'CONVERSACIÓN PRIVADA', textAlign: TextAlign.center, style: PlobbyText.eb)),
@@ -85,9 +93,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   if (m.kind == MessageKind.system) return _SystemMsg(m.body);
                   // en grupos: nombre+foto del remitente al empezar una racha de mensajes ajenos
                   final showSender = isGroup && !mine && (k == 0 || l[k - 1].senderId != m.senderId || l[k - 1].kind == MessageKind.system);
-                  return _Bubble(m, mine: mine, sender: isGroup && !mine ? byId[m.senderId] : null, showSender: showSender, meId: me,
-                      onRetry: () => ref.read(chatProvider(widget.conversationId).notifier).send(m.body));
-                }),
+                  final bubble = _Bubble(m, mine: mine, sender: isGroup && !mine ? byId[m.senderId] : null, showSender: showSender, meId: me,
+                      onRetry: () => ref.read(chatProvider(widget.conversationId).notifier).retry(m.id));
+                  return k < (_initialCount ?? 0) ? bubble : _NewMessage(fromRight: mine, child: bubble);
+                }); },
         )),
         // .chi: acciones rápidas · compartir resultado · campo en píldora · enviar (lima)
         Container(
@@ -151,6 +160,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
+/// Entrada de un mensaje nuevo: 12 px desde su lado + fundido, 240 ms. Sin clave propia: al pasar de «enviando» a
+/// «enviado» (cambia el id) el elemento se reutiliza y no se repite la animación.
+class _NewMessage extends StatelessWidget {
+  const _NewMessage({required this.child, required this.fromRight});
+  final Widget child; final bool fromRight;
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.of(context).disableAnimations) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1), duration: const Duration(milliseconds: 240), curve: Curves.easeOutCubic, child: child,
+      builder: (_, t, c) => Opacity(opacity: t, child: Transform.translate(offset: Offset((fromRight ? 12 : -12) * (1 - t), 8 * (1 - t)), child: c)),
+    );
+  }
+}
+
 class _SystemMsg extends StatelessWidget {
   const _SystemMsg(this.text);
   final String text;
@@ -176,7 +200,7 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final time = '${m.createdAt.hour.toString().padLeft(2, '0')}:${m.createdAt.minute.toString().padLeft(2, '0')}';
-    final status = !mine ? '' : switch (m.status) { MessageStatus.sending => ' …', MessageStatus.sent => ' ✓', MessageStatus.read => ' ✓✓', MessageStatus.failed => ' ⚠ Reintentar' };
+    final status = !mine ? '' : switch (m.status) { MessageStatus.sending => ' …', MessageStatus.sent => ' ✓', MessageStatus.read => ' ✓✓', MessageStatus.failed => ' · No enviado, toca para reintentar' };
     final align = mine ? Alignment.centerRight : Alignment.centerLeft;
 
     // La tarjeta de resultado va sin burbuja: es el contenido.
@@ -200,7 +224,7 @@ class _Bubble extends StatelessWidget {
     };
     return Align(
       alignment: align,
-      child: GestureDetector(
+      child: AnimatedOpacity(opacity: m.status == MessageStatus.sending ? .7 : 1, duration: const Duration(milliseconds: 200), child: GestureDetector(
         onTap: m.status == MessageStatus.failed ? onRetry : null,
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 4), padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
@@ -215,7 +239,7 @@ class _Bubble extends StatelessWidget {
             Padding(padding: const EdgeInsets.only(top: 3), child: Align(alignment: Alignment.centerRight, widthFactor: 1, child: Text('$time$status', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, letterSpacing: 0, color: fg.withValues(alpha: .7))))),
           ]),
         ),
-      ),
+      )),
     );
   }
 

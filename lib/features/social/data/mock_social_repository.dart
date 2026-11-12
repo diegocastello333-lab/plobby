@@ -7,7 +7,9 @@ class MockSocialRepository implements SocialRepository {
   @override
   String get meId => 'me';
   @override
-  Stream<void> changes() => const Stream.empty();
+  Stream<SocialChange> changes() => const Stream.empty();
+  @override
+  Future<int> friendCount(String userId) async => userId == meId ? _friends.length : 12;
   static const _a = PlayerSummary(id: 'marcos', name: 'Marcos R.', username: 'marcos.r', elo: 1455, level: 'Intermedio alto', online: true, city: 'Madrid', club: 'La Moraleja');
   static const _b = PlayerSummary(id: 'laura', name: 'Laura G.', username: 'laura.g', elo: 1545, level: 'Avanzado');
   late final List<Friend> _friends = [

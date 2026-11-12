@@ -195,10 +195,11 @@ const _types = {
   'match_disputed': NotificationType.matchDisputed, 'match_event': NotificationType.matchEvent, 'achievement': NotificationType.achievement,
   'streak': NotificationType.streak, 'elo_milestone': NotificationType.eloMilestone, 'rating_change': NotificationType.ratingChange,
   'league_invite': NotificationType.leagueInvite, 'league_starting': NotificationType.leagueStarting, 'league_position_change': NotificationType.leaguePositionChange,
+  'direct_message': NotificationType.directMessage, 'group_message': NotificationType.groupMessage, 'group_added': NotificationType.groupAdded,
 };
 
-/// Fila de `notifications` → [AppNotification]. Los tipos sin pantalla propia (p. ej. avisos de grupo, que ya se ven en Mensajes)
-/// se omiten. Puro, para poder probarlo.
+/// Fila de `notifications` → [AppNotification]. Los tipos desconocidos se omiten. Puro, para poder probarlo.
+/// Mensajes: un aviso por conversación que el servidor actualiza con el último mensaje (`actor_count` = sin leer).
 AppNotification? notificationFrom(Map<String, dynamic> r, FeedUser actor) {
   final t = _types[r['notification_type']];
   if (t == null) return null;
@@ -206,14 +207,20 @@ AppNotification? notificationFrom(Map<String, dynamic> r, FeedUser actor) {
   final more = ((r['actor_count'] ?? 1) as num).toInt() - 1;
   final whoAll = more > 0 ? '$who y $more más' : who;
   final title = r['title'] as String?, body = r['body'] as String?;
-  final text = body?.isNotEmpty == true ? (title?.isNotEmpty == true ? '$title: $body' : body!) : switch (t) {
+  final n = more + 1;
+  final text = switch (t) {
+    NotificationType.directMessage => n > 1 ? '$who te ha enviado $n mensajes · ${body ?? ''}' : '$who: ${body ?? ''}',
+    NotificationType.groupMessage => '$who en «${title ?? 'el grupo'}»: ${body ?? ''}${n > 1 ? ' (+${n - 1})' : ''}',
+    NotificationType.groupAdded => '$who te añadió al grupo «${body ?? ''}»',
+    _ => null,
+  } ?? (body?.isNotEmpty == true ? (title?.isNotEmpty == true ? '$title: $body' : body!) : switch (t) {
     NotificationType.reaction => '$whoAll reaccionó a tu actividad',
     NotificationType.comment => '$whoAll comentó tu actividad',
     NotificationType.friendRequest => '$who quiere ser tu amigo',
     NotificationType.friendAccepted => '$who aceptó tu solicitud de amistad',
     NotificationType.leagueInvite => '$who te invitó a una liga',
     _ => title ?? 'Tienes una novedad',
-  };
+  });
   final read = r['is_read'] == true;
   return AppNotification(
     id: r['id'] as String, type: t, actors: [if (actor.id.isNotEmpty) actor], text: text, createdAt: DateTime.parse(r['created_at'] as String).toLocal(),

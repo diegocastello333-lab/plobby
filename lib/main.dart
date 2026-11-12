@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/live/live_sync.dart';
 import 'core/router/app_router.dart';
 import 'core/supabase/supabase_bootstrap.dart';
 import 'core/theme/plobby_theme.dart';
@@ -18,5 +19,7 @@ class PlobbyApp extends ConsumerWidget {
   const PlobbyApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
-      title: 'Plobby', theme: buildPlobbyTheme(), routerConfig: ref.watch(routerProvider), debugShowCheckedModeBanner: false);
+      title: 'Plobby', theme: buildPlobbyTheme(), routerConfig: ref.watch(routerProvider), debugShowCheckedModeBanner: false,
+      // Sincronización en vivo y avisos emergentes en cualquier pantalla (no solo en las pestañas).
+      builder: (_, child) => LiveSync(child: child ?? const SizedBox.shrink()));
 }

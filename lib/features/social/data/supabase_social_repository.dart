@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/supabase/shared_realtime.dart';
 import '../domain/social_models.dart';
 import 'social_repository.dart';
 
@@ -60,26 +61,42 @@ class SupabaseSocialRepository implements SocialRepository {
   @override
   Future<void> removeFriend(String userId) => _db.rpc('remove_friend', params: {'target': userId});
 
-  /// Realtime: solicitudes enviadas o recibidas por mí y mis notificaciones (las dos tablas están en la publicación
-  /// `supabase_realtime`; la RLS de cada una solo deja pasar mis filas).
   @override
-  Stream<void> changes() {
-    late final StreamController<void> out;
-    RealtimeChannel? ch;
-    out = StreamController<void>.broadcast(
+  Future<int> friendCount(String userId) async => ((await _db.rpc('friend_count', params: {'p_user': userId})) as num?)?.toInt() ?? 0;
+
+  /// Realtime en dos canales (uno por tipo de autorización):
+  ///  - postgres_changes de mis solicitudes (enviadas y recibidas) y mis notificaciones; la RLS solo deja pasar mis filas;
+  ///  - Broadcast privado `user:<uid>`: el trigger de `friendships` avisa a LOS DOS usuarios de altas y bajas de
+  ///    amistad (los DELETE de postgres_changes no se pueden filtrar por usuario sin exponer los de otros).
+  /// También emite al recuperar la conexión, para recargar lo que pasó durante el corte.
+  late final _rows = SharedRealtime<SocialChange>(_db, 'social:$meId', (ch, emit) {
+    void req(PostgresChangePayload _) => emit(SocialChange.requests);
+    ch
+      ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'friend_requests',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'receiver_id', value: meId), callback: req)
+      ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'friend_requests',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'sender_id', value: meId), callback: req)
+      ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'notifications',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'recipient_user_id', value: meId),
+          callback: (_) => emit(SocialChange.notifications));
+  });
+  late final _friendships = SharedRealtime<SocialChange>(_db, 'user:$meId',
+      (ch, emit) => ch.onBroadcast(event: 'friends', callback: (_) => emit(SocialChange.friendships)), private: true);
+
+  @override
+  Stream<SocialChange> changes() {
+    final subs = <StreamSubscription<Object?>>[];
+    late final StreamController<SocialChange> out;
+    void add(SocialChange c) { if (!out.isClosed) out.add(c); }
+    out = StreamController<SocialChange>.broadcast(
       onListen: () {
-        final me = meId;
-        void ping(PostgresChangePayload _) { if (!out.isClosed) out.add(null); }
-        ch = _db.channel('social:$me')
-          ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'friend_requests',
-              filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'receiver_id', value: me), callback: ping)
-          ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'friend_requests',
-              filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'sender_id', value: me), callback: ping)
-          ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'notifications',
-              filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'recipient_user_id', value: me), callback: ping)
-          ..subscribe();
+        subs
+          ..add(_rows.events.listen(add))
+          ..add(_friendships.events.listen(add))
+          ..add(_rows.resyncs.listen((_) => add(SocialChange.resync)))
+          ..add(_friendships.resyncs.listen((_) => add(SocialChange.resync)));
       },
-      onCancel: () async { final c = ch; ch = null; if (c != null) await _db.removeChannel(c); },
+      onCancel: () { for (final s in subs) { s.cancel(); } subs.clear(); },
     );
     return out.stream;
   }

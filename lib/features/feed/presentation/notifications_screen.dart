@@ -28,6 +28,9 @@ import 'widgets/activity_cards.dart';
       NotificationType.leagueInvite => ('Invitación a una liga', PlobbyIcons.trophy),
       NotificationType.leagueStarting => ('Tu liga empieza pronto', PlobbyIcons.trophy),
       NotificationType.leaguePositionChange => ('Cambio en la clasificación', PlobbyIcons.trophy),
+      NotificationType.directMessage => ('Nuevo mensaje', PlobbyIcons.plane),
+      NotificationType.groupMessage => ('Mensaje en un grupo', PlobbyIcons.users),
+      NotificationType.groupAdded => ('Nuevo grupo', PlobbyIcons.users),
     };
 
 /// Notificaciones — `scFNotifs` del prototipo HTML: agrupadas por día, sin leer con fondo lima suave y punto,

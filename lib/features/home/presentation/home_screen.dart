@@ -210,14 +210,14 @@ class _Counters extends ConsumerWidget {
             ])),
             const SizedBox(width: 10),
           ],
-          Flexible(child: _StatText(value: '${c.friends}', label: 'Amigos')),
+          Flexible(child: _StatText(value: '${c.friends}', label: 'Amigos', number: c.friends, memoryKey: 'home:friends')),
         ]),
       )),
       const SizedBox(width: 10),
       Expanded(flex: 100, child: _LiftedCard(
         label: c.elo == null ? 'ELO' : 'ELO ${c.elo}${delta == 0 ? '' : ', ${delta > 0 ? '+' : '−'}${delta.abs()} puntos en 30 días'}. Ver detalle',
         onTap: () => HomeNav.elo(context),
-        child: _StatText(value: c.elo == null ? '—' : '${c.elo}', label: 'ELO', trailing: delta == 0 ? null : Row(mainAxisSize: MainAxisSize.min, children: [
+        child: _StatText(value: c.elo == null ? '—' : '${c.elo}', number: c.elo, memoryKey: 'home:elo', label: 'ELO', trailing: delta == 0 ? null : Row(mainAxisSize: MainAxisSize.min, children: [
           Transform.rotate(angle: delta > 0 ? 0 : 1.5708, child: SvgPicture.string(
               '<svg viewBox="0 0 24 24" fill="none" stroke="${delta > 0 ? '#171C19' : '#C4282E'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
               width: 9, height: 9)),
@@ -230,11 +230,12 @@ class _Counters extends ConsumerWidget {
         label: 'Racha actual: ${c.streak} ${c.streak == 1 ? 'partido ganado' : 'partidos ganados'} seguidos', onTap: () => HomeNav.streak(context, c),
         padding: const EdgeInsets.all(6),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          SizedBox(width: 25, height: 31, child: Stack(children: [
+          // La llama «salta» con un destello cuando la racha cambia (victoria confirmada).
+          PopOnEvent(trigger: c.streak, glow: c.streak > 0, child: SizedBox(width: 25, height: 31, child: Stack(children: [
             SvgPicture.string('<svg viewBox="0 0 32 40"><path d="M16 2C17 9 27 13 27 24a11 11 0 0 1-22 0c0-4 1.6-6.8 3.8-9.2.4 3.2 2.2 5 4.2 5.6C11.4 12 12.6 6 16 2z" fill="${c.streak > 0 ? '#D2F548' : '#EEF1EA'}"/></svg>', width: 25, height: 31),
             Positioned(left: 0, right: 0, top: 14, child: Text('${c.streak}', textAlign: TextAlign.center,
                 style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
-          ])),
+          ]))),
           const SizedBox(height: 3),
           const Text('Racha de victorias', textAlign: TextAlign.center, maxLines: 2,
               style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9, height: 1.1, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.textMuted)),
@@ -261,12 +262,16 @@ class _LiftedCard extends StatelessWidget {
 }
 
 class _StatText extends StatelessWidget {
-  const _StatText({required this.value, required this.label, this.trailing});
+  const _StatText({required this.value, required this.label, this.trailing, this.number, this.memoryKey});
   final String value, label; final Widget? trailing;
+  /// Si hay valor numérico real, se anima su cambio (LiveNumber); si no, se muestra [value] tal cual.
+  final int? number; final String? memoryKey;
   @override
   // En pantallas estrechas (320 px) la cifra y la etiqueta se reducen en vez de desbordar la tarjeta.
   Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(value, style: PlobbyText.stat)),
+        FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: number == null
+            ? Text(value, style: PlobbyText.stat)
+            : LiveNumber(value: number!, memoryKey: memoryKey ?? label, style: PlobbyText.stat)),
         const SizedBox(height: 4),
         FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(label, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w500, letterSpacing: 0, color: AppColors.textMuted)),

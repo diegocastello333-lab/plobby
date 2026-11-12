@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
 import '../application/social_providers.dart';
@@ -99,7 +101,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       if (reqs.hasError) Padding(padding: const EdgeInsets.only(bottom: 14), child: ErrorStateCard(title: 'No se pudieron cargar las solicitudes', onRetry: () => ref.invalidate(requestsProvider))),
       if (incoming.isNotEmpty) ...[
         _Header('Solicitudes pendientes', incoming.length),
-        for (final r in incoming) _IncomingRequest(r),
+        for (var i = 0; i < incoming.length; i++) AppearOnce(animationKey: 'req:${incoming[i].id}', index: i, child: _IncomingRequest(incoming[i])),
         const SizedBox(height: 18),
       ],
       if (outgoing.isNotEmpty) ...[
@@ -123,7 +125,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 ...list.maybeWhen(
                   data: (l) => l.isEmpty
                       ? [const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Ningún amigo coincide con tu búsqueda', textAlign: TextAlign.center, style: PlobbyText.sub))]
-                      : [for (final f in l) _FriendTile(f)],
+                      // Cada amigo entra con una aparición suave UNA vez: al aceptar una solicitud, el nuevo amigo «llega».
+                      : [for (var i = 0; i < l.length; i++) AppearOnce(animationKey: 'fr:${l[i].player.id}', index: i, child: _FriendTile(l[i]))],
                   orElse: () => const <Widget>[]),
               ],
       ),
@@ -186,12 +189,12 @@ class _PickRow extends StatelessWidget {
       child: PersonRow(
         leading: PlayerAvatar(player), title: player.name, subtitle: sub.isEmpty ? null : sub,
         onTap: disabled ? null : onTap,
-        trailing: GestureDetector(onTap: disabled ? null : onTap, child: AnimatedContainer(
+        trailing: GestureDetector(onTap: disabled ? null : onTap, child: AnimatedScale(scale: on ? 1 : .9, duration: const Duration(milliseconds: 180), curve: Curves.easeOutBack, child: AnimatedContainer(
           duration: const Duration(milliseconds: 150), width: 26, height: 26, alignment: Alignment.center,
           decoration: BoxDecoration(shape: BoxShape.circle, color: on ? AppColors.brand : null, border: on ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
           child: on ? (single ? const PlobbyIcon(PlobbyIcons.check, size: 14, strokeWidth: 3, color: AppColors.brandInk)
               : Text('${order + 1}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brandInk))) : null,
-        )),
+        ))),
       )));
   }
 }
@@ -221,7 +224,8 @@ class _IncomingRequestState extends ConsumerState<_IncomingRequest> {
     setState(() => _busy = true);
     try {
       await ref.read(requestsProvider.notifier).respond(widget.r.id, accept);
-      if (mounted) showPlobbySnack(context, accept ? 'Ahora sois amigos' : 'Solicitud rechazada');
+      if (accept) HapticFeedback.mediumImpact();
+      if (mounted) showPlobbySnack(context, accept ? 'Ahora tú y ${widget.r.player.name} sois amigos' : 'Solicitud rechazada');
     } catch (_) {
       if (mounted) { setState(() => _busy = false); showPlobbySnack(context, 'No se pudo responder a la solicitud. Inténtalo de nuevo.', error: true); }
     }
@@ -232,11 +236,11 @@ class _IncomingRequestState extends ConsumerState<_IncomingRequest> {
     return PersonRow(
       leading: PlayerAvatar(p), title: p.name, subtitle: '@${p.username} quiere ser tu amigo',
       onTap: () => context.push('/player/${p.id}'),
-      trailing: _busy ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)) : Row(mainAxisSize: MainAxisSize.min, children: [
+      trailing: AnimatedSwitcher(duration: const Duration(milliseconds: 180), child: _busy ? const SizedBox(key: ValueKey('busy'), width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)) : Row(key: const ValueKey('actions'), mainAxisSize: MainAxisSize.min, children: [
         PlobbyButton(label: 'Aceptar', kind: PlobbyButtonKind.small, onPressed: () => _respond(true)),
         const SizedBox(width: 6),
         PlobbyButton(label: 'Rechazar', kind: PlobbyButtonKind.smallOutline, onPressed: () => _respond(false)),
-      ]),
+      ])),
     );
   }
 }

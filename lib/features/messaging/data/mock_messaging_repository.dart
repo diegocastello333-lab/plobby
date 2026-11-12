@@ -98,6 +98,8 @@ class MockMessagingRepository implements MessagingRepository {
   Stream<ChatMessage> watch(String c) => _ctl.stream.where((m) => m.conversationId == c);
   @override
   Stream<ChatMessage> watchIncoming() => _ctl.stream.where((m) => m.senderId != meId);
+  @override
+  Stream<void> resyncs() => const Stream.empty();
 
   // ───────────── grupos ─────────────
   @override

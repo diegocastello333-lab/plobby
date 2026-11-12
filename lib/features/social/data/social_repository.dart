@@ -3,6 +3,9 @@ import '../domain/social_models.dart';
 /// Contrato de datos sociales. Implementación real: [SupabaseSocialRepository] (RPCs de la migración
 /// `20261112_home_social.sql`). Todas las mutaciones pasan por RPC `security definer`; el cliente
 /// jamás escribe en `friendships` ni en tablas de rating.
+/// Qué ha cambiado: solicitudes, notificaciones, amistades (alta/baja) o todo (tras recuperar la conexión).
+enum SocialChange { requests, notifications, friendships, resync }
+
 abstract class SocialRepository {
   String get meId;
   Future<List<Friend>> friends();
@@ -13,7 +16,8 @@ abstract class SocialRepository {
   Future<void> cancelRequest(String requestId);
   Future<void> respondRequest(String requestId, {required bool accept}); // RPC respond_friend_request
   Future<void> removeFriend(String userId);             // RPC remove_friend
-  /// Avisa cuando cambian las solicitudes o notificaciones del usuario en el servidor (Supabase Realtime), para que
-  /// los dos usuarios vean al momento una solicitud nueva, aceptada o rechazada.
-  Stream<void> changes();
+  /// Avisa de cambios sociales en el servidor (Supabase Realtime), con su tipo para refrescar solo lo afectado.
+  Stream<SocialChange> changes();
+  /// Número de amigos de cualquier jugador (RPC `friend_count`; la RLS de friendships solo deja leer las propias).
+  Future<int> friendCount(String userId);
 }

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../feed/application/feed_providers.dart' show notificationsProvider;
 import '../../matches/application/lifecycle_providers.dart';
 import '../../matches/domain/match_lifecycle.dart';
 import '../data/messaging_repository.dart';
@@ -9,14 +11,24 @@ import '../domain/messaging_models.dart';
 /// El mock obtiene los partidos confirmados de la MISMA fuente que el resto de la app (LifecycleRepository): sin duplicar datos.
 final messagingRepositoryProvider = Provider<MessagingRepository>((ref) => MockMessagingRepository(matches: () => ref.read(lifecycleRepositoryProvider).confirmedMatches()));
 
+/// Conversación abierta en pantalla (la fija ChatScreen). Sirve para no avisar de un mensaje que ya se está viendo.
+/// ValueNotifier y no provider: se actualiza desde initState/dispose, donde Riverpod no deja modificar estado.
+final activeConversation = ValueNotifier<String?>(null);
+
 class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
   @override
   Future<List<Conversation>> build() {
     final repo = ref.read(messagingRepositoryProvider);
-    final sub = repo.watchIncoming().listen((_) => ref.invalidateSelf());
-    final sub2 = repo.watchGroupChanges().listen((_) => ref.invalidateSelf());   // nombre/foto/miembros en tiempo real
-    ref.onDispose(() { sub.cancel(); sub2.cancel(); });
-    return ref.read(messagingRepositoryProvider).conversations();
+    // Recarga con un pequeño margen: varios mensajes seguidos generan una sola consulta.
+    Timer? debounce;
+    void reload() { debounce?.cancel(); debounce = Timer(const Duration(milliseconds: 250), ref.invalidateSelf); }
+    final subs = [
+      repo.watchIncoming().listen((_) => reload()),
+      repo.watchGroupChanges().listen((_) => reload()),   // nombre/foto/miembros en tiempo real
+      repo.resyncs().listen((_) => reload()),             // vuelta de la conexión: recuperar lo perdido
+    ];
+    ref.onDispose(() { debounce?.cancel(); for (final s in subs) { s.cancel(); } });
+    return repo.conversations();
   }
 }
 final conversationsProvider = AsyncNotifierProvider<ConversationsNotifier, List<Conversation>>(ConversationsNotifier.new);
@@ -42,19 +54,51 @@ final unreadMessagesProvider = Provider<int>((ref) => ref.watch(conversationsPro
 
 class ChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
   MessagingRepository get _repo => ref.read(messagingRepositoryProvider);
+
+  /// Une mensajes sin duplicar (el mismo mensaje puede llegar por la respuesta del envío y por Realtime) y en orden.
+  static List<ChatMessage> _merge(List<ChatMessage> a, Iterable<ChatMessage> b) {
+    final byId = {for (final m in a) m.id: m};
+    for (final m in b) { byId[m.id] = m; }
+    return byId.values.toList()..sort((x, y) => x.createdAt.compareTo(y.createdAt));
+  }
+
   @override
   Future<List<ChatMessage>> build(String conversationId) async {
-    final sub = _repo.watch(conversationId).listen((m) {
-      final cur = state.valueOrNull ?? [];
-      if (cur.any((x) => x.id == m.id)) return;
-      state = AsyncData([...cur, m]);
-      _repo.markRead(conversationId);
-    });
-    ref.onDispose(sub.cancel);
+    // Lo que llegue mientras se carga el historial se guarda y se une después (antes podía perderse).
+    final early = <ChatMessage>[];
+    var loaded = false;
+    final subs = [
+      _repo.watch(conversationId).listen((m) {
+        if (!loaded) { early.add(m); return; }
+        final cur = state.valueOrNull ?? const <ChatMessage>[];
+        if (cur.any((x) => x.id == m.id)) return;
+        state = AsyncData(_merge(cur, [m]));
+        if (m.senderId != _repo.meId) _read();
+      }),
+      _repo.resyncs().listen((_) => _reload()),
+    ];
+    ref.onDispose(() { for (final s in subs) { s.cancel(); } });
     final h = await _repo.history(conversationId);
-    await _repo.markRead(conversationId);
+    loaded = true;
+    unawaited(_read());
+    return _merge(h, early);
+  }
+
+  /// Marca la conversación como leída (servidor: last_read_at + avisos) y refresca lista y notificaciones.
+  Future<void> _read() async {
+    try { await _repo.markRead(arg); } catch (_) {/* sin conexión: se marcará al volver */}
     ref.invalidate(conversationsProvider);
-    return h;
+    ref.invalidate(notificationsProvider);   // sus avisos de mensaje quedan leídos en el servidor
+  }
+
+  /// Recarga tras recuperar la conexión, conservando los mensajes locales pendientes o fallidos.
+  Future<void> _reload() async {
+    try {
+      final h = await _repo.history(arg);
+      final local = (state.valueOrNull ?? const <ChatMessage>[]).where((m) => m.status == MessageStatus.sending || m.status == MessageStatus.failed);
+      state = AsyncData(_merge(h, local));
+      unawaited(_read());
+    } catch (_) {/* se reintentará en la siguiente reconexión */}
   }
 
   /// Envía la tarjeta de un partido. El resultado lo construye el servidor a partir del partido original: aquí solo viaja su id.
@@ -62,7 +106,7 @@ class ChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
   Future<void> sendMatchCard(String matchId) async {
     try {
       final saved = await _repo.sendMatchCard(arg, matchId);
-      if (!(state.valueOrNull ?? []).any((m) => m.id == saved.id)) state = AsyncData([...state.value ?? [], saved]);
+      state = AsyncData(_merge(state.valueOrNull ?? const [], [saved]));
     } finally {
       ref.invalidate(conversationsProvider);
     }
@@ -73,16 +117,33 @@ class ChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
     final text = body.trim();
     if (text.isEmpty && kind == MessageKind.text) return;
     final tmp = ChatMessage(id: 'tmp${DateTime.now().microsecondsSinceEpoch}', conversationId: arg, senderId: _repo.meId, kind: kind, body: text, refId: refId, createdAt: DateTime.now(), status: MessageStatus.sending);
-    state = AsyncData([...state.value ?? [], tmp]);
+    state = AsyncData([...state.valueOrNull ?? const <ChatMessage>[], tmp]);
+    await _deliver(tmp);
+  }
+
+  /// Reintenta un mensaje fallido: el MISMO mensaje pasa a «enviando» (antes se creaba otro y quedaba el fallido).
+  Future<void> retry(String tmpId) async {
+    final m = state.valueOrNull?.where((x) => x.id == tmpId).firstOrNull;
+    if (m == null || m.status != MessageStatus.failed) return;
+    _replace(tmpId, m.copyWith(status: MessageStatus.sending));
+    await _deliver(m);
+  }
+
+  Future<void> _deliver(ChatMessage tmp) async {
     try {
-      final saved = await _repo.send(arg, text, kind: kind, refId: refId);
-      state = AsyncData([for (final m in state.value!) m.id == tmp.id ? saved : m]);
+      final saved = await _repo.send(arg, tmp.body, kind: tmp.kind, refId: tmp.refId);
+      final cur = state.valueOrNull ?? const <ChatMessage>[];
+      // Si Realtime ya trajo la fila guardada, se quita el provisional; si no, se sustituye.
+      state = AsyncData(cur.any((m) => m.id == saved.id) ? cur.where((m) => m.id != tmp.id).toList() : [for (final m in cur) m.id == tmp.id ? saved : m]);
     } catch (_) {
-      state = AsyncData([for (final m in state.value!) m.id == tmp.id ? m.copyWith(status: MessageStatus.failed) : m]);
+      _replace(tmp.id, tmp.copyWith(status: MessageStatus.failed));
     }
     ref.invalidate(conversationsProvider);
   }
+
+  void _replace(String id, ChatMessage m) => state = AsyncData([for (final x in state.valueOrNull ?? const <ChatMessage>[]) x.id == id ? m : x]);
 }
+
 final chatProvider = AsyncNotifierProvider.family<ChatNotifier, List<ChatMessage>, String>(ChatNotifier.new);
 
 final conversationSearchProvider = StateProvider<String>((ref) => '');

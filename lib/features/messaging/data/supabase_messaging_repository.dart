@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/supabase/shared_realtime.dart';
 import '../../matches/domain/match_lifecycle.dart';
 import '../../social/domain/social_models.dart';
 import '../domain/messaging_models.dart';
 import 'messaging_repository.dart';
 
-/// Integración Supabase (SIN verificar contra una base real). Realtime: los canales respetan RLS, así que solo llegan
+/// Integración Supabase (verificada contra la base real con dos cuentas). Realtime: los canales respetan RLS, así que solo llegan
 /// mensajes/cambios de conversaciones en las que el usuario es miembro. Requiere la migración 20261117_messaging_groups.sql.
 class SupabaseMessagingRepository implements MessagingRepository {
   SupabaseMessagingRepository(this._db, {required this.confirmed});
@@ -139,42 +140,31 @@ class SupabaseMessagingRepository implements MessagingRepository {
   }
 
   // ── realtime ──
-  @override
-  Stream<ChatMessage> watch(String c) {
-    final ctl = StreamController<ChatMessage>();
-    final ch = _db.channel('chat:$c').onPostgresChanges(
-      event: PostgresChangeEvent.insert, schema: 'public', table: 'messages',
-      filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'conversation_id', value: c),
-      callback: (p) => ctl.add(_msg(p.newRecord)),
-    )..subscribe();
-    ctl.onCancel = () { _db.removeChannel(ch); ctl.close(); };
-    return ctl.stream;
-  }
+  // Un canal para TODOS los mensajes de mis conversaciones (la RLS de `messages` solo entrega los de conversaciones en
+  // las que soy miembro) y otro para los cambios de grupo. Cada chat, la lista y el contador filtran ese mismo flujo:
+  // antes cada pantalla abría un canal con el mismo nombre y el servidor cerraba el anterior.
+  late final _messages = SharedRealtime<ChatMessage>(_db, 'msgs:$meId', (ch, emit) => ch.onPostgresChanges(
+        event: PostgresChangeEvent.insert, schema: 'public', table: 'messages', callback: (p) => emit(_msg(p.newRecord))));
+  late final _groups = SharedRealtime<String>(_db, 'groups:$meId', (ch, emit) => ch
+    ..onPostgresChanges(event: PostgresChangeEvent.update, schema: 'public', table: 'conversations', callback: (p) {
+      final id = p.newRecord['id'] as String?; if (id != null) emit(id);
+    })
+    ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'conversation_members', callback: (p) {
+      final r = p.eventType == PostgresChangeEvent.delete ? p.oldRecord : p.newRecord;
+      final id = r['conversation_id'] as String?; if (id != null) emit(id);
+    }));
 
-  /// Mensajes entrantes de TODAS mis conversaciones (lista, badge, notificaciones locales). Se excluyen los míos y los de sistema.
   @override
-  Stream<ChatMessage> watchIncoming() {
-    final ctl = StreamController<ChatMessage>();
-    final ch = _db.channel('inbox:$meId').onPostgresChanges(
-      event: PostgresChangeEvent.insert, schema: 'public', table: 'messages',
-      callback: (p) { final m = _msg(p.newRecord); if (m.senderId != meId && m.kind != MessageKind.system) ctl.add(m); },
-    )..subscribe();
-    ctl.onCancel = () { _db.removeChannel(ch); ctl.close(); };
-    return ctl.stream;
-  }
+  Stream<ChatMessage> watch(String c) => _messages.events.where((m) => m.conversationId == c);
+
+  /// Mensajes entrantes de TODAS mis conversaciones (lista, badge, aviso en la app). Se excluyen los míos y los de sistema.
+  @override
+  Stream<ChatMessage> watchIncoming() => _messages.events.where((m) => m.senderId != meId && m.kind != MessageKind.system);
 
   /// Cambios de grupo: nombre/foto (conversations) y altas/bajas/roles (conversation_members). Emite el id de la conversación.
   @override
-  Stream<String> watchGroupChanges() {
-    final ctl = StreamController<String>();
-    final ch = _db.channel('groups:$meId')
-      ..onPostgresChanges(event: PostgresChangeEvent.update, schema: 'public', table: 'conversations', callback: (p) => ctl.add(p.newRecord['id'] as String))
-      ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'conversation_members', callback: (p) {
-        final r = p.eventType == PostgresChangeEvent.delete ? p.oldRecord : p.newRecord;
-        final id = r['conversation_id'] as String?; if (id != null) ctl.add(id);
-      })
-      ..subscribe();
-    ctl.onCancel = () { _db.removeChannel(ch); ctl.close(); };
-    return ctl.stream;
-  }
+  Stream<String> watchGroupChanges() => _groups.events;
+
+  @override
+  Stream<void> resyncs() => _messages.resyncs;
 }

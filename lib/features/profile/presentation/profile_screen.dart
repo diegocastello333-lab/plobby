@@ -38,8 +38,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(profileViewProvider(widget.playerId));
+    // Fundido entre carga y contenido (antes el perfil aparecía de golpe).
     return Scaffold(
-      body: async.when(
+      body: AnimatedSwitcher(duration: const Duration(milliseconds: 260), switchInCurve: Curves.easeOut, child: KeyedSubtree(key: ValueKey(async.hasValue ? 'data' : async.hasError ? 'error' : 'loading'), child: async.when(
         loading: () => const Center(child: CircularProgressIndicator(color: PlobbyColors.forest)),
         error: (e, _) => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.wifi_off, size: 36, color: PlobbyColors.mute), const SizedBox(height: 8),
@@ -47,7 +48,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           FilledButton(onPressed: () => ref.invalidate(profileProvider(widget.playerId)), child: const Text('Reintentar')),
         ])),
         data: (v) => _content(v),
-      ),
+      ))),
     );
   }
 
