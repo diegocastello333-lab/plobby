@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/motion_widgets.dart';
+import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
 import '../application/league_providers.dart';
 import '../domain/league_models.dart';
 import 'league_widgets.dart';
 
-/// Pestaña «Ligas» (prototipo `scLeagues`): resumen, mis ligas, crear liga y descubrir. Datos reales de `my_leagues` / `discover_leagues`.
+/// Pestaña «Ligas» — `scLeagues` del prototipo HTML: cabecera, resumen (activas · jugados · títulos), «Mis ligas»,
+/// crear liga y «Descubrir ligas». Datos reales de `my_leagues` / `discover_leagues`.
 class LeaguesScreen extends ConsumerWidget {
   const LeaguesScreen({super.key});
   @override
@@ -17,59 +21,71 @@ class LeaguesScreen extends ConsumerWidget {
     final teasers = ref.watch(discoverTeasersProvider);
     return Scaffold(
       body: SafeArea(bottom: false, child: RefreshIndicator(
+        color: AppColors.text,
         onRefresh: () async { ref.invalidate(leagueListProvider); ref.invalidate(discoverTeasersProvider); await ref.read(leagueListProvider.future).catchError((_) => <LeagueSummary>[]); },
-        child: ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 120), children: [
-          Row(children: [
-            const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Ligas', style: TextStyle(fontFamily: 'Unbounded', fontSize: 30, fontWeight: FontWeight.w700, letterSpacing: -.6)),
-              SizedBox(height: 2),
-              Text('Compite con tu comunidad.', style: TextStyle(color: AppColors.textMuted)),
+        child: ListView(padding: const EdgeInsets.fromLTRB(20, 26, 20, 130), children: [
+          // .lgh
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Semantics(header: true, child: const Text('Ligas', style: PlobbyText.t1)),
+              const SizedBox(height: 6),
+              const Text('Compite con tu comunidad.', style: PlobbyText.sub),
             ])),
-            IconButton(tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context), icon: const Icon(Icons.qr_code_2_rounded)),
+            IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
           ]),
-          const SizedBox(height: 18),
+          const SizedBox(height: 22),
           mine.when(
-            loading: () => const LoadingBlock(height: 86),
+            loading: () => const LoadingBlock(height: 119, radius: AppRadius.md),
             error: (_, __) => const SizedBox.shrink(),
             data: (l) => _Overview(leagues: l),
           ),
-          const SizedBox(height: 8),
-          SectionHeader(title: 'Mis ligas', actionLabel: 'Crear liga', onAction: () => context.push('/leagues/new')),
+          const SizedBox(height: 30),
+          // .sec «Mis ligas» + .sbtn «Crear liga»
+          Row(children: [
+            Expanded(child: Semantics(header: true, child: const Text('Mis ligas', style: PlobbyText.t2))),
+            PlobbyButton(label: 'Crear liga', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/leagues/new')),
+          ]),
+          const SizedBox(height: 12),
           mine.when(
-            loading: () => const Column(children: [LoadingBlock(height: 200), SizedBox(height: 12), LoadingBlock(height: 200)]),
+            loading: () => const Column(children: [LoadingBlock(height: 241, radius: AppRadius.md), SizedBox(height: 14), LoadingBlock(height: 241, radius: AppRadius.md)]),
             error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(leagueListProvider)),
             data: (l) => l.isEmpty
                 ? EmptyStateCard(icon: Icons.emoji_events_outlined, title: 'Todavía no estás en ninguna liga',
                     text: 'Crea una liga con tus amigos o únete a una de tu zona para empezar a competir.',
                     primary: 'Crear liga', onPrimary: () => context.push('/leagues/new'), secondary: 'Descubrir ligas', onSecondary: () => context.push('/leagues/discover'))
                 : Column(children: [
-                    for (var i = 0; i < l.length; i++) Padding(padding: const EdgeInsets.only(bottom: 12), child: AppearOnce(animationKey: 'lg:${l[i].id}', index: i, child: MyLeagueCard(league: l[i]))),
-                    OutlinedButton.icon(onPressed: () => context.push('/leagues/new'), icon: const Icon(Icons.add), label: const Text('Crear una liga nueva'),
-                        style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48))),
+                    for (var i = 0; i < l.length; i++) Padding(padding: const EdgeInsets.only(bottom: 14), child: AppearOnce(animationKey: 'lg:${l[i].id}', index: i, child: MyLeagueCard(league: l[i]))),
+                    _AddLeagueButton(onTap: () => context.push('/leagues/new')),
                   ]),
           ),
-          const SizedBox(height: 30),
-          const Text('Descubrir ligas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 2),
-          const Text('Encuentra tu próxima competición.', style: TextStyle(color: AppColors.textMuted)),
+          const SizedBox(height: 34),
+          Semantics(header: true, child: const Text('Descubrir ligas', style: PlobbyText.t2)),
+          const SizedBox(height: 4),
+          // En el HTML `.sub` hereda la tipografía de `.sec` (Unbounded 14/700): se reproduce tal cual.
+          const Text('Encuentra tu próxima competición.', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 14, height: 1.4, fontWeight: FontWeight.w700, letterSpacing: -0.28, color: AppColors.textMuted)),
           const SizedBox(height: 12),
-          Material(color: AppColors.surface, borderRadius: AppRadius.rMd, child: InkWell(
-            borderRadius: AppRadius.rMd, onTap: () => context.push('/leagues/discover'),
-            child: const SizedBox(height: 48, child: Row(children: [SizedBox(width: 14), Icon(Icons.search, color: AppColors.textMuted), SizedBox(width: 10),
-              Text('Buscar por nombre, club o zona', style: TextStyle(color: AppColors.textMuted))])))),
+          Semantics(button: true, label: 'Buscar ligas por nombre, club o zona', excludeSemantics: true, child: Material(
+            color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
+            child: InkWell(borderRadius: AppRadius.rMd, onTap: () => context.push('/leagues/discover'),
+              child: const SizedBox(height: 48, child: Row(children: [
+                SizedBox(width: 14), PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted), SizedBox(width: 10),
+                Expanded(child: Text('Buscar por nombre, club o zona', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, letterSpacing: 0, color: AppColors.textMuted))),
+              ]))),
+          )),
           const SizedBox(height: 14),
           teasers.when(
-            loading: () => const LoadingBlock(height: 88),
+            loading: () => const LoadingBlock(height: 260, radius: AppRadius.md),
             error: (_, __) => const SizedBox.shrink(),
             data: (l) => Column(children: [for (final d in l.take(2)) _TeaserCard(league: d)]),
           ),
-          OutlinedButton(onPressed: () => context.push('/leagues/discover'), style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)), child: const Text('Ver todas las ligas')),
+          PlobbyButton(label: 'Ver todas las ligas', kind: PlobbyButtonKind.outline, onPressed: () => context.push('/leagues/discover')),
         ]),
       )),
     );
   }
 }
 
+/// `.card2.ov3`: tres columnas separadas por una línea (eyebrow, número Inter 28/800, etiqueta 12).
 class _Overview extends StatelessWidget {
   const _Overview({required this.leagues});
   final List<LeagueSummary> leagues;
@@ -78,20 +94,39 @@ class _Overview extends StatelessWidget {
     final active = leagues.where((l) => l.status != LeagueStatus.ended).length;
     final played = leagues.fold<int>(0, (s, l) => s + l.myPlayed);
     final titles = leagues.where((l) => l.status == LeagueStatus.ended && l.myRank == 1).length;
-    Widget cell(String eb, int n, String l) => Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(eb.toUpperCase(), style: const TextStyle(fontSize: 10.5, letterSpacing: 1.1, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-          const SizedBox(height: 4),
-          Text('$n', style: const TextStyle(fontFamily: 'Unbounded', fontSize: 24, fontWeight: FontWeight.w700)),
-          Text(l, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-        ]));
+    Widget cell(String eb, int n, String l, {bool first = false}) => Expanded(child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(border: first ? null : const Border(left: BorderSide(color: Color(0x1A171C19)))),
+          child: Semantics(label: '$eb: $n $l', excludeSemantics: true, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(eb.toUpperCase(), maxLines: 1, style: PlobbyText.eb),
+            const SizedBox(height: 6),
+            Text('$n', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 28, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.56, color: AppColors.text)),
+            const SizedBox(height: 6),
+            Text(l, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
+          ])),
+        ));
     return Container(
-      padding: const EdgeInsets.all(16), decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, boxShadow: AppShadows.card),
-      child: Row(children: [
-        cell('Activas', active, active == 1 ? 'liga' : 'ligas'),
+      padding: const EdgeInsets.symmetric(vertical: 16), decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+      child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        cell('Activas', active, active == 1 ? 'liga' : 'ligas', first: true),
         cell('Jugados', played, 'partidos de liga'),
         cell('Títulos', titles, titles == 1 ? 'liga ganada' : 'ligas ganadas'),
-      ]));
+      ])));
   }
+}
+
+/// `.addc`: «Crear una liga nueva», 58 px, borde interior 1.5 px, Inter 14/700.
+class _AddLeagueButton extends StatelessWidget {
+  const _AddLeagueButton({required this.onTap});
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Semantics(button: true, label: 'Crear una liga nueva', excludeSemantics: true, child: Material(
+        color: Colors.transparent, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong, width: 1.5)),
+        child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: const SizedBox(height: 58, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          PlobbyIcon(PlobbyIcons.plus, size: 18, strokeWidth: 2.2), SizedBox(width: 8),
+          Text('Crear una liga nueva', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+        ]))),
+      ));
 }
 
 class _TeaserCard extends ConsumerStatefulWidget {
@@ -122,9 +157,7 @@ Future<void> joinLeague(BuildContext context, WidgetRef ref, DiscoverLeague d, v
 }
 
 /// Hoja «Unirme con código» (enlace/código de invitación de una liga privada).
-Future<void> showJoinByCodeSheet(BuildContext context, {String? initial}) => showModalBottomSheet(
-    context: context, isScrollControlled: true, showDragHandle: true,
-    builder: (_) => _JoinByCode(initial: initial));
+Future<void> showJoinByCodeSheet(BuildContext context, {String? initial}) => showPlobbySheet(context, (_) => _JoinByCode(initial: initial));
 
 class _JoinByCode extends ConsumerStatefulWidget {
   const _JoinByCode({this.initial});
@@ -150,17 +183,10 @@ class _JoinByCodeState extends ConsumerState<_JoinByCode> {
     } on LeagueException catch (e) { setState(() { _busy = false; _error = e.message; }); }
   }
   @override
-  Widget build(BuildContext context) => Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Unirme con código', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 4),
-        const Text('Pide el código al organizador de la liga.', style: TextStyle(color: AppColors.textMuted)),
-        const SizedBox(height: 16),
-        TextField(controller: _c, autofocus: true, textCapitalization: TextCapitalization.characters, onSubmitted: (_) => _go(),
-            decoration: InputDecoration(labelText: 'Código de invitación', hintText: 'JUEVES-01', errorText: _error)),
-        const SizedBox(height: 16),
-        SizedBox(width: double.infinity, child: FilledButton(onPressed: _busy ? null : _go,
-            child: _busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Unirme'))),
-      ]));
+  Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const SheetHeader(title: 'Unirme con código', subtitle: 'Pide el código al organizador de la liga.'),
+        LabeledField(label: 'Código de invitación', controller: _c, hint: 'JUEVES-01', error: _error, autofocus: true,
+            textCapitalization: TextCapitalization.characters, onSubmitted: (_) => _go()),
+        PlobbyButton(label: 'Unirme', busy: _busy, onPressed: _go),
+      ]);
 }

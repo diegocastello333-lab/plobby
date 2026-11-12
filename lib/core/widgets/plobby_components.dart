@@ -27,7 +27,7 @@ enum PlobbyButtonKind {
 }
 
 class PlobbyButton extends StatelessWidget {
-  const PlobbyButton({super.key, required this.label, required this.onPressed, this.kind = PlobbyButtonKind.primary, this.icon, this.busy = false, this.expand});
+  const PlobbyButton({super.key, required this.label, required this.onPressed, this.kind = PlobbyButtonKind.primary, this.icon, this.busy = false, this.expand, this.height});
   final String label;
   final VoidCallback? onPressed;
   final PlobbyButtonKind kind;
@@ -35,6 +35,8 @@ class PlobbyButton extends StatelessWidget {
   final bool busy;
   /// Ancho completo (por defecto: sí en primary/outline/dark, no en small).
   final bool? expand;
+  /// Alto propio (p. ej. 44 en las tarjetas de «Descubrir ligas»); por defecto 48, o 36 en los pequeños.
+  final double? height;
 
   bool get _small => kind == PlobbyButtonKind.small || kind == PlobbyButtonKind.smallOutline;
   bool get _outline => kind == PlobbyButtonKind.outline || kind == PlobbyButtonKind.smallOutline;
@@ -50,7 +52,7 @@ class PlobbyButton extends StatelessWidget {
     };
     final fg = switch (kind) { PlobbyButtonKind.dark => AppColors.surface, PlobbyButtonKind.danger => AppColors.danger, _ => AppColors.text };
     final radius = _small ? AppRadius.rSm : AppRadius.rMd;
-    final h = _small ? 36.0 : 48.0;
+    final h = height ?? (_small ? 36.0 : 48.0);
     final style = (_small ? PlobbyText.buttonSmall : PlobbyText.button).copyWith(color: fg);
     final content = busy
         ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
