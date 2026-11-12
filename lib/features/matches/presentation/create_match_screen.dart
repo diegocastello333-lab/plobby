@@ -50,6 +50,8 @@ class _S extends ConsumerState<CreateMatchScreen> {
   String _selectedClub(List<String> clubs) => clubs.isNotEmpty ? (_club ?? clubs.first) : _clubText.text.trim();
 
   Future<void> _submit(List<String> clubs) async {
+    // Dos toques seguidos llegan antes de que el botón se redibuje como «ocupado»: sin esta guarda se creaban dos partidos.
+    if (_busy) return;
     final club = _selectedClub(clubs);
     final d = MatchDraft(type: widget.type, leagueId: _friendly ? null : _league, partnerId: _partner, rival1Id: _r1, rival2Id: _r2, when: _when, club: club, sets: _scores);
     final err = validateDraft(d, resultRequired: widget.resultRequired) ?? (club.isEmpty ? 'Indica el club donde se juega el partido.' : null);

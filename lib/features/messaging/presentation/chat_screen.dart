@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/live/presence.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
@@ -23,6 +24,9 @@ class ChatScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
+
+/// Verde de «En línea» (indicador de presencia).
+const _onlineGreen = Color(0xFF1FA463);
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _c = TextEditingController();
@@ -52,7 +56,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final byId = {for (final m in members) m.id: m};
     final me = ref.read(messagingRepositoryProvider).meId;
     ref.listen(chatProvider(widget.conversationId), (_, __) => _toEnd());
+    // Si me sacan del grupo (o lo abandono desde otro dispositivo) mientras estoy dentro, salgo con un aviso en vez de
+    // quedarme en un chat al que ya no puedo escribir.
+    ref.listen(conversationProvider(widget.conversationId), (prev, next) {
+      if (prev?.valueOrNull != null && next.hasValue && next.value == null && mounted) {
+        showPlobbySnack(context, 'Ya no formas parte de esta conversación');
+        context.pop();
+      }
+    });
     final other = conv?.other;
+    // Presencia real del amigo (Realtime Presence en su canal `presence:<id>`), no un dato guardado.
+    final online = !isGroup && other != null && (ref.watch(onlineProvider(other.id)).valueOrNull ?? false);
     return Scaffold(
       body: SafeArea(child: Column(children: [
         // .chh: volver · avatar con punto «en línea» · nombre y estado (grupo: participantes → info)
@@ -66,12 +80,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               onTap: isGroup ? () => context.push('/messages/${widget.conversationId}/info') : widget.otherId == null ? null : () => context.push('/player/${widget.otherId}'),
               child: Row(children: [
                 if (isGroup) GroupAvatar(url: conv!.groupAvatarUrl, bytes: conv.groupAvatarBytes, presetId: conv.groupAvatarId, size: 40)
-                else if (other != null) PlayerAvatar(other, size: 40),
+                else if (other != null) Stack(clipBehavior: Clip.none, children: [
+                  PlayerAvatar(other, size: 40),
+                  Positioned(right: -1, bottom: -1, child: AnimatedContainer(duration: const Duration(milliseconds: 250), width: 12, height: 12,
+                      decoration: BoxDecoration(color: online ? _onlineGreen : const Color(0xFFB9C0BB), shape: BoxShape.circle, border: Border.all(color: AppColors.bg, width: 2)))),
+                ]),
                 const SizedBox(width: 10),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(conv?.title ?? widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
-                  Text(isGroup ? '${conv!.memberCount} participantes · toca para ver info' : (other?.online == true ? 'En línea' : 'Desconectado'), maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
+                  AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: Text(
+                      isGroup ? '${conv!.memberCount} participantes · toca para ver info' : (online ? 'En línea' : 'Desconectado'),
+                      key: ValueKey(isGroup ? 'g${conv!.memberCount}' : '$online'), maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0,
+                          fontWeight: online ? FontWeight.w600 : FontWeight.w400, color: online ? _onlineGreen : AppColors.textMuted))),
                 ])),
               ]),
             ))),

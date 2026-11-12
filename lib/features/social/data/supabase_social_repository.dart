@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase/shared_realtime.dart';
+import '../../../core/supabase/user_channel.dart';
 import '../domain/social_models.dart';
 import 'social_repository.dart';
 
 /// Datos sociales contra Supabase (verificado con la base real y dos cuentas, 12 nov 2026). Usa solo la clave publicable
 /// + sesión del usuario. Vistas/RPCs en `supabase/migrations/20261112_home_social.sql`.
 class SupabaseSocialRepository implements SocialRepository {
-  SupabaseSocialRepository(this._db);
+  SupabaseSocialRepository(this._db, {UserChannel? channel}) : _channel = channel;
+  final UserChannel? _channel;
   final SupabaseClient _db;
   @override
   String get meId => _db.auth.currentUser!.id;
@@ -66,8 +68,8 @@ class SupabaseSocialRepository implements SocialRepository {
 
   /// Realtime en dos canales (uno por tipo de autorización):
   ///  - postgres_changes de mis solicitudes (enviadas y recibidas) y mis notificaciones; la RLS solo deja pasar mis filas;
-  ///  - Broadcast privado `user:<uid>`: el trigger de `friendships` avisa a LOS DOS usuarios de altas y bajas de
-  ///    amistad (los DELETE de postgres_changes no se pueden filtrar por usuario sin exponer los de otros).
+  ///  - canal privado del usuario ([UserChannel], `user:<uid>`): el trigger de `friendships` avisa a LOS DOS usuarios
+  ///    de altas y bajas de amistad (los DELETE de postgres_changes no se pueden filtrar sin exponer los de otros).
   /// También emite al recuperar la conexión, para recargar lo que pasó durante el corte.
   late final _rows = SharedRealtime<SocialChange>(_db, 'social:$meId', (ch, emit) {
     void req(PostgresChangePayload _) => emit(SocialChange.requests);
@@ -80,8 +82,10 @@ class SupabaseSocialRepository implements SocialRepository {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'recipient_user_id', value: meId),
           callback: (_) => emit(SocialChange.notifications));
   });
-  late final _friendships = SharedRealtime<SocialChange>(_db, 'user:$meId',
-      (ch, emit) => ch.onBroadcast(event: 'friends', callback: (_) => emit(SocialChange.friendships)), private: true);
+
+  /// Foto, avatar o nombre de alguien que aparece en mis pantallas (trigger de `profiles` → canal del usuario).
+  @override
+  Stream<ProfileEvent> profileUpdates() => _channel?.events.where((e) => e is ProfileEvent).cast<ProfileEvent>() ?? const Stream.empty();
 
   @override
   Stream<SocialChange> changes() {
@@ -92,9 +96,13 @@ class SupabaseSocialRepository implements SocialRepository {
       onListen: () {
         subs
           ..add(_rows.events.listen(add))
-          ..add(_friendships.events.listen(add))
-          ..add(_rows.resyncs.listen((_) => add(SocialChange.resync)))
-          ..add(_friendships.resyncs.listen((_) => add(SocialChange.resync)));
+          ..add(_rows.resyncs.listen((_) => add(SocialChange.resync)));
+        final uc = _channel;
+        if (uc != null) {
+          subs
+            ..add(uc.events.where((e) => e is FriendshipEvent).listen((_) => add(SocialChange.friendships)))
+            ..add(uc.resyncs.listen((_) => add(SocialChange.resync)));
+        }
       },
       onCancel: () { for (final s in subs) { s.cancel(); } subs.clear(); },
     );

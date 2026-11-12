@@ -28,10 +28,12 @@ class IdentityCard extends ConsumerWidget {
       rows.add(_Add('Añadir club base (opcional)', () => _pickClub(context, ref, n)));
     }
     final pa = profile.partner;
-    if (pa != null && (pa.status == PartnerStatus.accepted || isOwner)) {
+    // Cada jugador elige su pareja de forma independiente: se muestra siempre (antes, en perfiles ajenos solo si era mutua,
+    // y parecía que la elección «no se había guardado»). Si es mutua se indica.
+    if (pa != null) {
       // Propietario: tocar la fila cambia la pareja (selector de Amigos) y la «×» la quita. Resto: abre su perfil.
       rows.add(_Row(icon: PlobbyIcons.user, avatar: SilhouetteAvatar(seed: pa.userId, size: 34), avatarUrl: pa.avatarUrl, label: 'PAREJA HABITUAL', title: pa.name,
-          sub: isOwner ? '@${pa.username} · Toca para cambiarla' : '@${pa.username}',
+          sub: '@${pa.username}${pa.status == PartnerStatus.accepted ? ' · Pareja mutua' : ''}${isOwner ? ' · Toca para cambiarla' : ''}',
           onTap: isOwner ? () => _pickPartner(context, n, pa) : () => context.push('/player/${pa.userId}'),
           onEdit: isOwner ? () => _removePartner(context, n) : null, editIcon: PlobbyIcons.close));
     } else if (isOwner) {

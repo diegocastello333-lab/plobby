@@ -1,3 +1,4 @@
+import '../../../core/supabase/user_channel.dart' show ProfileEvent;
 import '../domain/social_models.dart';
 
 /// Contrato de datos sociales. Implementación real: [SupabaseSocialRepository] (RPCs de la migración
@@ -18,6 +19,8 @@ abstract class SocialRepository {
   Future<void> removeFriend(String userId);             // RPC remove_friend
   /// Avisa de cambios sociales en el servidor (Supabase Realtime), con su tipo para refrescar solo lo afectado.
   Stream<SocialChange> changes();
+  /// Cambios de foto/avatar/nombre de jugadores que aparecen en mis pantallas (en vivo).
+  Stream<ProfileEvent> profileUpdates();
   /// Número de amigos de cualquier jugador (RPC `friend_count`; la RLS de friendships solo deja leer las propias).
   Future<int> friendCount(String userId);
 }

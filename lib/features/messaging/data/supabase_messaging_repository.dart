@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase/shared_realtime.dart';
+import '../../../core/supabase/user_channel.dart';
 import '../../matches/domain/match_lifecycle.dart';
 import '../../social/domain/social_models.dart';
 import '../domain/messaging_models.dart';
@@ -10,7 +11,8 @@ import 'messaging_repository.dart';
 /// Integración Supabase (verificada contra la base real con dos cuentas). Realtime: los canales respetan RLS, así que solo llegan
 /// mensajes/cambios de conversaciones en las que el usuario es miembro. Requiere la migración 20261117_messaging_groups.sql.
 class SupabaseMessagingRepository implements MessagingRepository {
-  SupabaseMessagingRepository(this._db, {required this.confirmed});
+  SupabaseMessagingRepository(this._db, {required this.confirmed, UserChannel? channel}) : _channel = channel;
+  final UserChannel? _channel;
   final SupabaseClient _db;
   /// `lifecycleRepository.confirmedMatches` — misma fuente que el resto de la app.
   final Future<List<LifecycleMatch>> Function() confirmed;
@@ -141,19 +143,10 @@ class SupabaseMessagingRepository implements MessagingRepository {
 
   // ── realtime ──
   // Un canal para TODOS los mensajes de mis conversaciones (la RLS de `messages` solo entrega los de conversaciones en
-  // las que soy miembro) y otro para los cambios de grupo. Cada chat, la lista y el contador filtran ese mismo flujo:
+  // las que soy miembro); los cambios de grupo llegan por el canal privado del usuario. Cada chat, la lista y el contador filtran ese mismo flujo:
   // antes cada pantalla abría un canal con el mismo nombre y el servidor cerraba el anterior.
   late final _messages = SharedRealtime<ChatMessage>(_db, 'msgs:$meId', (ch, emit) => ch.onPostgresChanges(
         event: PostgresChangeEvent.insert, schema: 'public', table: 'messages', callback: (p) => emit(_msg(p.newRecord))));
-  late final _groups = SharedRealtime<String>(_db, 'groups:$meId', (ch, emit) => ch
-    ..onPostgresChanges(event: PostgresChangeEvent.update, schema: 'public', table: 'conversations', callback: (p) {
-      final id = p.newRecord['id'] as String?; if (id != null) emit(id);
-    })
-    ..onPostgresChanges(event: PostgresChangeEvent.all, schema: 'public', table: 'conversation_members', callback: (p) {
-      final r = p.eventType == PostgresChangeEvent.delete ? p.oldRecord : p.newRecord;
-      final id = r['conversation_id'] as String?; if (id != null) emit(id);
-    }));
-
   @override
   Stream<ChatMessage> watch(String c) => _messages.events.where((m) => m.conversationId == c);
 
@@ -161,9 +154,10 @@ class SupabaseMessagingRepository implements MessagingRepository {
   @override
   Stream<ChatMessage> watchIncoming() => _messages.events.where((m) => m.senderId != meId && m.kind != MessageKind.system);
 
-  /// Cambios de grupo: nombre/foto (conversations) y altas/bajas/roles (conversation_members). Emite el id de la conversación.
+  /// Cambios de grupo (altas, bajas, roles, nombre, foto) por el canal privado del usuario: los triggers de la BD los
+  /// envían a TODOS los miembros y a quien sale. Emite el id de la conversación.
   @override
-  Stream<String> watchGroupChanges() => _groups.events;
+  Stream<String> watchGroupChanges() => _channel?.events.where((e) => e is GroupEvent).map((e) => (e as GroupEvent).conversationId) ?? const Stream.empty();
 
   @override
   Stream<void> resyncs() => _messages.resyncs;

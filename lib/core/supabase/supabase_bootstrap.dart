@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/env.dart';
+import '../net/timeout_client.dart';
+import '../live/presence.dart';
+import 'user_channel.dart';
 import '../router/app_router.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/data/supabase_auth_repository.dart';
@@ -34,24 +37,31 @@ class SupabaseBootstrap {
   /// Inicializa el cliente si hay credenciales. Devuelve null en modo demo.
   static Future<SupabaseClient?> init() async {
     if (!Env.hasSupabase) return null;
-    await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabasePublishableKey);
+    // Cliente HTTP con límite de tiempo: ninguna consulta deja una pantalla cargando indefinidamente.
+    await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabasePublishableKey, httpClient: TimeoutHttpClient());
     return Supabase.instance.client;
   }
 
   /// Sustituye cada `*RepositoryProvider` mock por su implementación real. La UI no cambia.
-  static List<Override> overrides(SupabaseClient c) => [
+  static List<Override> overrides(SupabaseClient c) {
+    // Canal privado único del usuario (amistades, perfiles y grupos en vivo), compartido por los repositorios.
+    final uid = c.auth.currentUser?.id;
+    final channel = uid == null ? null : UserChannel(c, uid);
+    return [
         authGuardEnabledProvider.overrideWithValue(true),
         currentUserIdProvider.overrideWithValue(c.auth.currentUser?.id ?? ''),
         authRepositoryProvider.overrideWithValue(SupabaseAuthRepository(c)),
         profileRepositoryProvider.overrideWithValue(SupabaseProfileRepository(c)),
         feedRepositoryProvider.overrideWithValue(SupabaseFeedRepository(c)),
-        socialRepositoryProvider.overrideWithValue(SupabaseSocialRepository(c)),
+        socialRepositoryProvider.overrideWithValue(SupabaseSocialRepository(c, channel: channel)),
+        presenceServiceProvider.overrideWithValue(uid == null ? const NoPresenceService() : SupabasePresenceService(c, uid)),
         ratingRepositoryProvider.overrideWithValue(SupabaseRatingRepository(c)),
         matchRepositoryProvider.overrideWithValue(SupabaseMatchRepository(c)),
         lifecycleRepositoryProvider.overrideWithValue(SupabaseLifecycleRepository(c)),
         leagueRepositoryProvider.overrideWithValue(SupabaseLeagueRepository(c)),
-        messagingRepositoryProvider.overrideWith((ref) => SupabaseMessagingRepository(c, confirmed: () => ref.read(lifecycleRepositoryProvider).confirmedMatches())),
+        messagingRepositoryProvider.overrideWith((ref) => SupabaseMessagingRepository(c, channel: channel, confirmed: () => ref.read(lifecycleRepositoryProvider).confirmedMatches())),
       ];
+  }
 }
 
 /// Raíz con Supabase: recrea el [ProviderScope] cuando cambia el usuario de la sesión (login, logout, cambio de cuenta),

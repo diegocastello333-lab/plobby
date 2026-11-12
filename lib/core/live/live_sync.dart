@@ -3,6 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/application/auth_providers.dart';
+import '../../features/auth/domain/auth_models.dart' show isValidAvatarId;
+import '../../features/leagues/application/league_providers.dart' show standingsProvider;
+import '../../features/matches/application/lifecycle_providers.dart' show upcomingMatchesProvider, matchProvider;
+import '../../features/matches/application/match_providers.dart' show leagueMembersProvider;
+import '../../features/profile/application/profile_providers.dart' show profileProvider;
+import '../../features/profile/presentation/widgets/avatar_gallery_sheet.dart' show renderAvatarPng;
+import '../errors/app_errors.dart';
+import '../supabase/user_channel.dart' show ProfileEvent;
+import 'presence.dart';
 import '../../features/feed/application/feed_providers.dart';
 import '../../features/feed/domain/feed_models.dart';
 import '../../features/feed/presentation/notifications_screen.dart' show notificationTitle;
@@ -36,6 +45,8 @@ class LiveSync extends ConsumerStatefulWidget {
 
 class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver {
   StreamSubscription<ChatMessage>? _incoming;
+  StreamSubscription<ProfileEvent>? _profiles;
+  Timer? _peopleDebounce, _healTimer;
   LiveBanner? _banner;
   Timer? _hide;
   int _seq = 0;
@@ -49,21 +60,67 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
     if (!_signedIn) return;
     WidgetsBinding.instance.addObserver(this);
     _incoming = ref.read(messagingRepositoryProvider).watchIncoming().listen(_onMessage);
+    _profiles = ref.read(socialRepositoryProvider).profileUpdates().listen(_onProfile);
+    ref.read(presenceServiceProvider).setActive(true);   // «En línea» para mis amigos mientras uso la app
+    _healTimer = Timer(const Duration(seconds: 2), () => unawaited(_healAvatar()));
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _incoming?.cancel();
+    _profiles?.cancel();
     _hide?.cancel();
+    _peopleDebounce?.cancel();
+    _healTimer?.cancel();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) return;
-    refreshSocial(ref);
-    ref.invalidate(chatProvider);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        ref.read(presenceServiceProvider).setActive(true);
+        // Realtime no reenvía lo ocurrido mientras la app estaba en segundo plano: se recarga lo que puede haber cambiado.
+        refreshSocial(ref);
+        ref.invalidate(chatProvider);
+      case AppLifecycleState.paused || AppLifecycleState.hidden || AppLifecycleState.detached:
+        ref.read(presenceServiceProvider).setActive(false);   // en segundo plano o cerrada → «Desconectado»
+      case AppLifecycleState.inactive:
+        break;   // transitorio (llamada, persiana de notificaciones): no cambia la presencia
+    }
+  }
+
+  /// Un jugador visible en mis pantallas cambió su foto, avatar o nombre: se vuelven a pedir los datos que lo muestran
+  /// (las URLs de foto son únicas por subida, así que la imagen nueva no sale de la caché; al eliminarla, la URL pasa a
+  /// nula y se dibuja el avatar). Varios cambios seguidos → una sola recarga.
+  void _onProfile(ProfileEvent e) {
+    _peopleDebounce?.cancel();
+    _peopleDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      for (final p in <ProviderOrFamily>[friendsProvider, requestsProvider, conversationsProvider, conversationProvider, groupMembersProvider,
+          profileProvider, feedControllerProvider, notificationsProvider, upcomingMatchesProvider, matchProvider, standingsProvider, leagueMembersProvider]) {
+        ref.invalidate(p);
+      }
+    });
+  }
+
+  /// Perfiles que eligieron un avatar antes de que se guardara como imagen (solo `avatar_id`, sin URL): los demás veían
+  /// sus iniciales. Se genera la imagen del avatar UNA vez y se guarda; a partir de ahí todos lo ven.
+  Future<void> _healAvatar() async {
+    if (!mounted) return;
+    try {
+      final auth = ref.read(authRepositoryProvider);
+      final d = await auth.loadOnboarding();
+      final id = d.avatarId;
+      if (!isValidAvatarId(id) || (d.avatarUrl ?? '').isNotEmpty) return;
+      final url = await auth.uploadAvatar(await renderAvatarPng(id!), 'image/png');
+      await auth.saveStep(3, d.copyWith(avatarUrl: url, avatarId: id));
+      await auth.deleteAvatarFiles(keepUrl: url);
+      if (mounted) ref.invalidate(profileProvider);
+    } catch (e, s) {
+      AppErrors.record(e, s, origin: 'avatar');
+    }
   }
 
   Future<void> _onMessage(ChatMessage m) async {

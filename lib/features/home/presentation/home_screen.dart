@@ -5,6 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/motion_widgets.dart';
+import 'banner_catalog.dart';
+import 'banner_editor.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/silhouette_avatar.dart';
 import '../../../core/widgets/state_views.dart';
@@ -132,9 +134,9 @@ class _Banner extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       child: SizedBox(height: 300 + top, child: Stack(fit: StackFit.expand, children: [
         const ColoredBox(color: AppColors.ink900),
-        // object-position: 50% 58%
-        Image.asset('assets/images/home_banner.jpg', fit: BoxFit.cover, alignment: const Alignment(0, .16), semanticLabel: 'Pistas de pádel al atardecer',
-            cacheWidth: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round(), errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+        // Banner personalizable (foto propia, predeterminado o el clásico). Mantener pulsado también abre el editor.
+        GestureDetector(onLongPress: () => showBannerSheet(context), child: AnimatedSwitcher(duration: const Duration(milliseconds: 350),
+            child: KeyedSubtree(key: ValueKey('${profile?.bannerUrl}|${profile?.bannerId}'), child: BannerImage(profile: profile)))),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Color(0x94171C19), Color(0x0D171C19), Color(0x1F171C19), Color(0xC7171C19)], stops: [0, .30, .52, 1]))),
         // Logo: Unbounded 700 24px −0.03em lima, sombra 0 1 8 .55
@@ -148,7 +150,8 @@ class _Banner extends StatelessWidget {
           const SizedBox(width: 8),
           _GlassButton(icon: PlobbyIcons.plane, label: 'Mensajes', badge: counters.unreadMessages, onTap: () => HomeNav.messages(context)),
         ])),
-        Positioned(left: 20, right: 20, bottom: 46, child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        Positioned(right: 20, bottom: 46, child: _GlassButton(icon: PlobbyIcons.image, label: 'Personalizar banner', onTap: () => showBannerSheet(context))),
+        Positioned(left: 20, right: 76, bottom: 46, child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
           Semantics(button: true, label: 'Ver mi perfil', excludeSemantics: true, child: GestureDetector(onTap: () => HomeNav.profile(context),
               child: Container(width: 68, height: 68, padding: const EdgeInsets.all(3), decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.lime300),
                   child: ClipOval(child: profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty

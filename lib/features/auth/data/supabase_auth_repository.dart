@@ -91,7 +91,8 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       final bucket = _c.storage.from('avatars');
       final files = await bucket.list(path: uid);
-      final stale = [for (final f in files) if (f.name.isNotEmpty && bucket.getPublicUrl('$uid/${f.name}') != keepUrl) '$uid/${f.name}'];
+      // Solo fotos de perfil (`avatar_*`): en la misma carpeta vive el banner de Inicio (`banner_*`).
+      final stale = [for (final f in files) if (f.name.startsWith('avatar_') && bucket.getPublicUrl('$uid/${f.name}') != keepUrl) '$uid/${f.name}'];
       if (stale.isNotEmpty) await bucket.remove(stale);   // política de Storage: solo se puede borrar en la carpeta propia
     } catch (_) {/* limpieza best-effort: el registro del perfil ya no apunta a esos ficheros */}
   }

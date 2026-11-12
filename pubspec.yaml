@@ -1,6 +1,7 @@
 name: plobby
 description: Plobby — social and competitive padel app.
 publish_to: none
+version: 1.3.0+4   # sube con cada APK entregado (fase 3)
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
@@ -13,6 +14,8 @@ dependencies:
   image_picker: ^1.1.2   # foto de perfil desde la galería (onboarding / editar perfil)
   supabase_flutter: ^2.5.0   # Auth con Google, RPC, Realtime, Storage (cliente único en main.dart cuando Env.hasSupabase)
   flutter_svg: ^2.3.4
+  http: ^1.6.0
+  image: ^4.12.0
 dev_dependencies:
   flutter_test: {sdk: flutter}
   flutter_lints: ^4.0.0

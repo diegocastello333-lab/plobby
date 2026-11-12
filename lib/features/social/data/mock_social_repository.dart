@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../domain/social_models.dart';
+import '../../../core/supabase/user_channel.dart' show ProfileEvent;
 import 'social_repository.dart';
 
 /// DATOS MOCK para desarrollo/tests. Sustituir por SupabaseSocialRepository.
@@ -8,6 +9,8 @@ class MockSocialRepository implements SocialRepository {
   String get meId => 'me';
   @override
   Stream<SocialChange> changes() => const Stream.empty();
+  @override
+  Stream<ProfileEvent> profileUpdates() => const Stream.empty();
   @override
   Future<int> friendCount(String userId) async => userId == meId ? _friends.length : 12;
   static const _a = PlayerSummary(id: 'marcos', name: 'Marcos R.', username: 'marcos.r', elo: 1455, level: 'Intermedio alto', online: true, city: 'Madrid', club: 'La Moraleja');

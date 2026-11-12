@@ -8,6 +8,7 @@ import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../profile/application/profile_providers.dart' show profileProvider;
 import '../application/social_providers.dart';
 import '../domain/social_models.dart';
 import 'player_tile.dart';
@@ -280,6 +281,17 @@ class _FriendTile extends ConsumerWidget {
         SheetListItem(icon: PlobbyIcons.user, label: 'Ver perfil', onTap: () { Navigator.pop(c); context.push('/player/${f.player.id}'); }),
         SheetListItem(icon: PlobbyIcons.plane, label: 'Enviar mensaje', onTap: () { Navigator.pop(c); context.push('/messages/with/${f.player.id}'); }),
         SheetListItem(icon: PlobbyIcons.racket, label: 'Invitar a jugar', onTap: () { Navigator.pop(c); context.push('/messages/with/${f.player.id}?invite=1'); }),
+        // Pareja habitual directamente desde Amigos (cada usuario elige la suya; no hace falta que sea mutua).
+        SheetListItem(icon: PlobbyIcons.users, label: 'Elegir como pareja habitual', onTap: () async {
+          Navigator.pop(c);
+          try {
+            await ref.read(profileProvider('me').notifier).requestPartner(f.player.id);
+            HapticFeedback.selectionClick();
+            if (context.mounted) showPlobbySnack(context, '${f.player.name} es tu pareja habitual');
+          } catch (_) {
+            if (context.mounted) showPlobbySnack(context, 'No se pudo guardar la pareja habitual. Inténtalo de nuevo.', error: true);
+          }
+        }),
         SheetListItem(icon: PlobbyIcons.trash, label: 'Eliminar amigo', danger: true, onTap: () async {
           Navigator.pop(c);
           final ok = await showPlobbySheet<bool>(context, (d) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [

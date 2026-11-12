@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/config/build_info.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/plobby_theme.dart';
@@ -28,6 +29,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _keys = List.generate(4, (_) => GlobalKey());
   int _tab = 0;
   static const _names = ['Resumen', 'Partidos', 'Estadísticas', 'Actividad'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Perfil de OTRO jugador: los datos de una visita anterior quedaban en caché para siempre (pareja, bio, foto…).
+    // Si ya estaban cargados se muestran al instante y se vuelven a pedir en segundo plano (sin pantalla de carga).
+    if (widget.playerId != 'me' && ref.exists(profileProvider(widget.playerId))) {
+      WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) ref.invalidate(profileProvider(widget.playerId)); });
+    }
+  }
 
   void _goTo(int i) {
     setState(() => _tab = i);
@@ -86,6 +97,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _section(null, 'Logros', AchievementGrid(items: v.achievements)),
         _section(3, 'Actividad', ActivityFeed(view: v)),
         if (own) const LogoutButton(),   // solo en el perfil propio, al final y separado
+        // Versión instalada: así se sabe si un móvil sigue con un APK antiguo.
+        if (own) const Padding(padding: EdgeInsets.only(top: 14), child: Center(child: Text('Plobby · versión $plobbyBuild',
+            style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, letterSpacing: 0, color: AppColors.textMuted)))),
         const SizedBox(height: 120),
       ])),
     ]);

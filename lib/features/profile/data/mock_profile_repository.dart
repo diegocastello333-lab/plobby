@@ -58,6 +58,14 @@ class MockProfileRepository implements ProfileRepository {
   @override
   Future<void> setBio(String bio) async => _me = _me.copyWith(bio: bio);
   @override
+  Future<void> setBanner({String? presetId, String? url}) async =>
+      _me = url != null ? _me.copyWith(clearBanner: true).copyWith(bannerUrl: url) : presetId != null ? _me.copyWith(clearBanner: true).copyWith(bannerId: presetId) : _me.copyWith(clearBanner: true);
+  @override
+  Future<String> uploadBanner(List<int> jpeg) async => 'https://example.invalid/avatars/me/banner_${jpeg.length}.jpg';
+  final deletedBannersKeeping = <String?>[];
+  @override
+  Future<void> deleteOldBanners({String? keepUrl}) async => deletedBannersKeeping.add(keepUrl);
+  @override
   Future<List<ClubRef>> searchClubs(String q) async =>
       _clubs.where((c) => c.name.toLowerCase().contains(q.toLowerCase())).toList();
 }
