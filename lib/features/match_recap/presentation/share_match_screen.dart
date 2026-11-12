@@ -50,7 +50,7 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
       setState(() => done = switch (r) {
             RecapAction.saved => 'Imagen guardada en tu galería',
             RecapAction.copied => 'Imagen copiada',
-            RecapAction.copyUnsupported => 'Tu dispositivo no permite copiar imágenes',
+            RecapAction.copyUnsupported => 'Copiar imagen no está disponible: usa Guardar o Compartir',
             RecapAction.shared => null,
           });
     } catch (_) {

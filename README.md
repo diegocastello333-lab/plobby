@@ -87,9 +87,10 @@ Todas están aplicadas en el proyecto remoto. La última se validó antes en una
 | `flutter pub get` / `flutter analyze` | OK · 0 errores (solo avisos informativos) |
 | `flutter test` | 133/133 |
 | `flutter build web --dart-define-from-file=env.json` | OK · arranca contra el proyecto real, sin sesión redirige a `/welcome` |
-| `flutter build apk --release` | **Falla** por `super_clipboard` → `super_native_extensions` 0.9.1 (incompatible con Gradle 9, que exige Flutter 3.50). Sin esa dependencia el APK compila (61,7 MB) |
+| `flutter build apk --release` | OK · 61,7 MB, firmado con la clave de depuración (para publicar hace falta tu propia clave) |
 | Flujo real en la base de datos (transacción revertida) | 26/26: perfiles por trigger, amistades, crear/empezar/finalizar partido, resultado, disputa, corrección, confirmación de capitanes, ELO ±16, feed, historial, chat + tarjeta de partido, RLS |
 | Migraciones | 11/11 aplicadas; RLS activa en todas las tablas; buckets `avatars` y `group-avatars`; 14 tablas en Realtime |
+| Copiar imagen (Match Recap) | Desactivado: `super_clipboard` no compila con Gradle 9; el botón avisa y Guardar/Compartir siguen |
 | Login con Google | **No activado** en Supabase (solo email): ver «Configuración del panel» |
 
 ## Cómo está conectado

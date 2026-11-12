@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 import '../../share_stats/application/share_service.dart';
 import '../domain/recap_data.dart';
 import 'recap_painter.dart';
@@ -52,12 +51,9 @@ class RecapService {
     return RecapAction.shared;
   }
 
-  /// Portapapeles como imagen PNG cuando la plataforma lo permite (si no, `copyUnsupported`).
-  Future<RecapAction> copy(Uint8List png) async {
-    final cb = SystemClipboard.instance;
-    if (cb == null) return RecapAction.copyUnsupported;
-    final item = DataWriterItem()..add(Formats.png(png));
-    await cb.write([item]);
-    return RecapAction.copied;
-  }
+  /// Copiar la imagen al portapapeles: desactivado. `super_clipboard` (super_native_extensions) no compila con
+  /// Gradle 9, que exige Flutter 3.50, y bloqueaba el APK. El botón se mantiene y avisa al usuario; guardar en la
+  /// galería y compartir siguen disponibles. Para recuperarlo, añadir de nuevo un paquete de portapapeles de imágenes
+  /// compatible con Gradle 9 y devolver `RecapAction.copied` tras escribir el PNG.
+  Future<RecapAction> copy(Uint8List png) async => RecapAction.copyUnsupported;
 }
