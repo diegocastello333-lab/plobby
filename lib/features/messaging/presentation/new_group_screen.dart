@@ -5,7 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/plobby_text.dart';
+import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/plobby_icon.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../social/application/social_providers.dart';
+import '../../social/domain/social_models.dart';
 import '../../social/presentation/player_tile.dart' as pt;
 import '../application/messaging_providers.dart';
 import '../domain/messaging_models.dart';
@@ -53,42 +58,72 @@ class _NewGroupState extends ConsumerState<NewGroupScreen> {
   Widget build(BuildContext context) {
     final friends = ref.watch(friendsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Nuevo grupo'), centerTitle: true),
-      body: friends.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(child: TextButton(onPressed: () => ref.invalidate(friendsProvider), child: const Text('No se pudo cargar. Reintentar'))),
-        data: (all) {
-          final l = all.where((f) => q.isEmpty || f.player.name.toLowerCase().contains(q) || f.player.username.toLowerCase().contains(q)).toList();
-          return Column(children: [
-            Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 8, AppSpacing.screenH, 24), children: [
-              GroupAvatarPicker(presetId: presetId, bytes: bytes, onPreset: (id) => setState(() { presetId = id; bytes = null; }), onGallery: _pick),
-              const SizedBox(height: 16),
-              TextField(controller: _name, maxLength: maxGroupName, textCapitalization: TextCapitalization.sentences, decoration: const InputDecoration(labelText: 'Nombre del grupo', hintText: 'Pádel de los jueves'), onChanged: (_) => setState(() => error = null)),
-              const SizedBox(height: 8),
-              Text('Participantes (${_sel.length})', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-              const SizedBox(height: 8),
-              if (_sel.isNotEmpty) SizedBox(height: 40, child: ListView(scrollDirection: Axis.horizontal, children: [
-                for (final f in all.where((f) => _sel.contains(f.player.id))) Padding(padding: const EdgeInsets.only(right: 8), child: InputChip(
-                    label: Text(f.player.name.split(' ').first), onDeleted: () => setState(() => _sel.remove(f.player.id)), deleteButtonTooltipMessage: 'Quitar')),
+      body: Column(children: [
+        PlobbyHeaderBar(title: 'Nuevo grupo', onBack: () => context.pop()),
+        Expanded(child: friends.when(
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(friendsProvider))),
+          data: (all) {
+            final l = all.where((f) => q.isEmpty || f.player.name.toLowerCase().contains(q) || f.player.username.toLowerCase().contains(q)).toList();
+            return Column(children: [
+              Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), children: [
+                GroupAvatarPicker(presetId: presetId, bytes: bytes, onPreset: (id) => setState(() { presetId = id; bytes = null; }), onGallery: _pick),
+                const SizedBox(height: 18),
+                LabeledField(label: 'Nombre del grupo', controller: _name, maxLength: maxGroupName, hint: 'Pádel de los jueves', textCapitalization: TextCapitalization.sentences, onChanged: (_) => setState(() => error = null)),
+                Text('Participantes (${_sel.length})', style: PlobbyText.label),
+                const SizedBox(height: 4),
+                Text(_sel.isEmpty ? 'Elige al menos un amigo' : 'Solo puedes añadir a tus amigos.', style: PlobbyText.help.copyWith(fontSize: 12)),
+                const SizedBox(height: 10),
+                if (_sel.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 6, runSpacing: 6, children: [
+                  for (final f in all.where((f) => _sel.contains(f.player.id))) Semantics(button: true, label: 'Quitar a ${f.player.name}', excludeSemantics: true, child: InkWell(
+                    borderRadius: AppRadius.rPill, onTap: () => setState(() => _sel.remove(f.player.id)),
+                    child: Container(height: 30, padding: const EdgeInsets.only(left: 4, right: 10), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rPill),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        pt.PlayerAvatar(f.player, size: 22), const SizedBox(width: 6),
+                        Text(f.player.name.split(' ').first, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.ink50)),
+                        const SizedBox(width: 6), const PlobbyIcon(PlobbyIcons.close, size: 12, strokeWidth: 2.4, color: AppColors.brand),
+                      ])),
+                  )),
+                ])),
+                SearchField(hint: 'Buscar por nombre o usuario', onChanged: (v) => setState(() => q = v.trim().toLowerCase())),
+                const SizedBox(height: 6),
+                if (all.isEmpty) const Padding(padding: EdgeInsets.all(24), child: Text('Añade amigos para poder crear un grupo.', textAlign: TextAlign.center, style: PlobbyText.sub))
+                else if (l.isEmpty) const Padding(padding: EdgeInsets.all(24), child: Text('Sin resultados', textAlign: TextAlign.center, style: PlobbyText.sub)),
+                for (final f in l) _Pick(f: f, selected: _sel.contains(f.player.id), onTap: () => setState(() => _sel.contains(f.player.id) ? _sel.remove(f.player.id) : _sel.add(f.player.id))),
               ])),
-              const SizedBox(height: 8),
-              SearchBar(hintText: 'Buscar por nombre o usuario', leading: const Icon(Icons.search), onChanged: (v) => setState(() => q = v.trim().toLowerCase())),
-              const SizedBox(height: 8),
-              if (all.isEmpty) const Padding(padding: EdgeInsets.all(24), child: Text('Añade amigos para poder crear un grupo.', textAlign: TextAlign.center))
-              else if (l.isEmpty) const Padding(padding: EdgeInsets.all(24), child: Text('Sin resultados', textAlign: TextAlign.center)),
-              for (final f in l) CheckboxListTile(
-                contentPadding: EdgeInsets.zero, value: _sel.contains(f.player.id), controlAffinity: ListTileControlAffinity.trailing,
-                onChanged: (v) => setState(() => v == true ? _sel.add(f.player.id) : _sel.remove(f.player.id)),
-                secondary: pt.PlayerAvatar(f.player, size: 40), title: Text(f.player.name, style: const TextStyle(fontWeight: FontWeight.w700)), subtitle: Text('@${f.player.username}'),
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + MediaQuery.paddingOf(context).bottom),
+                decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: Color(0x14171C19)))),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  AnimatedSwitcher(duration: AppAnimations.scaled(context, AppAnimations.tab), child: error == null ? const SizedBox(height: 0) : Padding(padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(error!, key: ValueKey(error), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, color: AppColors.danger, fontWeight: FontWeight.w600, letterSpacing: 0)))),
+                  PlobbyButton(label: 'Crear grupo', busy: busy, onPressed: _create),
+                ]),
               ),
-            ])),
-            SafeArea(top: false, child: Padding(padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 8, AppSpacing.screenH, 12), child: Column(mainAxisSize: MainAxisSize.min, children: [
-              AnimatedSwitcher(duration: AppAnimations.scaled(context, AppAnimations.tab), child: error == null ? const SizedBox(height: 0) : Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(error!, key: ValueKey(error), style: const TextStyle(color: AppColors.danger, fontWeight: FontWeight.w600)))),
-              FilledButton(onPressed: busy ? null : _create, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)), child: busy ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Crear grupo')),
-            ]))),
-          ]);
-        },
-      ),
+            ]);
+          },
+        )),
+      ]),
     );
   }
+}
+
+/// Fila de amigo con selección circular (como `gntog` del prototipo).
+class _Pick extends StatelessWidget {
+  const _Pick({required this.f, required this.selected, required this.onTap});
+  final Friend f; final bool selected; final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Semantics(checked: selected, label: '${f.player.name}, @${f.player.username}', excludeSemantics: true, child: InkWell(onTap: onTap, child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+        child: Row(children: [
+          pt.PlayerAvatar(f.player, size: 40), const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(f.player.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text('@${f.player.username}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
+          ])),
+          Container(width: 24, height: 24, decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? AppColors.inverse : null, border: selected ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
+              child: selected ? const Center(child: PlobbyIcon(PlobbyIcons.check, size: 13, strokeWidth: 3, color: AppColors.brand)) : null),
+        ]),
+      )));
 }
