@@ -144,11 +144,14 @@ class LiveBannerCard extends StatelessWidget {
         child: Dismissible(
           key: const ValueKey('live-banner'), direction: DismissDirection.up, onDismissed: (_) => onClose(),
           child: Semantics(container: true, button: true, liveRegion: true, label: '${banner.title}. ${banner.body}', excludeSemantics: true,
-            child: Material(
-              color: AppColors.surface, borderRadius: BorderRadius.circular(14), elevation: 0, clipBehavior: Clip.antiAlias,
+            // Sombra y fondo FUERA del recorte (si no, el recorte se come la sombra y la tarjeta se ve gris).
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0x14171C19)),
+                  boxShadow: const [BoxShadow(color: Color(0x29171C19), blurRadius: 24, offset: Offset(0, 8), spreadRadius: -6)]),
+              child: Material(
+              type: MaterialType.transparency, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
               child: InkWell(onTap: onTap, child: Container(
                 padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0x14171C19)), boxShadow: AppShadows.card),
                 child: Row(children: [
                   Container(width: 38, height: 38, decoration: BoxDecoration(color: AppColors.inverse, borderRadius: BorderRadius.circular(10)),
                       child: Center(child: PlobbyIcon(banner.icon, size: 18, color: AppColors.brand))),
@@ -160,7 +163,7 @@ class LiveBannerCard extends StatelessWidget {
                   ])),
                 ]),
               )),
-            ),
+            )),
           ),
         ),
       );

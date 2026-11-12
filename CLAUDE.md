@@ -51,7 +51,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   V9 Mi rating, Compartir mis stats, Share Match, Bienvenida y Onboarding. Rediseño completo (V0–V9).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Tests: 208/208. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Tests: 218/218. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
 - Pendiente: probar en móvil real con Supabase; build web/APK tras el rediseño. Mocks de amigos y mensajes no
   comparten la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
@@ -82,4 +82,18 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   `renderAvatarPng` y subido, `avatar_id` guarda cuál) o eliminar (url e id a NULL). Tras cada cambio
   `AuthRepository.deleteAvatarFiles(keepUrl:)` borra las imágenes anteriores de `avatars/<uid>/`.
 - Sin cambios de esquema ni de RLS. Verificado entre diego.c y antocuesta con RPC reales en transacción con ROLLBACK.
+
+## Auditoría social y tiempo real (12 nov 2026)
+- Migraciones `20261121a_direct_message_type` + `20261121b_social_sync` (aplicadas con autorización): avisos de
+  mensaje privado (`direct_message`), avisos de privado/grupo que se reactivan (upsert por `dm:`/`gm:` + actor_count),
+  `mark_conversation_read` los marca leídos, `cancel_friend_request` retira el aviso, `remove_friend` quita la pareja,
+  `save_onboarding_step(2)` solo admite pareja amiga, `friend_count(uuid)`, trigger `friendships_broadcast` →
+  Broadcast privado `user:<uid>` (política `plobby_user_topic_read` en realtime.messages), índice duplicado eliminado.
+- Causa de «los mensajes no siempre llegan»: varios canales Realtime con el MISMO nombre (`groups:<uid>`, `chat:<id>`);
+  el servidor cierra el anterior. Ahora `core/supabase/shared_realtime.dart` (un canal por tema, sufijo único, resyncs).
+- `core/live/live_sync.dart` (MaterialApp.builder): Realtime social con refresco proporcional (`applySocialChange`),
+  recarga al volver a primer plano y banner en la app (`activeConversation` evita avisar del chat abierto).
+- Fuente única: `relationProvider`, `requestWithProvider`, `friendCountOfProvider`; perfil ajeno con botón según relación.
+- Push con la app cerrada: NO implementado (requiere proyecto Firebase/APNs del usuario).
+- Prueba de 14 pasos entre diego.c y antocuesta (+2 usuarios temporales) con ROLLBACK: todo correcto.
 
