@@ -51,7 +51,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   V9 Mi rating, Compartir mis stats, Share Match, Bienvenida y Onboarding. Rediseño completo (V0–V9).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Tests: 225/225. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Tests: 235/235. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
 - Pendiente: probar en móvil real con Supabase; build web/APK tras el rediseño. Mocks de amigos y mensajes no
   comparten la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
@@ -112,4 +112,16 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   JPEG 1200 px q82 con `package:image` en isolate, `avatars/<uid>/banner_*.jpg`). `deleteAvatarFiles` solo borra `avatar_*`.
 - Crear partido exige 3 amigos distintos (regla del servidor): con 2 cuentas no se puede por diseño.
 - Push con la app cerrada: sigue sin implementar (requiere Firebase del usuario).
+
+## Splash, banner y presencia (12 nov 2026, v1.3.1)
+- Pareja habitual / presencia «fallan»: los logs (x-client-info) muestran que el Samsung S942B de antocuesta sigue con
+  un APK anterior al arreglo (envía «lucia» a las 22:17). El S928B de diego.c tiene la versión nueva. El usuario
+  rechazó crear la tabla `app_config` (versión mínima): no se hizo.
+- Banner con bandas: el Stack interno de `AnimatedSwitcher` daba restricciones sueltas → `cover` no llenaba. Ahora
+  `layoutBuilder` con StackFit.expand + `SizedBox.expand` en `BannerImage`; encuadre con la proporción REAL del banner
+  (`homeBannerAspect`, medida en Inicio antes de abrir la hoja).
+- Presencia: heartbeat 30 s (re-track) y caducidad 75 s medida con el reloj del receptor (`presenceHeartbeat/Expiry`).
+- Splash: paquete `plobby_icono_y_splash.zip` integrado (icono Android/iOS, splash nativo lima, `features/splash/`).
+  Fuentes empaquetadas en vez de google_fonts. `SplashBoot.pending` (main) → solo una vez por arranque;
+  `criticalWork` espera sesión/onboarding (6 s) y perfil propio (3 s); `authRedirect` deja pasar `/splash`.
 

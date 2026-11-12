@@ -15,10 +15,16 @@ import '../../profile/domain/models.dart';
 import 'banner_catalog.dart';
 
 /// Hoja «Banner de Inicio»: subir una foto propia (con encuadre) o elegir uno de los banners de Plobby.
-Future<void> showBannerSheet(BuildContext context) => showPlobbySheet<void>(context, (_) => const _BannerSheet());
+/// La proporción del banner se mide AQUÍ, en la pantalla de Inicio: dentro de la hoja inferior MediaQuery ya no
+/// incluye la barra de estado y el cálculo saldría distinto.
+Future<void> showBannerSheet(BuildContext context) {
+  final aspect = homeBannerAspect(context);
+  return showPlobbySheet<void>(context, (_) => _BannerSheet(aspect: aspect));
+}
 
 class _BannerSheet extends ConsumerStatefulWidget {
-  const _BannerSheet();
+  const _BannerSheet({required this.aspect});
+  final double aspect;
   @override
   ConsumerState<_BannerSheet> createState() => _BannerSheetState();
 }
@@ -58,7 +64,7 @@ class _BannerSheetState extends ConsumerState<_BannerSheet> {
     try {
       final prepared = await compute(prepareBannerSource, await x.readAsBytes());
       if (!mounted) return;
-      final rect = await nav.push<Rect>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => BannerCropScreen(source: prepared)));
+      final rect = await nav.push<Rect>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => BannerCropScreen(source: prepared, aspect: widget.aspect)));
       if (rect == null || !mounted) { if (mounted) setState(() => _busy = null); return; }
       final jpeg = await compute(cropBannerJpeg, BannerCropJob(prepared.bytes, rect));
       final repo = ref.read(profileRepositoryProvider);
@@ -135,7 +141,7 @@ BannerSource prepareBannerSource(Uint8List raw) {
 class BannerCropJob {
   const BannerCropJob(this.bytes, this.rect);
   final Uint8List bytes;
-  final Rect rect;   // en píxeles de la imagen preparada
+  final Rect rect;   // en píxeles de la imagen preparada; su proporción = la del banner en el móvil del usuario
 }
 
 /// En un isolate: recorta el encuadre elegido, lo reduce a 1200 px de ancho como máximo (sin ampliar nunca: no se
@@ -146,7 +152,8 @@ Uint8List cropBannerJpeg(BannerCropJob job) {
   final x = r.left.round().clamp(0, image.width - 1), y = r.top.round().clamp(0, image.height - 1);
   final w = r.width.round().clamp(1, image.width - x), h = r.height.round().clamp(1, image.height - y);
   var out = img.copyCrop(image, x: x, y: y, width: w, height: h);
-  if (out.width > 1200) out = img.copyResize(out, width: 1200, height: (1200 / kBannerAspect).round(), interpolation: img.Interpolation.cubic);
+  // Se reduce manteniendo EXACTAMENTE la proporción del recorte (sin deformar).
+  if (out.width > 1200) out = img.copyResize(out, width: 1200, height: (1200 * out.height / out.width).round(), interpolation: img.Interpolation.cubic);
   return Uint8List.fromList(img.encodeJpg(out, quality: 82));
 }
 
@@ -154,8 +161,10 @@ Uint8List cropBannerJpeg(BannerCropJob job) {
 /// dedo y se amplía con dos. Encima se ve el degradado y el saludo tal y como quedará en Inicio. Devuelve el
 /// rectángulo elegido en píxeles de la imagen.
 class BannerCropScreen extends StatefulWidget {
-  const BannerCropScreen({super.key, required this.source});
+  const BannerCropScreen({super.key, required this.source, this.aspect = kBannerAspect});
   final BannerSource source;
+  /// Proporción del marco = la del banner real en este móvil ([homeBannerAspect]).
+  final double aspect;
   @override
   State<BannerCropScreen> createState() => _BannerCropScreenState();
 }
@@ -197,7 +206,7 @@ class _BannerCropScreenState extends State<BannerCropScreen> {
         ])),
         const Padding(padding: EdgeInsets.fromLTRB(24, 0, 24, 14), child: Text('Arrastra para encuadrar y pellizca para acercar.', textAlign: TextAlign.center,
             style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: Color(0xB8F6F8F1)))),
-        Expanded(child: Center(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: AspectRatio(aspectRatio: kBannerAspect, child: LayoutBuilder(builder: (_, c) {
+        Expanded(child: Center(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: AspectRatio(aspectRatio: widget.aspect, child: LayoutBuilder(builder: (_, c) {
           _layout(c.biggest);
           return ClipRRect(borderRadius: BorderRadius.circular(18), child: Stack(fit: StackFit.expand, children: [
             InteractiveViewer(transformationController: _ctrl, constrained: false, minScale: 1, maxScale: 4, boundaryMargin: EdgeInsets.zero, clipBehavior: Clip.hardEdge,

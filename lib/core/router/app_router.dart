@@ -30,6 +30,8 @@ import '../../features/rating/presentation/elo_detail_screen.dart';
 import '../../features/share_stats/presentation/share_stats_screen.dart';
 import '../../features/social/presentation/add_friends_screen.dart';
 import '../../features/social/presentation/friends_screen.dart';
+import '../../features/splash/application/splash_boot.dart';
+import '../../features/splash/presentation/splash_screen.dart';
 
 /// true cuando la app usa Supabase (lo activa `SupabaseBootstrap.overrides`): sin sesión → /welcome, sin onboarding → /onboarding.
 /// En modo demo (mocks) se entra directamente al Inicio.
@@ -50,7 +52,8 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(sessionGateProvider, (_, __) => refresh.value++);
   ref.onDispose(refresh.dispose);
   return GoRouter(
-    initialLocation: '/home',
+    // Primer arranque: pantalla de carga. Si el router se recrea (inicio/cierre de sesión), directamente al Inicio.
+    initialLocation: SplashBoot.consume() ? '/splash' : '/home',
     refreshListenable: refresh,
     redirect: (_, state) {
       if (!ref.read(authGuardEnabledProvider)) return null;
@@ -68,6 +71,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 final appRoutes = <RouteBase>[
+  // Pantalla de carga (solo al abrir la app). Al terminar sustituye la ruta por /home y la guardia decide el destino.
+  GoRoute(path: '/splash', pageBuilder: (_, s) => NoTransitionPage(key: s.pageKey, child: const _SplashRoute())),
   StatefulShellRoute.indexedStack(
     builder: (_, __, shell) => AppShell(shell: shell),
     branches: [
@@ -158,9 +163,41 @@ class _OpenChat extends ConsumerWidget {
 /// Guardia de acceso para `GoRouter(redirect: …, refreshListenable: …)`. Pura y testeable:
 /// sin sesión → /welcome; con sesión pero perfil sin completar → /onboarding; con todo listo no se vuelve a ver ninguna de las dos.
 String? authRedirect({required bool signedIn, required bool onboardingDone, required String location}) {
+  if (location == '/splash') return null; // la pantalla de carga se muestra siempre; navega ella al terminar
   final onAuth = location == '/welcome', onOnb = location == '/onboarding';
   if (!signedIn) return onAuth ? null : '/welcome';
   if (!onboardingDone) return onOnb ? null : '/onboarding';
   if (onAuth || onOnb) return '/home';
   return null;
 }
+
+/// Ruta de la pantalla de carga: lanza el trabajo crítico una sola vez y, al terminar la animación y ese trabajo
+/// (o su límite de tiempo, o un error de red: la app sigue y cada pantalla muestra su estado), funde la marca y entra.
+class _SplashRoute extends ConsumerStatefulWidget {
+  const _SplashRoute();
+  @override
+  ConsumerState<_SplashRoute> createState() => _SplashRouteState();
+}
+
+class _SplashRouteState extends ConsumerState<_SplashRoute> {
+  late final Future<void> _ready = SplashBoot.criticalWork(ref);
+  bool _leaving = false;
+
+  void _finish() {
+    if (_leaving) return;
+    setState(() => _leaving = true);
+    // Salida: la marca se funde y crece ligeramente (260 ms) y se entra al Inicio sin pila (atrás no vuelve aquí).
+    Future<void>.delayed(const Duration(milliseconds: 260), () { if (mounted) GoRouter.of(context).go('/home'); });
+  }
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+        color: const Color(0xFFD2F548),
+        child: AnimatedOpacity(
+          opacity: _leaving ? 0 : 1, duration: const Duration(milliseconds: 260), curve: Curves.easeIn,
+          child: AnimatedScale(scale: _leaving ? 1.04 : 1, duration: const Duration(milliseconds: 260), curve: Curves.easeIn,
+              child: SplashScreen(ready: _ready, onFinished: _finish)),
+        ),
+      );
+}
+

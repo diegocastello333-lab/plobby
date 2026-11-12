@@ -46,6 +46,7 @@ void main() {
   test('guardia de rutas', () {
     expect(authRedirect(signedIn: false, onboardingDone: false, location: '/feed'), '/welcome');
     expect(authRedirect(signedIn: false, onboardingDone: false, location: '/welcome'), isNull);
+    expect(authRedirect(signedIn: false, onboardingDone: false, location: '/splash'), isNull);
     expect(authRedirect(signedIn: true, onboardingDone: false, location: '/feed'), '/onboarding');
     expect(authRedirect(signedIn: true, onboardingDone: true, location: '/welcome'), '/home');
     expect(authRedirect(signedIn: true, onboardingDone: true, location: '/profile'), isNull);

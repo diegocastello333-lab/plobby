@@ -12,7 +12,15 @@ class BannerPreset {
   final String? svg;   // null = foto original (asset)
 }
 
+/// Proporción de referencia (lienzo de los predeterminados y vista de la galería).
 const kBannerAspect = 6 / 5;
+
+/// Alto real del banner de Inicio: 300 dp + la barra de estado (como en el prototipo).
+double homeBannerHeight(BuildContext context) => 300 + MediaQuery.paddingOf(context).top;
+
+/// Proporción REAL del banner en esta pantalla (ancho / alto). El encuadre de la foto usa esta misma proporción:
+/// lo que se ve al recortar es exactamente lo que aparece en Inicio, en cualquier tamaño de móvil.
+double homeBannerAspect(BuildContext context) => MediaQuery.sizeOf(context).width / homeBannerHeight(context);
 const _ink = '#171C19', _lime = '#D2F548', _ivory = '#F6F8F1';
 
 String _lines(Iterable<String> paths, String stroke, double width, [double opacity = 1]) =>
@@ -92,13 +100,15 @@ class BannerImage extends StatelessWidget {
     final width = (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round();
     final classic = Image.asset('assets/images/home_banner.jpg', fit: BoxFit.cover, alignment: const Alignment(0, .16), cacheWidth: width,
         semanticLabel: 'Pistas de pádel al atardecer', errorBuilder: (_, __, ___) => const SizedBox.shrink());
+    // SizedBox.expand: la imagen ocupa SIEMPRE todo el banner (cover recorta sin deformar ni dejar bandas),
+    // aunque el padre le pase restricciones sueltas.
     if (u != null && u.isNotEmpty) {
-      return Image.network(u, fit: BoxFit.cover, cacheWidth: width, semanticLabel: 'Banner personalizado',
+      return SizedBox.expand(child: Image.network(u, fit: BoxFit.cover, cacheWidth: width, semanticLabel: 'Banner personalizado',
           frameBuilder: (_, child, frame, sync) => sync ? child : AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 250), child: child),
-          errorBuilder: (_, __, ___) => classic);
+          errorBuilder: (_, __, ___) => classic));
     }
     final p = bannerPresetById(presetId ?? profile?.bannerId);
-    if (p?.svg != null) return SvgPicture.string(p!.svg!, fit: BoxFit.cover, semanticsLabel: 'Banner ${p.name}');
-    return classic;
+    if (p?.svg != null) return SizedBox.expand(child: SvgPicture.string(p!.svg!, fit: BoxFit.cover, semanticsLabel: 'Banner ${p.name}'));
+    return SizedBox.expand(child: classic);
   }
 }

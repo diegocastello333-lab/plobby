@@ -132,10 +132,13 @@ class _Banner extends StatelessWidget {
     final first = (profile?.fullName ?? '').trim().split(RegExp(r'\s+')).first;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-      child: SizedBox(height: 300 + top, child: Stack(fit: StackFit.expand, children: [
+      child: SizedBox(height: homeBannerHeight(context), child: Stack(fit: StackFit.expand, children: [
         const ColoredBox(color: AppColors.ink900),
         // Banner personalizable (foto propia, predeterminado o el clásico). Mantener pulsado también abre el editor.
+        // El Stack interno de AnimatedSwitcher daba restricciones «sueltas» a la imagen: `cover` no recibía el tamaño
+        // del banner y la foto se encogía dejando bandas. Ahora cada imagen ocupa exactamente todo el banner.
         GestureDetector(onLongPress: () => showBannerSheet(context), child: AnimatedSwitcher(duration: const Duration(milliseconds: 350),
+            layoutBuilder: (current, previous) => Stack(fit: StackFit.expand, children: [...previous, if (current != null) current]),
             child: KeyedSubtree(key: ValueKey('${profile?.bannerUrl}|${profile?.bannerId}'), child: BannerImage(profile: profile)))),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Color(0x94171C19), Color(0x0D171C19), Color(0x1F171C19), Color(0xC7171C19)], stops: [0, .30, .52, 1]))),

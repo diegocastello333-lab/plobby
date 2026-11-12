@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/errors/app_errors.dart';
 import 'core/live/live_sync.dart';
 import 'core/router/app_router.dart';
+import 'features/splash/application/splash_boot.dart';
 import 'core/supabase/supabase_bootstrap.dart';
 import 'core/theme/plobby_theme.dart';
 
@@ -10,7 +11,8 @@ import 'core/theme/plobby_theme.dart';
 /// sin credenciales arranca en modo demo con datos de ejemplo (repositorios mock).
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  AppErrors.install();   // errores no controlados: registrados y sin pantallas grises/negras en la APK
+  AppErrors.install();
+  SplashBoot.pending = true;   // pantalla de carga en este arranque (una sola vez)   // errores no controlados: registrados y sin pantallas grises/negras en la APK
   final client = await SupabaseBootstrap.init();
   runApp(client == null
       ? const ProviderScope(child: PlobbyApp())
