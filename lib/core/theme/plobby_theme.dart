@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'design_tokens.dart';
 import '../motion/app_motion.dart';
 export 'design_tokens.dart';
@@ -49,10 +48,14 @@ class AppCardStyles {
   static const sunken = BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rMd);
 }
 
+/// Inter y Unbounded van EMPAQUETADAS en assets/fonts (pubspec `fonts:`), con los mismos pesos que carga el prototipo
+/// HTML (Inter 400–800, Unbounded 500–700). Antes se descargaban en tiempo de ejecución con google_fonts, que las
+/// registra como «Unbounded_700»: por eso `TextStyle(fontFamily: 'Unbounded')` caía en la fuente del sistema, y sin
+/// red en el primer arranque toda la app salía sin sus fuentes.
 TextTheme _textTheme(TextTheme base) {
-  final inter = GoogleFonts.interTextTheme(base).apply(bodyColor: AppColors.text, displayColor: AppColors.text);
+  final inter = base.apply(fontFamily: AppTypography.sansFamily, bodyColor: AppColors.text, displayColor: AppColors.text);
   TextStyle uni(TextStyle? s, double size, double lh, FontWeight w, [double ls = -0.02]) =>
-      GoogleFonts.unbounded(textStyle: s, fontSize: size, height: lh / size, fontWeight: w, letterSpacing: size * ls, color: AppColors.text);
+      (s ?? const TextStyle()).copyWith(fontFamily: AppTypography.displayFamily, fontSize: size, height: lh / size, fontWeight: w, letterSpacing: size * ls, color: AppColors.text);
   return inter.copyWith(
     displayLarge: uni(inter.displayLarge, 40, 44, FontWeight.w700),      // display-xl
     displayMedium: uni(inter.displayMedium, 28, 34, FontWeight.w700),    // display-l
@@ -74,7 +77,7 @@ ThemeData buildPlobbyTheme() {
     surfaceContainerHighest: AppColors.surfaceSunken, outline: AppColors.borderStrong, outlineVariant: AppColors.border,
     error: AppColors.danger, onError: Colors.white, errorContainer: AppColors.dangerSoft, onErrorContainer: AppColors.danger,
   );
-  final base = ThemeData(useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: AppColors.bg);
+  final base = ThemeData(useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: AppColors.bg, fontFamily: AppTypography.sansFamily);
   OutlineInputBorder ob(Color c, [double w = 1.5]) => OutlineInputBorder(borderRadius: AppRadius.rMd, borderSide: BorderSide(color: c, width: w));
   return base.copyWith(
     pageTransitionsTheme: AppTransitions.theme, // solo la animación; GoRouter y rutas intactos
@@ -83,7 +86,7 @@ ThemeData buildPlobbyTheme() {
     focusColor: AppColors.focus,
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.bg, foregroundColor: AppColors.text, elevation: 0, scrolledUnderElevation: 0, centerTitle: true,
-      titleTextStyle: GoogleFonts.unbounded(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.text, letterSpacing: -0.2),
+      titleTextStyle: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.text, letterSpacing: -0.2),
     ),
     filledButtonTheme: FilledButtonThemeData(style: AppButtonStyles.primary()),
     elevatedButtonTheme: ElevatedButtonThemeData(style: AppButtonStyles.primary()),

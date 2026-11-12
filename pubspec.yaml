@@ -10,7 +10,6 @@ dependencies:
   share_plus: ^10.0.0
   path_provider: ^2.1.4
   gal: ^2.3.0            # guardar PNG en la galería (pide permisos en iOS/Android)
-  google_fonts: ^6.2.1   # Inter + Unbounded
   image_picker: ^1.1.2   # foto de perfil desde la galería (onboarding / editar perfil)
   supabase_flutter: ^2.5.0   # Auth con Google, RPC, Realtime, Storage (cliente único en main.dart cuando Env.hasSupabase)
 dev_dependencies:
@@ -20,3 +19,17 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/   # home_banner.jpg: foto del banner del Home, extraída del prototipo HTML
+  # Fuentes del prototipo HTML, empaquetadas (OFL, ver assets/fonts/OFL-*.txt). Sin descarga en tiempo de ejecución.
+  fonts:
+    - family: Inter
+      fonts:
+        - {asset: assets/fonts/Inter-Regular.ttf, weight: 400}
+        - {asset: assets/fonts/Inter-Medium.ttf, weight: 500}
+        - {asset: assets/fonts/Inter-SemiBold.ttf, weight: 600}
+        - {asset: assets/fonts/Inter-Bold.ttf, weight: 700}
+        - {asset: assets/fonts/Inter-ExtraBold.ttf, weight: 800}
+    - family: Unbounded
+      fonts:
+        - {asset: assets/fonts/Unbounded-Medium.ttf, weight: 500}
+        - {asset: assets/fonts/Unbounded-SemiBold.ttf, weight: 600}
+        - {asset: assets/fonts/Unbounded-Bold.ttf, weight: 700}
