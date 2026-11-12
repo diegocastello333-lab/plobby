@@ -51,18 +51,16 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
-  testWidgets('Bienvenida: «Continuar con Google» inicia sesión (mock) sin errores de maquetación', (t) async {
-    t.view.physicalSize = const Size(320, 640);
-    t.view.devicePixelRatio = 1;
-    addTearDown(t.view.reset);
-    final c = ProviderContainer();
-    addTearDown(c.dispose);
-    await t.pumpWidget(UncontrolledProviderScope(container: c, child: MaterialApp(theme: buildPlobbyTheme(), home: const WelcomeScreen())));
-    await _settle(t, 3);
+  testWidgets('Bienvenida: «Continuar con Google» inicia sesión (mock) y entra, sin errores de maquetación a 320 px', (t) async {
+    final (r, c) = await _app(t, '/welcome', width: 320);
+    expect(find.byType(WelcomeScreen), findsOneWidget);
     expect(t.takeException(), isNull);
     await t.tap(find.bySemanticsLabel('Continuar con Google'));
-    await _settle(t, 3);
+    await _settle(t, 4);
     expect(c.read(authRepositoryProvider).currentUser, isNotNull);
+    expect(find.byType(WelcomeScreen), findsNothing);
+    expect(find.textContaining('No se pudo completar'), findsNothing);
+    expect(r.routerDelegate.currentConfiguration.uri.path, '/home');
   });
 
   testWidgets('Onboarding: sin datos el paso 1 no avanza', (t) async {

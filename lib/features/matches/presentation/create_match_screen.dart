@@ -6,6 +6,7 @@ import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
+import '../application/lifecycle_providers.dart';
 import '../application/match_providers.dart';
 import '../domain/match_models.dart';
 
@@ -22,6 +23,9 @@ class CreateMatchScreen extends ConsumerStatefulWidget {
 
 class _S extends ConsumerState<CreateMatchScreen> {
   String? _league, _partner, _r1, _r2, _club;
+  /// Club escrito a mano cuando la tabla `clubs` está vacía o no se pudo leer (antes: `clubs.first` sobre una lista
+  /// vacía lanzaba «Bad state: No element» al construir la pantalla → pantalla gris/negra en la APK).
+  final _clubText = TextEditingController();
   late DateTime _when = DateTime.now().add(const Duration(hours: 2));
   final _sets = List.generate(3, (_) => [TextEditingController(), TextEditingController()]);
   String? _error;
@@ -30,7 +34,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
   @override
   void initState() { super.initState(); _league = widget.leagueId; }
   @override
-  void dispose() { for (final s in _sets) { for (final c in s) { c.dispose(); } } super.dispose(); }
+  void dispose() { for (final s in _sets) { for (final c in s) { c.dispose(); } } _clubText.dispose(); super.dispose(); }
 
   bool get _friendly => widget.type == MatchType.friendly;
 
@@ -38,16 +42,23 @@ class _S extends ConsumerState<CreateMatchScreen> {
         for (final s in _sets) if (s[0].text.isNotEmpty || s[1].text.isNotEmpty) SetScore(int.tryParse(s[0].text) ?? -1, int.tryParse(s[1].text) ?? -1),
       ];
 
-  Future<void> _submit() async {
-    final d = MatchDraft(type: widget.type, leagueId: _friendly ? null : _league, partnerId: _partner, rival1Id: _r1, rival2Id: _r2, when: _when, club: _club ?? 'Club La Moraleja', sets: _scores);
-    final err = validateDraft(d, resultRequired: widget.resultRequired);
+  /// Club que se envía: el elegido en la lista (o el primero, que es el que se ve seleccionado) o el escrito a mano.
+  String _selectedClub(List<String> clubs) => clubs.isNotEmpty ? (_club ?? clubs.first) : _clubText.text.trim();
+
+  Future<void> _submit(List<String> clubs) async {
+    final club = _selectedClub(clubs);
+    final d = MatchDraft(type: widget.type, leagueId: _friendly ? null : _league, partnerId: _partner, rival1Id: _r1, rival2Id: _r2, when: _when, club: club, sets: _scores);
+    final err = validateDraft(d, resultRequired: widget.resultRequired) ?? (club.isEmpty ? 'Indica el club donde se juega el partido.' : null);
     if (err != null) { setState(() => _error = err); return; }
     setState(() { _error = null; _busy = true; });
     try {
       await ref.read(matchRepositoryProvider).create(d);
       if (!mounted) return;
+      ref.invalidate(upcomingMatchesProvider);   // el nuevo partido aparece en «Próximos partidos» sin esperar a Realtime
       showPlobbySnack(context, d.sets.isEmpty ? 'Partido creado.' : 'Resultado enviado. Pendiente de confirmación.');
       context.pop();
+    } on MatchCreateException catch (e) {
+      if (mounted) setState(() { _busy = false; _error = e.message; });
     } catch (_) {
       if (mounted) setState(() { _busy = false; _error = 'No se pudo enviar. Comprueba tu conexión e inténtalo de nuevo.'; });
     }
@@ -57,7 +68,8 @@ class _S extends ConsumerState<CreateMatchScreen> {
   Widget build(BuildContext context) {
     final leagues = ref.watch(myLeaguesProvider);
     final pool = _friendly ? ref.watch(friendOptionsProvider) : (_league == null ? const AsyncData<List<PlayerOption>>([]) : ref.watch(leagueMembersProvider(_league!)));
-    final clubs = ref.watch(clubsProvider).valueOrNull ?? const ['Club La Moraleja'];
+    final clubsAsync = ref.watch(clubsProvider);
+    final clubs = clubsAsync.valueOrNull ?? const <String>[];
     final hasSets = _scores.isNotEmpty;
     String p2(int n) => n.toString().padLeft(2, '0');
     return Scaffold(
@@ -95,6 +107,20 @@ class _S extends ConsumerState<CreateMatchScreen> {
         ]),
         const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Center(child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.2, color: AppColors.textMuted)))),
         _Team('Pareja 2', [_pick('Rival 1', _r1, pool, (v) => _r1 = v), _pick('Rival 2', _r2, pool, (v) => _r2 = v)]),
+        // Estado de la lista de jugadores (antes, un error o una lista vacía dejaba los desplegables vacíos sin explicación).
+        if (_friendly || _league != null) pool.when(
+          loading: () => Padding(padding: const EdgeInsets.only(top: 8), child: Text('Cargando jugadores…', style: PlobbyText.help.copyWith(fontSize: 12))),
+          error: (_, __) => Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [
+            Expanded(child: Text('No se pudieron cargar los jugadores.', style: PlobbyText.help.copyWith(fontSize: 12, color: AppColors.danger))),
+            PlobbyButton(label: 'Reintentar', kind: PlobbyButtonKind.smallOutline, onPressed: () => ref.invalidate(_friendly ? friendOptionsProvider : leagueMembersProvider(_league!))),
+          ])),
+          data: (l) => l.length >= 3 ? const SizedBox.shrink() : Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [
+            Expanded(child: Text(_friendly
+                ? 'Para un amistoso necesitas tres amigos que hayan aceptado tu solicitud (tienes ${l.length}).'
+                : 'La liga necesita al menos tres miembros más para crear un partido (tiene ${l.length}).', style: PlobbyText.help.copyWith(fontSize: 12))),
+            if (_friendly) ...[const SizedBox(width: 8), PlobbyButton(label: 'Añadir amigos', kind: PlobbyButtonKind.smallOutline, onPressed: () => context.push('/friends/add'))],
+          ])),
+        ),
         if (!_friendly && _league == null) Padding(padding: const EdgeInsets.only(top: 8), child: Text('Elige primero la liga para ver a sus jugadores.', style: PlobbyText.help.copyWith(fontSize: 12))),
         const SizedBox(height: 12),
         Row(children: [
@@ -108,7 +134,10 @@ class _S extends ConsumerState<CreateMatchScreen> {
             if (t != null) setState(() => _when = DateTime(_when.year, _when.month, _when.day, t.hour, t.minute));
           }))),
         ]),
-        _Field(label: 'Club', child: _Select<String>(value: _club ?? clubs.first, items: [for (final c in clubs) DropdownMenuItem(value: c, child: Text(c, overflow: TextOverflow.ellipsis))], onChanged: (v) => setState(() => _club = v))),
+        // Club: lista de `clubs` si hay; si la tabla está vacía o falla la lectura, campo de texto (la RPC guarda texto).
+        if (clubsAsync.isLoading && !clubsAsync.hasValue) const _Field(label: 'Club', child: LoadingBlock(height: 48, radius: AppRadius.md))
+        else if (clubs.isNotEmpty) _Field(label: 'Club', child: _Select<String>(value: clubs.contains(_club) ? _club : clubs.first, items: [for (final c in clubs) DropdownMenuItem(value: c, child: Text(c, overflow: TextOverflow.ellipsis))], onChanged: (v) => setState(() => _club = v)))
+        else LabeledField(label: 'Club', controller: _clubText, maxLength: 80, hint: 'p. ej. Club La Moraleja', textCapitalization: TextCapitalization.words, onChanged: (_) { if (_error != null) setState(() => _error = null); }),
         Text.rich(TextSpan(style: PlobbyText.label, children: [
           const TextSpan(text: 'Resultado (sets)'),
           if (!widget.resultRequired) TextSpan(text: ' · opcional si aún no se ha jugado', style: PlobbyText.label.copyWith(fontWeight: FontWeight.w400, letterSpacing: 0, color: AppColors.textMuted)),
@@ -143,7 +172,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
         const SizedBox(height: 6),
         Text(_friendly ? 'Un amistoso no pertenece a ninguna liga.' : 'El partido quedará vinculado a la liga elegida.', style: PlobbyText.help.copyWith(fontSize: 12)),
         const SizedBox(height: 14),
-        PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: _submit),
+        PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(clubs)),
       ])),
     );
   }

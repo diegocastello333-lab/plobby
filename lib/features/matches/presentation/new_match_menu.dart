@@ -26,12 +26,20 @@ class _Menu extends StatelessWidget {
             const Text('MÁS OPCIONES', style: PlobbyText.eb),
             const SizedBox(height: 10),
             Wrap(spacing: 8, runSpacing: 8, children: [
-              _MoreButton(icon: PlobbyIcons.trophy, label: 'Crear una liga', onTap: () { Navigator.pop(context); context.push('/leagues/new'); }),
-              _MoreButton(icon: PlobbyIcons.search, label: 'Descubrir ligas', onTap: () { Navigator.pop(context); context.push('/leagues/discover'); }),
+              _MoreButton(icon: PlobbyIcons.trophy, label: 'Crear una liga', onTap: () => _go(context, '/leagues/new')),
+              _MoreButton(icon: PlobbyIcons.search, label: 'Descubrir ligas', onTap: () => _go(context, '/leagues/discover')),
             ]),
           ]),
         ),
       ]);
+}
+
+/// Cierra la hoja y abre [path]. El router se toma ANTES de cerrar: la hoja vive en el navegador raíz y su contexto
+/// deja de ser válido al desmontarse, así que no se usa después del `pop`.
+void _go(BuildContext context, String path) {
+  final router = GoRouter.of(context);
+  Navigator.of(context).pop();
+  router.push(path);
 }
 
 /// `.mmore button`: 36 px, pastilla, borde interior 1.5 px, Inter 13/600, icono 15.
@@ -62,7 +70,7 @@ class _OptionCard extends StatefulWidget {
 }
 
 class _OptionCardState extends State<_OptionCard> {
-  bool _down = false;
+  bool _down = false, _done = false;   // _done: un segundo toque rápido no abre dos formularios
   @override
   Widget build(BuildContext context) {
     final bg = widget.dark ? AppColors.inverse : AppColors.brand;
@@ -76,7 +84,12 @@ class _OptionCardState extends State<_OptionCard> {
           color: bg, borderRadius: AppRadius.rLg,
           child: InkWell(
             borderRadius: AppRadius.rLg, onHighlightChanged: (v) => setState(() => _down = v),
-            onTap: () { HapticFeedback.selectionClick(); Navigator.pop(context); context.push('/match/new?type=${widget.type}'); },
+            onTap: () {
+              if (_done) return;
+              _done = true;
+              HapticFeedback.selectionClick();
+              _go(context, '/match/new?type=${widget.type}');
+            },
             child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 96), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18), child: Row(children: [
               Container(width: 52, height: 52, decoration: BoxDecoration(color: widget.dark ? AppColors.brand : const Color(0x1A171C19), borderRadius: BorderRadius.circular(16)),
                   child: Center(child: PlobbyIcon(widget.icon, size: 26, color: AppColors.brandInk))),

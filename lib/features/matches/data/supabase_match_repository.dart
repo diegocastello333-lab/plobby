@@ -1,8 +1,10 @@
+import 'dart:async';
+import 'dart:io' show SocketException;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'match_repository.dart';
 import '../domain/match_models.dart';
 
-/// Integración Supabase (SIN verificar contra una base real). Mover a lib/features/matches/data/.
+/// Creación de partidos contra Supabase (RPC `create_match`, verificada con la base real: 12 nov 2026).
 class SupabaseMatchRepository implements MatchRepository {
   SupabaseMatchRepository(this._db);
   final SupabaseClient _db;
@@ -31,13 +33,23 @@ class SupabaseMatchRepository implements MatchRepository {
 
   @override
   Future<String> create(MatchDraft d) async {
-    final id = await _db.rpc('create_match', params: {
-      'p_type': d.type.name,                 // 'league' | 'friendly'
-      'p_league_id': d.leagueId,             // null en amistosos
-      'p_partner': d.partnerId, 'p_rival1': d.rival1Id, 'p_rival2': d.rival2Id,
-      'p_when': d.when.toUtc().toIso8601String(), 'p_club': d.club,
-      'p_sets': [for (final s in d.sets) [s.a, s.b]],
-    });
-    return id as String;
+    try {
+      final id = await _db.rpc('create_match', params: {
+        'p_type': d.type.name,                 // 'league' | 'friendly'
+        'p_league_id': d.leagueId,             // null en amistosos
+        'p_partner': d.partnerId, 'p_rival1': d.rival1Id, 'p_rival2': d.rival2Id,
+        'p_when': d.when.toUtc().toIso8601String(), 'p_club': d.club,
+        'p_sets': [for (final s in d.sets) [s.a, s.b]],
+      });
+      return id as String;
+    } on PostgrestException catch (e) {
+      throw MatchCreateException.fromServerMessage(e.message);
+    } on AuthException {
+      throw const MatchCreateException('auth');
+    } on SocketException {
+      throw const MatchCreateException('network');
+    } on TimeoutException {
+      throw const MatchCreateException('network');
+    }
   }
 }

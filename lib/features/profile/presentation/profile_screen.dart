@@ -12,6 +12,7 @@ import 'widgets/achievement_grid.dart';
 import 'widgets/activity_feed.dart';
 import 'widgets/elo_card.dart';
 import 'widgets/identity_card.dart';
+import 'widgets/logout_button.dart';
 import 'widgets/match_card.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/stats_grid.dart';
@@ -83,6 +84,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _section(2, 'Estadísticas completas', StatsGrid(view: v, full: true)),
         _section(null, 'Logros', AchievementGrid(items: v.achievements)),
         _section(3, 'Actividad', ActivityFeed(view: v)),
+        if (own) const LogoutButton(),   // solo en el perfil propio, al final y separado
         const SizedBox(height: 120),
       ])),
     ]);

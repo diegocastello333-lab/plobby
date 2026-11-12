@@ -51,10 +51,18 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   V9 Mi rating, Compartir mis stats, Share Match, Bienvenida y Onboarding. Rediseño completo (V0–V9).
 - Reglas: letterSpacing SIEMPRE explícito (si es null, Material añade +0.5 px); usar PlobbyText/componentes, no
   TextStyle/colores sueltos; los tests cargan las fuentes reales (test/flutter_test_config.dart).
-- Tests: 190/190. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
+- Tests: 202/202. `flutter analyze`: 0 errores, 0 avisos (solo infos de deprecaciones). (Los emojis salen como cuadros solo en los tests: no hay fuente de emojis.) Botones con `Semantics(container: true)` para que el lector no los fusione con el texto vecino.
 - Pendiente: probar en móvil real con Supabase; build web/APK tras el rediseño. Mocks de amigos y mensajes no
   comparten la lista de amigos (solo demo). Diferencias pendientes: estado «VIVO»/panel en directo de
   amigos (el feed solo trae partidos confirmados), fecha de logros (el modelo no la guarda).
+
+## Cierre de sesión y creación de partidos (12 nov 2026)
+- Perfil propio → «Cerrar sesión» al final (`profile/presentation/widgets/logout_button.dart`): diálogo de confirmación y
+  `AuthRepository.signOut()` (= `supabase.auth.signOut()`, scope local: borra la sesión del dispositivo, no la cuenta).
+  `SupabaseSessionScope` recrea el ProviderScope y la guardia lleva a /welcome con `go` (sin pila → «atrás» no vuelve).
+- Pantalla negra al crear partido: `clubs.first` sobre la lista vacía de la tabla `clubs` (0 filas) → StateError en build.
+  Ahora: lista si hay clubes, campo de texto si no; se envía el club visible; errores de `create_match` traducidos
+  (`MatchCreateException`). Verificado contra la BD real en transacción con ROLLBACK.
 
 ## Entorno de nube
 - Entorno personal «plobby» (red limitada): `niwognkvoifrvlizcdvb.supabase.co`, `dl.google.com`, `services.gradle.org`, `plugins.gradle.org`, `storage.googleapis.com` + gestores de paquetes.

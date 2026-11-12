@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/plobby_logo.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/app_router.dart' show authGuardEnabledProvider;
 import '../application/auth_providers.dart';
 
 /// Bienvenida: logo, frase de comunidad y «Continuar con Google» (OAuth REAL de Supabase en producción).
@@ -15,9 +17,16 @@ class _S extends ConsumerState<WelcomeScreen> {
   bool _busy = false; String? _error;
   Future<void> _google() async {
     setState(() { _busy = true; _error = null; });
-    try { await ref.read(authRepositoryProvider).signInWithGoogle(); }   // abre el navegador/Google; la sesión llega por authStateProvider
-    catch (_) { if (mounted) setState(() => _error = 'No se pudo completar el acceso con Google. Inténtalo de nuevo.'); }
-    finally { if (mounted) setState(() => _busy = false); }
+    try {
+      await ref.read(authRepositoryProvider).signInWithGoogle();   // abre el navegador/Google; la sesión llega por authStateProvider
+    } catch (_) {
+      if (mounted) setState(() { _busy = false; _error = 'No se pudo completar el acceso con Google. Inténtalo de nuevo.'; });
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    // Con Supabase la guardia del router lleva a /onboarding o /home. En modo demo no hay guardia: se entra aquí.
+    if (!ref.read(authGuardEnabledProvider)) context.go('/home');
   }
   @override
   Widget build(BuildContext context) {

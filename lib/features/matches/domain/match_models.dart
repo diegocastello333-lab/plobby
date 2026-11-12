@@ -44,3 +44,35 @@ bool isValidSet(int a, int b) {
   final hi = a > b ? a : b, lo = a > b ? b : a;
   return (hi == 6 && lo <= 4) || (hi == 7 && (lo == 5 || lo == 6));
 }
+
+/// Error de `create_match` traducido a un mensaje para el usuario. El repositorio Supabase lo construye a partir
+/// del mensaje del servidor (la función valida jugadores, liga/amistad y sets y lanza `raise exception`).
+class MatchCreateException implements Exception {
+  const MatchCreateException(this.code);
+  /// `players`, `not_friend`, `not_league_member`, `league_required`, `invalid_sets`, `auth`, `network`, `unknown`.
+  final String code;
+  String get message => switch (code) {
+        'players' => 'Elige a tu compañero y a los dos rivales (tres jugadores distintos).',
+        'not_friend' => 'En un amistoso solo puedes jugar con amigos que hayan aceptado tu solicitud.',
+        'not_league_member' => 'Todos los jugadores deben ser miembros de la liga.',
+        'league_required' => 'Elige la liga del partido.',
+        'invalid_sets' => 'Revisa el resultado: al menos dos sets válidos, por ejemplo 6-3, 7-5 o 7-6.',
+        'auth' => 'Tu sesión ha caducado. Vuelve a iniciar sesión.',
+        'network' => 'No hay conexión. Comprueba tu red e inténtalo de nuevo.',
+        _ => 'No se pudo crear el partido. Inténtalo de nuevo.',
+      };
+  @override
+  String toString() => 'MatchCreateException($code)';
+
+  /// Clasifica el texto de `raise exception` de la RPC `create_match`.
+  static MatchCreateException fromServerMessage(String m) {
+    final t = m.toLowerCase();
+    if (t.contains('three different players')) return const MatchCreateException('players');
+    if (t.contains('is not your friend')) return const MatchCreateException('not_friend');
+    if (t.contains('not a member of the league')) return const MatchCreateException('not_league_member');
+    if (t.contains('league required') || t.contains('cannot have a league')) return const MatchCreateException('league_required');
+    if (t.contains('invalid set') || t.contains('two sets')) return const MatchCreateException('invalid_sets');
+    if (t.contains('not authenticated') || t.contains('jwt')) return const MatchCreateException('auth');
+    return const MatchCreateException('unknown');
+  }
+}
