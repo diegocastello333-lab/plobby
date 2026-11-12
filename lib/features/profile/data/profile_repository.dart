@@ -9,4 +9,6 @@ abstract class ProfileRepository {
   Future<PartnerLink?> requestPartner(String userId);
   Future<void> removePartner();
   Future<List<ClubRef>> searchClubs(String query);
+  /// Bio del propio perfil (máx. 160 caracteres en la app; la columna admite 280).
+  Future<void> setBio(String bio);
 }

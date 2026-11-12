@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/plobby_icon.dart';
+import '../../../../core/widgets/silhouette_avatar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/plobby_theme.dart';
@@ -15,21 +17,21 @@ class IdentityCard extends ConsumerWidget {
     final n = ref.read(profileProvider(profile.id).notifier);
     final rows = <Widget>[];
     if (profile.club != null) {
-      rows.add(_Row(icon: Icons.apartment, label: 'CLUB BASE', title: profile.club!.name, sub: profile.club!.city,
+      rows.add(_Row(icon: PlobbyIcons.building, label: 'CLUB BASE', title: profile.club!.name, sub: profile.club!.city,
           onEdit: isOwner ? () => _pickClub(context, ref, n) : null));
     } else if (isOwner) {
       rows.add(_Add('Añadir club base (opcional)', () => _pickClub(context, ref, n)));
     }
     final pa = profile.partner;
     if (pa != null && (pa.status == PartnerStatus.accepted || isOwner)) {
-      rows.add(_Row(icon: Icons.person_outline, label: 'PAREJA HABITUAL', title: pa.name,
+      rows.add(_Row(icon: PlobbyIcons.user, avatar: SilhouetteAvatar(seed: pa.userId, size: 34), avatarUrl: pa.avatarUrl, label: 'PAREJA HABITUAL', title: pa.name,
           sub: '@${pa.username}${pa.status == PartnerStatus.pending ? ' · Pendiente de aceptación' : ''}',
           onTap: () => context.push('/player/${pa.userId}'),
-          onEdit: isOwner ? () => n.removePartner() : null, editIcon: Icons.close));
+          onEdit: isOwner ? () => n.removePartner() : null, editIcon: PlobbyIcons.close));
     } else if (isOwner) {
       rows.add(_Add('Elegir pareja habitual', () => n.requestPartner('lucia')));
     }
-    rows.add(_Row(icon: Icons.sports_tennis, label: 'LADO DE JUEGO', title: profile.side == PlaySide.right ? 'Derecha' : 'Izquierda',
+    rows.add(_Row(icon: PlobbyIcons.swords, label: 'LADO DE JUEGO', title: profile.side == PlaySide.right ? 'Derecha' : 'Izquierda',
         onEdit: isOwner ? () => n.setSide(profile.side == PlaySide.right ? PlaySide.left : PlaySide.right) : null));
     // Material (no DecoratedBox) como fondo blanco: los ListTile pintan su efecto de pulsación en el Material más
     // cercano y un DecoratedBox con color lo ocultaba. Mismo aspecto: blanco, radio 14.
@@ -51,25 +53,30 @@ class IdentityCard extends ConsumerWidget {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.icon, required this.label, required this.title, this.sub, this.onTap, this.onEdit, this.editIcon = Icons.edit_outlined});
-  final IconData icon; final String label, title; final String? sub; final VoidCallback? onTap, onEdit; final IconData editIcon;
+  const _Row({required this.icon, required this.label, required this.title, this.sub, this.onTap, this.onEdit, this.editIcon = PlobbyIcons.edit, this.avatar, this.avatarUrl});
+  final PlobbyIcons icon; final String label, title; final String? sub; final VoidCallback? onTap, onEdit; final PlobbyIcons editIcon;
+  /// Pareja habitual: foto (o avatar por defecto) de 34 px en lugar del icono, como en el prototipo.
+  final Widget? avatar; final String? avatarUrl;
   @override
   Widget build(BuildContext context) => ListTile(
       onTap: onTap, minVerticalPadding: 10,
-      leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: const Color(0xFFEEF1EA), borderRadius: BorderRadius.circular(9)), child: Icon(icon, size: 18, color: PlobbyColors.forest)),
+      leading: avatar != null
+          ? ClipOval(child: SizedBox(width: 34, height: 34, child: avatarUrl != null && avatarUrl!.isNotEmpty
+              ? Image.network(avatarUrl!, fit: BoxFit.cover, cacheWidth: 102, errorBuilder: (_, __, ___) => avatar!) : avatar))
+          : Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.ink900))),
       title: Text(label, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: PlobbyColors.charcoal)),
         if (sub != null) Text(sub!, style: const TextStyle(fontSize: 12.5, color: PlobbyColors.mute)),
       ]),
-      trailing: onEdit == null ? null : IconButton(onPressed: onEdit, icon: Icon(editIcon, size: 18), tooltip: 'Editar'));
+      trailing: onEdit == null ? null : IconButton(onPressed: onEdit, icon: PlobbyIcon(editIcon, size: 16, color: AppColors.textMuted), tooltip: 'Editar'));
 }
 
 class _Add extends StatelessWidget {
   const _Add(this.t, this.onTap);
   final String t; final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => ListTile(onTap: onTap, leading: const Icon(Icons.add, color: PlobbyColors.mute), title: Text(t, style: const TextStyle(color: PlobbyColors.mute, fontWeight: FontWeight.w600, fontSize: 13.5)));
+  Widget build(BuildContext context) => ListTile(onTap: onTap, leading: const PlobbyIcon(PlobbyIcons.plus, color: AppColors.textMuted), title: Text(t, style: const TextStyle(color: PlobbyColors.mute, fontWeight: FontWeight.w600, fontSize: 13.5)));
 }
 
 class _ClubSearch extends StatefulWidget {

@@ -5,6 +5,7 @@ import '../../../core/theme/plobby_theme.dart';
 import '../../matches/presentation/upcoming_matches_section.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/widgets/motion_widgets.dart';
+import '../../../core/theme/plobby_text.dart';
 import '../application/profile_providers.dart';
 import '../domain/models.dart';
 import 'widgets/achievement_grid.dart';
@@ -53,7 +54,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       key: i == null ? null : _keys[i], padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(height: AppLayout.headerHeight, child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))), if (trailing != null) trailing])),
+          Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.sec)), if (trailing != null) trailing])),  // h2.sec
         const SizedBox(height: 4), child,
       ]));
 
@@ -103,13 +104,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 class _TabsDelegate extends SliverPersistentHeaderDelegate {
   _TabsDelegate(this.names, this.sel, this.onTap);
   final List<String> names; final int sel; final ValueChanged<int> onTap;
-  @override double get minExtent => 62;
-  @override double get maxExtent => 62;
+  // `.tabs .seg` del prototipo (fijo al hacer scroll): fondo marfil, padding 20 12 20 8, pestañas de 46 px.
+  @override double get minExtent => 66;
+  @override double get maxExtent => 66;
   @override
   Widget build(BuildContext c, double shrink, bool overlaps) => Container(
       color: PlobbyColors.ivory, padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-      child: SegmentedButton<int>(showSelectedIcon: false, segments: [for (var i = 0; i < names.length; i++) ButtonSegment(value: i, label: Text(names[i], style: const TextStyle(fontSize: 12)))],
-          selected: {sel}, onSelectionChanged: (s) => onTap(s.first)));
+      child: SlidingTabs(labels: names, index: sel, onChanged: onTap));
   @override
   bool shouldRebuild(_TabsDelegate o) => o.sel != sel;
 }

@@ -75,6 +75,10 @@ class SupabaseProfileRepository implements ProfileRepository {
   Future<void> removePartner() => _db.rpc('set_habitual_partner', params: {'p_partner': null});
 
   @override
+  Future<void> setBio(String bio) =>
+      _db.from('profiles').update({'bio': bio.trim(), 'updated_at': DateTime.now().toUtc().toIso8601String()}).eq('id', _uid);
+
+  @override
   Future<List<ClubRef>> searchClubs(String q) async {
     final rows = await _db.from('clubs').select('id, name, city').ilike('name', '%${q.trim()}%').order('name').limit(20);
     return [for (final r in rows) ClubRef(id: r['id'] as String, name: r['name'] as String, city: (r['city'] ?? '') as String)];

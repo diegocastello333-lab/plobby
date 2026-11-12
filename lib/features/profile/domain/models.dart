@@ -36,10 +36,10 @@ class PlayerProfile {
   final PartnerLink? partner;
   final int leaguesPlayed;
 
-  PlayerProfile copyWith({PlaySide? side, ClubRef? club, bool clearClub = false, PartnerLink? partner, bool clearPartner = false}) =>
+  PlayerProfile copyWith({PlaySide? side, ClubRef? club, bool clearClub = false, PartnerLink? partner, bool clearPartner = false, String? bio}) =>
       PlayerProfile(
         id: id, fullName: fullName, username: username, location: location, avatarUrl: avatarUrl,
-        verified: verified, bio: bio, declaredLevel: declaredLevel, declaredLevelValue: declaredLevelValue,
+        verified: verified, bio: bio ?? this.bio, declaredLevel: declaredLevel, declaredLevelValue: declaredLevelValue,
         side: side ?? this.side, dominantHand: dominantHand,
         club: clearClub ? null : (club ?? this.club),
         partner: clearPartner ? null : (partner ?? this.partner), leaguesPlayed: leaguesPlayed,

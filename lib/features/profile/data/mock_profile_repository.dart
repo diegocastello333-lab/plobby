@@ -56,6 +56,8 @@ class MockProfileRepository implements ProfileRepository {
   @override
   Future<void> removePartner() async => _me = _me.copyWith(clearPartner: true);
   @override
+  Future<void> setBio(String bio) async => _me = _me.copyWith(bio: bio);
+  @override
   Future<List<ClubRef>> searchClubs(String q) async =>
       _clubs.where((c) => c.name.toLowerCase().contains(q.toLowerCase())).toList();
 }

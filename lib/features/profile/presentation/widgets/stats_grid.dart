@@ -4,6 +4,9 @@ import '../../../../core/theme/plobby_theme.dart';
 import '../../application/profile_providers.dart';
 import '../../domain/stats_calculator.dart';
 import 'win_streak_badge.dart';
+import '../../../../core/widgets/motion_widgets.dart';
+
+const _order = [StatsPeriod.d30, StatsPeriod.d90, StatsPeriod.all];
 
 class StatsGrid extends ConsumerWidget {
   const StatsGrid({super.key, required this.view, this.full = false});
@@ -13,16 +16,9 @@ class StatsGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = view.stats, k = view.streak, period = ref.watch(statsPeriodProvider);
     return Column(children: [
-      SegmentedButton<StatsPeriod>(
-        showSelectedIcon: false,
-        segments: const [
-          ButtonSegment(value: StatsPeriod.all, label: Text('Todo')),
-          ButtonSegment(value: StatsPeriod.d30, label: Text('30 días')),
-          ButtonSegment(value: StatsPeriod.d90, label: Text('3 meses')),
-        ],
-        selected: {period},
-        onSelectionChanged: (v) => ref.read(statsPeriodProvider.notifier).state = v.first,
-      ),
+      // `.seg` del prototipo, mismo orden que el HTML: 30 días · 3 meses · Todo.
+      SlidingTabs(labels: const ['30 días', '3 meses', 'Todo'], index: _order.indexOf(period),
+          onChanged: (i) => ref.read(statsPeriodProvider.notifier).state = _order[i]),
       const SizedBox(height: 14),
       Row(children: [
         Expanded(child: _Tile(value: '${s.played}', label: 'Partidos jugados')),

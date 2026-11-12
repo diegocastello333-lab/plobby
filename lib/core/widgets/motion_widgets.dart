@@ -223,14 +223,16 @@ class _BellBadgeState extends State<BellBadge> with SingleTickerProviderStateMix
 /// Selector de pestañas con indicador deslizante y color de texto progresivo. Misma API que un TabBar simple:
 /// el estado (`index`) y `onChanged` siguen siendo del llamador; aquí solo se anima.
 class SlidingTabs extends StatelessWidget {
-  const SlidingTabs({super.key, required this.labels, required this.index, required this.onChanged, this.height = 46});
+  const SlidingTabs({super.key, required this.labels, required this.index, required this.onChanged, this.height = 46, this.dark = false});
   final List<String> labels; final int index; final ValueChanged<int> onChanged; final double height;
+  /// Variante sobre fondo tinta (`.eloc .seg`): contenedor marfil .08 y pestañas inactivas en marfil .65.
+  final bool dark;
   /// `.seg` del prototipo: contenedor hundido `#EEF1EA` en píldora con 3 px de relleno; pestaña activa en lima
   /// (píldora que se desliza), Inter 12.5/600; inactivas en gris.
   @override
   Widget build(BuildContext context) => Container(
         height: height < AppLayout.minTap ? AppLayout.minTap : height, padding: const EdgeInsets.all(3),
-        decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rPill),
+        decoration: BoxDecoration(color: dark ? const Color(0x14F6F8F1) : AppColors.surfaceSunken, borderRadius: AppRadius.rPill),
         child: LayoutBuilder(builder: (_, c) {
           final w = c.maxWidth / labels.length;
           final d = AppAnimations.scaled(context, AppAnimations.tab);
@@ -240,7 +242,7 @@ class SlidingTabs extends StatelessWidget {
             Row(children: [for (var i = 0; i < labels.length; i++) Expanded(child: Semantics(selected: i == index, button: true, child: InkWell(
                 borderRadius: AppRadius.rPill, onTap: () => onChanged(i),
                 child: Center(child: TweenAnimationBuilder<Color?>(
-                    tween: ColorTween(end: i == index ? AppColors.brandInk : AppColors.textMuted), duration: d,
+                    tween: ColorTween(end: i == index ? AppColors.brandInk : (dark ? const Color(0xA6F6F8F1) : AppColors.textMuted)), duration: d,
                     builder: (_, col, __) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, // etiquetas largas: se reducen en vez de cortarse
                         child: Text(labels[i], maxLines: 1, style: PlobbyText.tab.copyWith(color: col)))))))))]),
           ]);

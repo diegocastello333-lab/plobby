@@ -24,6 +24,7 @@ import '../../features/messaging/presentation/chat_screen.dart';
 import '../../features/messaging/presentation/conversations_screen.dart';
 import '../../features/messaging/presentation/group_info_screen.dart';
 import '../../features/messaging/presentation/new_group_screen.dart';
+import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/rating/presentation/elo_detail_screen.dart';
 import '../../features/share_stats/presentation/share_stats_screen.dart';
@@ -77,6 +78,9 @@ final appRoutes = <RouteBase>[
           routes: [GoRoute(path: 'share', builder: (_, __) => const ShareStatsScreen())])]),
     ],
   ),
+  // Editar perfil a pantalla completa (fuera de la barra inferior). '/profile' (pestaña) no tiene hijo 'edit', así que
+  // GoRouter sigue buscando y encuentra esta ruta.
+  GoRoute(path: '/profile/edit', builder: (_, __) => const EditProfileScreen()),
   GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
   GoRoute(path: '/player/:id', builder: (_, s) => ProfileScreen(playerId: s.pathParameters['id']!)),
   GoRoute(path: '/friends', builder: (_, __) => const FriendsScreen(), routes: [

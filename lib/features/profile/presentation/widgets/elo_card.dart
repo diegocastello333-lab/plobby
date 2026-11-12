@@ -3,6 +3,10 @@ import '../../../../core/theme/plobby_theme.dart';
 import '../../application/profile_providers.dart';
 import '../../domain/stats_calculator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/motion_widgets.dart';
+
+/// Un decimal con coma, como en el HTML (4,2).
+String _dec(double v) => v.toStringAsFixed(1).replaceAll('.', ',');
 
 String formatInt(int n) => n.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
 
@@ -33,26 +37,22 @@ class EloCard extends ConsumerWidget {
         const SizedBox(height: 10),
         Wrap(spacing: 8, children: [
           _chip(c.category(elo), true),
-          _chip('Nivel calculado ${c.estimatedLevel(elo).toStringAsFixed(1)}', false),
+          _chip('Nivel calculado ${_dec(c.estimatedLevel(elo))}', false),
         ]),
         const SizedBox(height: 14),
-        SegmentedButton<EloRange>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(foregroundColor: const Color(0xA6F6F8F1), selectedForegroundColor: PlobbyColors.forest, selectedBackgroundColor: PlobbyColors.ivory, visualDensity: VisualDensity.compact),
-          segments: const [
-            ButtonSegment(value: EloRange.d30, label: Text('30 días')),
-            ButtonSegment(value: EloRange.d90, label: Text('3 meses')),
-            ButtonSegment(value: EloRange.d365, label: Text('12 meses')),
-          ],
-          selected: {range},
-          onSelectionChanged: (s) => ref.read(eloRangeProvider.notifier).state = s.first,
-        ),
+        // `.eloc .seg`: variante oscura (marfil .08), activa en lima.
+        SlidingTabs(dark: true, labels: const ['30 días', '3 meses', '12 meses'], index: const [EloRange.d30, EloRange.d90, EloRange.d365].indexOf(range),
+            onChanged: (i) => ref.read(eloRangeProvider.notifier).state = const [EloRange.d30, EloRange.d90, EloRange.d365][i]),
         const SizedBox(height: 12),
         SizedBox(height: 110, width: double.infinity, child: CustomPaint(painter: _EloChart(view.series))),
         const Divider(color: Color(0x24F6F8F1)),
-        Text('Calculado (ELO): ${c.category(elo)} · ${c.estimatedLevel(elo).toStringAsFixed(1)}   |   '
-            'Declarado por ti: ${view.data.profile.declaredLevel} · ${view.data.profile.declaredLevelValue.toStringAsFixed(1)}',
-            style: const TextStyle(color: Color(0xB8F6F8F1), fontSize: 12)),
+        // Pie del prototipo: dos líneas, etiqueta en marfil .7 y valor en negrita, espaciado .1em, decimales con coma.
+        Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, color: Color(0xB3F6F8F1), fontSize: 11.5, height: 1.5, letterSpacing: 1.15, fontWeight: FontWeight.w600), children: [
+          const TextSpan(text: 'Calculado (ELO): '),
+          TextSpan(text: '${c.category(elo)} · ${_dec(c.estimatedLevel(elo))}', style: const TextStyle(color: AppColors.ink50, fontWeight: FontWeight.w800)),
+          const TextSpan(text: '\nDeclarado por ti: '),
+          TextSpan(text: '${view.data.profile.declaredLevel} · ${_dec(view.data.profile.declaredLevelValue)}', style: const TextStyle(color: AppColors.ink50, fontWeight: FontWeight.w800)),
+        ])),
       ]),
     );
   }
