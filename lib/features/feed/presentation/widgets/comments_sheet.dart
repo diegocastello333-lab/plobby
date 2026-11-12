@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/plobby_theme.dart';
+import '../../../../core/theme/plobby_text.dart';
+import '../../../../core/widgets/plobby_components.dart';
+import '../../../../core/widgets/plobby_icon.dart';
+import '../../../../core/widgets/state_views.dart';
+import 'activity_cards.dart' show avatar, timeAgo;
 import '../../application/feed_providers.dart';
 import '../../domain/feed_models.dart';
 
-void showCommentsSheet(BuildContext context, FeedPost post) => showModalBottomSheet(
-    context: context, isScrollControlled: true, showDragHandle: true, builder: (_) => CommentsSheet(postId: post.id));
+void showCommentsSheet(BuildContext context, FeedPost post) => showPlobbySheet(context, (_) => CommentsSheet(postId: post.id));
 
 class CommentsSheet extends ConsumerStatefulWidget {
   const CommentsSheet({super.key, required this.postId});
@@ -24,28 +28,40 @@ class _S extends ConsumerState<CommentsSheet> {
   Widget build(BuildContext context) {
     final async = ref.watch(commentsProvider(widget.postId));
     final me = ref.read(feedRepositoryProvider).me;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(context).viewInsets.bottom + 16),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Comentarios', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 8),
+    Widget small(PlobbyIcons i, String tip, VoidCallback f) => Tooltip(message: tip, child: Semantics(button: true, label: tip, excludeSemantics: true,
+        child: InkResponse(onTap: f, radius: 20, child: SizedBox(width: 36, height: 36, child: Center(child: PlobbyIcon(i, size: 17, color: AppColors.textMuted))))));
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .7),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const SheetHeader(title: 'Comentarios'),
         Flexible(child: async.when(
-          loading: () => const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator())),
-          error: (_, __) => TextButton(onPressed: () => ref.invalidate(commentsProvider(widget.postId)), child: const Text('No se pudieron cargar. Reintentar')),
-          data: (list) => list.isEmpty ? const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Aún no hay comentarios. Escribe el primero.', style: TextStyle(color: PlobbyColors.mute)))
-              : ListView(shrinkWrap: true, children: [for (final c in list) ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(radius: 17, backgroundColor: PlobbyColors.forest, child: Text(c.author.name[0], style: const TextStyle(color: PlobbyColors.ivory, fontSize: 13))),
-                  title: Text.rich(TextSpan(children: [TextSpan(text: '${c.author.id == me.id ? 'Tú' : c.author.name} ', style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: c.content)]), style: const TextStyle(fontSize: 14)),
-                  trailing: c.author.id == me.id
-                      ? IconButton(tooltip: 'Eliminar mi comentario', icon: const Icon(Icons.delete_outline, size: 18), onPressed: () => ref.read(commentsProvider(widget.postId).notifier).remove(c))
-                      : IconButton(tooltip: 'Denunciar', icon: const Icon(Icons.flag_outlined, size: 18), onPressed: () { ref.read(commentsProvider(widget.postId).notifier).report(c); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gracias. Hemos ocultado el comentario y lo revisaremos.'))); }),
+          loading: () => const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.text))),
+          error: (_, __) => ErrorStateCard(title: 'No se pudieron cargar', onRetry: () => ref.invalidate(commentsProvider(widget.postId))),
+          data: (list) => list.isEmpty ? const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Aún no hay comentarios. Escribe el primero.', style: PlobbyText.sub))
+              : ListView(shrinkWrap: true, children: [for (final c in list) Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    avatar(c.author, 17), const SizedBox(width: 10),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text.rich(TextSpan(children: [TextSpan(text: '${c.author.id == me.id ? 'Tú' : c.author.name} ', style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: c.content)]),
+                          style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.text)),
+                      const SizedBox(height: 2),
+                      Text(timeAgo(c.createdAt), style: PlobbyText.help.copyWith(fontSize: 12)),
+                    ])),
+                    c.author.id == me.id
+                        ? small(PlobbyIcons.trash, 'Eliminar mi comentario', () => ref.read(commentsProvider(widget.postId).notifier).remove(c))
+                        : small(PlobbyIcons.flag, 'Denunciar', () { ref.read(commentsProvider(widget.postId).notifier).report(c); showPlobbySnack(context, 'Gracias. Hemos ocultado el comentario y lo revisaremos.'); }),
+                  ]),
                 )]),
         )),
-        const SizedBox(height: 8),
-        Row(children: [
-          Expanded(child: TextField(controller: ctl, maxLength: 140, decoration: InputDecoration(hintText: 'Añade un comentario', counterText: '', errorText: empty ? 'Escribe algo antes de enviar.' : null), onChanged: (_) => empty ? setState(() => empty = false) : null)),
-          IconButton.filled(onPressed: _send, icon: const Icon(Icons.send, size: 18), tooltip: 'Enviar'),
+        const SizedBox(height: 12),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: TextField(controller: ctl, maxLength: 140, style: PlobbyText.input, cursorColor: AppColors.text, textInputAction: TextInputAction.send, onSubmitted: (_) => _send(),
+              decoration: plobbyInputDecoration(hint: 'Añade un comentario', error: empty ? 'Escribe algo antes de enviar.' : null), onChanged: (_) => empty ? setState(() => empty = false) : null)),
+          const SizedBox(width: 8),
+          Tooltip(message: 'Enviar', child: Semantics(button: true, label: 'Enviar comentario', excludeSemantics: true, child: Material(color: AppColors.brand, borderRadius: AppRadius.rMd,
+              child: InkWell(borderRadius: AppRadius.rMd, onTap: _send, child: const SizedBox(width: 48, height: 48, child: Center(child: PlobbyIcon(PlobbyIcons.plane, size: 18, color: AppColors.brandInk))))))),
         ]),
       ]),
     );

@@ -400,6 +400,7 @@ class SheetListItem extends StatelessWidget {
 /// Hoja inferior con el aspecto del prototipo (`.sheet`: radio 22 arriba, asa 40×4, padding 20) y el contenido dado.
 Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => showModalBottomSheet<T>(
       context: context, isScrollControlled: true, showDragHandle: false, backgroundColor: AppColors.bg,
+      useRootNavigator: true,   // por encima de la barra inferior, como `.shs` en el HTML
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [

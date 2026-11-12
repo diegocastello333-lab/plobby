@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/plobby_theme.dart';
+import '../../../../core/theme/plobby_text.dart';
+import '../../../../core/widgets/plobby_components.dart';
+import 'activity_cards.dart' show avatar;
 import '../../application/feed_providers.dart';
 import '../../domain/feed_models.dart';
 import 'comments_sheet.dart';
@@ -12,7 +15,7 @@ class ReactionBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final r = post.reactions;
-    final fg = onDark ? PlobbyColors.ivory.withOpacity(.7) : PlobbyColors.mute;
+    final fg = onDark ? AppColors.ink50.withValues(alpha: .7) : AppColors.textMuted;
     final names = r.recent.take(2).map((u) => u.name.split(' ').first).join(', ');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const SizedBox(height: 12),
@@ -21,18 +24,18 @@ class ReactionBar extends ConsumerWidget {
       Row(children: [
         if (r.total > 0) ...[
           InkWell(onTap: () => _who(context, ref), child: Row(children: [
-            SizedBox(width: 22.0 + 15 * (r.recent.length.clamp(1, 3) - 1), height: 22, child: Stack(children: [for (var i = 0; i < r.recent.length.clamp(0, 3); i++) Positioned(left: i * 15.0, child: CircleAvatar(radius: 11, backgroundColor: PlobbyColors.sage, child: Text(r.recent[i].name[0], style: const TextStyle(fontSize: 10, color: PlobbyColors.forest, fontWeight: FontWeight.w800)))) ])),
+            SizedBox(width: 22.0 + 15 * (r.recent.length.clamp(1, 3) - 1), height: 22, child: Stack(children: [for (var i = 0; i < r.recent.length.clamp(0, 3); i++) Positioned(left: i * 15.0, child: avatar(r.recent[i], 11, ring: onDark ? AppColors.inverse : AppColors.surface))])),
             const SizedBox(width: 8),
-            Text('$names${r.total > 2 ? ' y ${r.total - 2} más' : ''}', style: TextStyle(fontSize: 12.5, color: fg, fontWeight: FontWeight.w600)),
+            Text(names.isEmpty ? '${r.total} ${r.total == 1 ? 'reacción' : 'reacciones'}' : '$names${r.total > 2 ? ' y ${r.total - 2} más' : ''}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: fg, fontWeight: FontWeight.w600)),
           ])),
-        ] else Text('Sé el primero en reaccionar', style: TextStyle(fontSize: 12.5, color: fg)),
+        ] else Text('Sé el primero en reaccionar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: fg)),
         const Spacer(),
         TextButton(onPressed: () => showCommentsSheet(context, post), style: TextButton.styleFrom(foregroundColor: fg, minimumSize: Size.zero, padding: EdgeInsets.zero),
-            child: Text(post.commentCount == 0 ? 'Comentar' : '${post.commentCount} ${post.commentCount == 1 ? 'comentario' : 'comentarios'}', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600))),
+            child: Text(post.commentCount == 0 ? 'Comentar' : '${post.commentCount} ${post.commentCount == 1 ? 'comentario' : 'comentarios'}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w600, letterSpacing: 0))),
       ]),
       if (post.previewComments.isNotEmpty) ...[
-        Divider(height: 18, color: onDark ? const Color(0x24F6F8F1) : null),
-        for (final c in post.previewComments) Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text.rich(TextSpan(children: [TextSpan(text: '${c.author.name.split(' ').first} ', style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: c.content)]), style: TextStyle(fontSize: 13, color: onDark ? PlobbyColors.ivory : PlobbyColors.charcoal))),
+        Divider(height: 18, thickness: 1, color: onDark ? const Color(0x24F6F8F1) : const Color(0x1A171C19)),
+        for (final c in post.previewComments) Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text.rich(TextSpan(children: [TextSpan(text: '${c.author.name.split(' ').first} ', style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: c.content)]), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.4, letterSpacing: 0, color: onDark ? AppColors.ink50 : AppColors.text))),
         if (post.commentCount > 2) TextButton(onPressed: () => showCommentsSheet(context, post), style: TextButton.styleFrom(foregroundColor: fg, padding: EdgeInsets.zero, minimumSize: Size.zero), child: Text('Ver los ${post.commentCount} comentarios', style: const TextStyle(fontSize: 12.5))),
       ],
     ]);
@@ -41,9 +44,10 @@ class ReactionBar extends ConsumerWidget {
   Future<void> _who(BuildContext context, WidgetRef ref) async {
     final list = await ref.read(feedRepositoryProvider).reactionsFor(post.id);
     if (!context.mounted) return;
-    showModalBottomSheet(context: context, showDragHandle: true, builder: (_) => ListView(shrinkWrap: true, padding: const EdgeInsets.fromLTRB(20, 0, 20, 24), children: [
-      const Text('Reacciones', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-      for (final e in list) ListTile(contentPadding: EdgeInsets.zero, leading: CircleAvatar(backgroundColor: PlobbyColors.forest, child: Text(e.$1.name[0], style: const TextStyle(color: PlobbyColors.ivory))), title: Text(e.$1.name), subtitle: Text('@${e.$1.username}'), trailing: Text(e.$2.emoji, style: const TextStyle(fontSize: 22))),
+    showPlobbySheet(context, (_) => Column(mainAxisSize: MainAxisSize.min, children: [
+      const SheetHeader(title: 'Reacciones'),
+      for (final e in list) ListTile(contentPadding: EdgeInsets.zero, leading: avatar(e.$1, 20),
+          title: Text(e.$1.name, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w700)), subtitle: Text('@${e.$1.username}', style: PlobbyText.help), trailing: Text(e.$2.emoji, style: const TextStyle(fontSize: 22))),
     ]));
   }
 }
@@ -71,10 +75,10 @@ class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
         return Transform.scale(scale: c.isAnimating ? s : 1, child: child);
       }, child: AnimatedContainer(
         duration: const Duration(milliseconds: 150), height: 32, constraints: const BoxConstraints(minWidth: 40), padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(color: sel ? PlobbyColors.lime : (widget.onDark ? const Color(0x1FF6F8F1) : const Color(0xFFEEF1EA)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: PlobbyColors.forest, width: 1.5) : null),
+        decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : const Color(0x0F171C19)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.text, width: 1.5) : null),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(widget.t.emoji, style: const TextStyle(fontSize: 15)),
-          if (widget.count > 0) ...[const SizedBox(width: 5), Text('${widget.count}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: sel ? PlobbyColors.forest : (widget.onDark ? const Color(0xBFF6F8F1) : PlobbyColors.mute)))],
+          if (widget.count > 0) ...[const SizedBox(width: 5), Text('${widget.count}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: sel ? AppColors.brandInk : (widget.onDark ? const Color(0xBFF6F8F1) : AppColors.textMuted)))],
         ]))),
     ));
   }
