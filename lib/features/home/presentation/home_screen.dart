@@ -1,3 +1,6 @@
+import '../../gamification/presentation/gamification_widgets.dart';
+import '../../gamification/domain/gamification_models.dart';
+import '../../gamification/application/gamification_providers.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +19,6 @@ import '../../feed/application/feed_providers.dart';
 import '../../feed/domain/feed_models.dart';
 import '../../matches/presentation/upcoming_matches_section.dart';
 import '../../profile/application/profile_providers.dart';
-import '../../profile/domain/achievements.dart';
 import '../../profile/domain/models.dart';
 import '../../social/application/social_providers.dart';
 import 'home_wiring.dart';
@@ -97,10 +99,10 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 30),
             _SecHead('Logros', action: 'Ver todos', onAction: () => HomeNav.seeAllAchievements(context)),
             const SizedBox(height: 14),
-            view.when(
+            ref.watch(achievementsProvider).when(
               loading: () => const LoadingBlock(height: 140),
               error: (_, __) => const SizedBox.shrink(),
-              data: (v) => _Achievements(items: v.achievements),
+              data: (a) => _Achievements(items: [...a.unlocked, ...a.next].take(8).toList()),
             ),
           ]))),
         ]),
@@ -465,26 +467,26 @@ const _grayscale = <double>[.2126, .7152, .0722, 0, 0, .2126, .7152, .0722, 0, 0
 /// trofeo 30 px; bloqueado = círculo discontinuo gris con candado y «n de m». Primero los conseguidos.
 class _Achievements extends StatelessWidget {
   const _Achievements({required this.items});
-  final List<Achievement> items;
+  final List<AchievementItem> items;
   @override
   Widget build(BuildContext context) {
-    final list = [...items]..sort((a, b) => (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0));
+    final list = items;
     return SizedBox(height: 76 + 10 + 33 + 18 + 4, child: OverflowBox(maxWidth: MediaQuery.sizeOf(context).width, child: ListView.separated(
       scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 20), itemCount: list.length, separatorBuilder: (_, __) => const SizedBox(width: 12),
       itemBuilder: (_, i) {
         final a = list[i];
-        return Semantics(label: '${a.title}: ${a.unlocked ? 'conseguido' : '${a.current} de ${a.goal}'}', excludeSemantics: true, child: SizedBox(width: 84, child: Column(children: [
+        return Semantics(label: '${a.title}: ${a.unlocked ? 'conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}'}', excludeSemantics: true, child: SizedBox(width: 84, child: Column(children: [
           if (a.unlocked)
             Container(width: 76, height: 76, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.lime300), alignment: Alignment.center,
                 child: Container(width: 62, height: 62, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0x4D171C19), width: 1.5)),
-                    child: const Center(child: PlobbyIcon(PlobbyIcons.trophy, size: 30, color: AppColors.ink900))))
+                    child: Center(child: PlobbyIcon(achievementIcon(a.icon), size: 30, color: AppColors.ink900))))
           else
             SizedBox(width: 76, height: 76, child: CustomPaint(painter: _DashedCircle(), child: const Center(child: PlobbyIcon(PlobbyIcons.lock, size: 28, color: AppColors.textMuted)))),
           const SizedBox(height: 10),
           Text(a.title, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,
               style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.25, fontWeight: FontWeight.w700, letterSpacing: 0, color: a.unlocked ? AppColors.text : AppColors.textMuted)),
           const SizedBox(height: 3),
-          Text(a.unlocked ? 'Conseguido' : '${a.current} de ${a.goal}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
+          Text(a.unlocked ? 'Conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
         ])));
       },
     )));

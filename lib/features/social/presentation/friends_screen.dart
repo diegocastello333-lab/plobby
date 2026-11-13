@@ -1,3 +1,4 @@
+import '../../gamification/presentation/progress_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -98,6 +99,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
     final incoming = reqs.valueOrNull?.incoming ?? const <FriendRequest>[];
     final outgoing = reqs.valueOrNull?.outgoing ?? const <FriendRequest>[];
     return ListView(padding: EdgeInsets.fromLTRB(20, 14, 20, 40 + MediaQuery.paddingOf(context).bottom), children: [
+      // Competición entre amigos: tu puesto semanal y acceso al ranking completo.
+      if (all.valueOrNull?.isNotEmpty ?? false) const Padding(padding: EdgeInsets.only(bottom: 18), child: RankingCard()),
       // Solicitudes: quién la envía, aceptar/rechazar. Un error al cargarlas ya no se oculta.
       if (reqs.hasError) Padding(padding: const EdgeInsets.only(bottom: 14), child: ErrorStateCard(title: 'No se pudieron cargar las solicitudes', onRetry: () => ref.invalidate(requestsProvider))),
       if (incoming.isNotEmpty) ...[

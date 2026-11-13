@@ -68,6 +68,6 @@ class HomeNav {
   static void match(BuildContext c, String id) => c.push('/match/$id');
   static void seeAllFriendMatches(BuildContext c) => c.go('/feed'); // filtro "Partidos"
   static void seeAllMyMatches(BuildContext c) => c.go('/profile'); // pestaña Partidos
-  static void seeAllAchievements(BuildContext c) => c.go('/profile'); // pestaña Estadísticas/Logros
+  static void seeAllAchievements(BuildContext c) => c.push('/achievements');
   static void streak(BuildContext c, HomeCounters h) => showStreakSheet(c, current: h.streak, best: h.bestStreak);
 }

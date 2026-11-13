@@ -197,3 +197,19 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Tests: `test/share_images_layout_test.dart` (48 combinaciones × casos de `test/support/share_fixtures.dart`: sin
   solapes, nada fuera de su caja/imagen, sin caracteres sin glifo (lee el cmap del TTF), «…» solo en textos libres del
   caso extremo, cifras nunca). Etiqueta «ELO ANTES Y DESPUÉS» (Inter no tiene «→»). Tests: 324/324.
+
+## Gamificación: Head to Head, Friends Ranking, Wrapped, logros y niveles (13 nov 2026, v1.6.0)
+- Diseño y reglas: `docs/gamificacion.md`. Migraciones `20261126a_gamification_notification_types` (enum ranking/level_up/
+  wrapped) + `20261126b_gamification` — **PENDIENTES DE APLICAR EN PRODUCCIÓN** (el conector de Supabase falló con 502 en esa
+  sesión). Validadas en una réplica local: PostgreSQL 16 en /var/lib/postgresql/plobby_pg (puerto 5499) con
+  `supabase/tests/local_supabase_stub.sql`; `supabase/tests/run_local.sh <socket> 5499` → 55/55.
+- Fuente única `player_match_stats` (trigger al confirmar/desconfirmar y al cambiar sets) → RPC `head_to_head`,
+  `friends_ranking` (+ cierre perezoso de temporadas `_g_close_periods` → `ranking_periods`/`ranking_snapshots`), `wrapped`,
+  `wrapped_periods`, `my_achievements`, `mark_achievements_seen`, `my_season_titles`. XP en `xp_events` (único por origen),
+  nivel en `player_progress` (300+100·L por nivel). Catálogo `achievement_catalog` (20); `user_achievements.seen_at`.
+  Avisos con `notification_prefs` y límite diario. Desempate de victorias: % y luego MÁS partidos.
+- App `lib/features/gamification/`: `GamificationEngine` (réplica Dart del SQL, usada por el mock y los tests), repos
+  mock/Supabase, pantallas `/h2h/:id`, `/ranking`, `/wrapped`, `/wrapped/:kind/:yyyy-mm`, `/achievements`; imágenes con
+  `ShareText` (`gamification_share.dart`, contenido centrado con doble pasada). Perfil propio → «Progreso»; perfil de amigo →
+  Head to Head; Amigos → tarjeta de ranking; Inicio → logros del servidor. Eliminado el cálculo de logros en el móvil.
+- Tests: 360/360 (motor, interfaz, imágenes y verificador de maquetación).

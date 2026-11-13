@@ -1,3 +1,5 @@
+import '../../features/gamification/application/gamification_providers.dart';
+import '../../features/gamification/data/supabase_gamification_repository.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,6 +59,7 @@ class SupabaseBootstrap {
         feedRepositoryProvider.overrideWithValue(SupabaseFeedRepository(c)),
         socialRepositoryProvider.overrideWithValue(SupabaseSocialRepository(c, channel: channel)),
         tournamentRepositoryProvider.overrideWithValue(SupabaseTournamentRepository(c, channel: channel)),
+        gamificationRepositoryProvider.overrideWithValue(SupabaseGamificationRepository(c)),
         presenceServiceProvider.overrideWithValue(uid == null ? const NoPresenceService() : SupabasePresenceService(c, uid)),
         ratingRepositoryProvider.overrideWithValue(SupabaseRatingRepository(c)),
         matchRepositoryProvider.overrideWithValue(SupabaseMatchRepository(c)),

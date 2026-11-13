@@ -32,6 +32,9 @@ import 'widgets/activity_cards.dart';
       NotificationType.groupMessage => ('Mensaje en un grupo', PlobbyIcons.users),
       NotificationType.groupAdded => ('Nuevo grupo', PlobbyIcons.users),
       NotificationType.tournamentAdded => ('Inscripción en un torneo', PlobbyIcons.trophy),
+      NotificationType.ranking => ('Ranking de amigos', PlobbyIcons.trophy),
+      NotificationType.levelUp => ('Nuevo nivel', PlobbyIcons.arrup),
+      NotificationType.wrapped => ('Plobby Wrapped', PlobbyIcons.star),
     };
 
 /// Notificaciones — `scFNotifs` del prototipo HTML: agrupadas por día, sin leer con fondo lima suave y punto,

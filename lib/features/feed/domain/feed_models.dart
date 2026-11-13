@@ -113,6 +113,8 @@ enum NotificationType {
   directMessage, groupMessage, groupAdded,
   // torneos (refId = id del torneo)
   tournamentAdded,
+  // gamificación
+  ranking, levelUp, wrapped,
 }
 
 /// Destino al pulsar una notificación (se resuelve en la UI con GoRouter).
@@ -123,10 +125,14 @@ extension NotificationDestination on NotificationType {
         NotificationType.friendAccepted => '/player/${n.actors.first.id}',
         NotificationType.playInvite => '/messages/with/${n.actors.first.id}',
         NotificationType.matchConfirmationRequired || NotificationType.matchConfirmed || NotificationType.matchDisputed || NotificationType.matchEvent => '/match/${n.refId ?? ''}',
-        NotificationType.achievement || NotificationType.streak => '/profile',
+        NotificationType.achievement => '/achievements',
+        NotificationType.streak => '/profile',
         NotificationType.eloMilestone || NotificationType.ratingChange => '/rating',
         NotificationType.leagueInvite || NotificationType.leagueStarting || NotificationType.leaguePositionChange => '/leagues/${n.refId ?? ''}',
         NotificationType.tournamentAdded => n.refId == null ? '/leagues' : '/tournaments/${n.refId}',
+        NotificationType.ranking => '/ranking',
+        NotificationType.levelUp => '/achievements',
+        NotificationType.wrapped => '/wrapped',
         NotificationType.directMessage || NotificationType.groupMessage || NotificationType.groupAdded =>
             n.refId == null ? '/messages' : '/messages/${n.refId}',
       };

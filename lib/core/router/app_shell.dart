@@ -1,3 +1,4 @@
+import '../../features/gamification/presentation/achievements_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +44,7 @@ class AppShell extends ConsumerWidget {
       )));
     }
     return Scaffold(
-      body: shell,
+      body: AchievementCelebration(child: shell),
       extendBody: true,
       bottomNavigationBar: Container(
         height: 66 + (bottom > 26 ? bottom : 26),

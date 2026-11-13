@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/mock_profile_repository.dart';
 import '../data/profile_repository.dart';
-import '../domain/achievements.dart';
 import '../domain/models.dart';
 import '../domain/stats_calculator.dart';
 
@@ -38,9 +37,6 @@ class ProfileView {
   List<EloPoint> get series => calc.eloSeries(data.matches, data.currentElo, eloRange);
   int get eloMonth => calc.eloChange(data.matches, data.currentElo, EloRange.d30);
   int get eloPeriod => calc.eloChange(data.matches, data.currentElo, eloRange);
-  List<Achievement> get achievements => buildAchievements(
-      calc: calc, matches: data.matches, leagues: data.profile.leaguesPlayed,
-      eloGain12m: calc.eloChange(data.matches, data.currentElo, EloRange.d365));
 }
 
 final profileViewProvider = Provider.family<AsyncValue<ProfileView>, String>((ref, id) {

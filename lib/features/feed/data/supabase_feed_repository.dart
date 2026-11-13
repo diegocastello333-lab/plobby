@@ -201,7 +201,7 @@ const _types = {
   'match_disputed': NotificationType.matchDisputed, 'match_event': NotificationType.matchEvent, 'achievement': NotificationType.achievement,
   'streak': NotificationType.streak, 'elo_milestone': NotificationType.eloMilestone, 'rating_change': NotificationType.ratingChange,
   'league_invite': NotificationType.leagueInvite, 'league_starting': NotificationType.leagueStarting, 'league_position_change': NotificationType.leaguePositionChange,
-  'tournament_added': NotificationType.tournamentAdded, 'direct_message': NotificationType.directMessage, 'group_message': NotificationType.groupMessage, 'group_added': NotificationType.groupAdded,
+  'tournament_added': NotificationType.tournamentAdded, 'ranking': NotificationType.ranking, 'level_up': NotificationType.levelUp, 'wrapped': NotificationType.wrapped, 'direct_message': NotificationType.directMessage, 'group_message': NotificationType.groupMessage, 'group_added': NotificationType.groupAdded,
 };
 
 /// Fila de `notifications` → [AppNotification]. Los tipos desconocidos se omiten. Puro, para poder probarlo.

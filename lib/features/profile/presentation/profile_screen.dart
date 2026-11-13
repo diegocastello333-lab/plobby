@@ -1,3 +1,4 @@
+import '../../gamification/presentation/progress_widgets.dart';
 import 'package:flutter/material.dart';
 import '../../../core/config/build_info.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,6 @@ import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../application/profile_providers.dart';
 import '../domain/models.dart';
-import 'widgets/achievement_grid.dart';
 import 'widgets/activity_feed.dart';
 import 'widgets/elo_card.dart';
 import 'widgets/identity_card.dart';
@@ -94,7 +94,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Align(alignment: Alignment.centerRight, child: SectionLink(label: 'Ver todos los partidos', onTap: () {})),
         ])),
         _section(2, 'Estadísticas completas', StatsGrid(view: v, full: true)),
-        _section(null, 'Logros', AchievementGrid(items: v.achievements)),
+        // Progreso (nivel, logros, Head to Head, ranking y Wrapped) desde la MISMA fuente que el resto: el servidor.
+        if (own) _section(null, 'Progreso', const ProgressSection())
+        else _section(null, 'Head to Head', H2HTeaser(otherId: widget.playerId, name: p.fullName)),
         _section(3, 'Actividad', ActivityFeed(view: v)),
         if (own) const LogoutButton(),   // solo en el perfil propio, al final y separado
         // Versión instalada: así se sabe si un móvil sigue con un APK antiguo.
