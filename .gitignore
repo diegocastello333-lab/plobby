@@ -24,3 +24,6 @@ supabase/.branches/
 # Sistema
 .DS_Store
 *.apk
+
+# Entregables locales (APK, capturas)
+/dist/
