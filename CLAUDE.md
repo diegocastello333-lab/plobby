@@ -174,3 +174,14 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Pendiente: activar «Leaked password protection» en Supabase (panel); eliminación de cuenta NO existe (decidir diseño:
   hay FKs sin cascada en partidos/torneos); push con la app cerrada sigue sin Firebase.
 - Tests: 267/267.
+
+## iOS con Codemagic + TestFlight (13 nov 2026, v1.5.1)
+- Guía completa para el usuario: `docs/ios_codemagic_testflight.md`. `codemagic.yaml` (workflow `ios-testflight`):
+  Flutter 3.50.0, Xcode latest, integración ASC llamada «Plobby App Store Connect», grupo de variables `plobby_supabase`
+  (SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY; rechaza sb_secret_/JWT service_role), analyze --no-fatal-infos, tests,
+  `xcode-project use-profiles`, `flutter build ipa --build-number=$BUILD_NUMBER`, subida a TestFlight. Auto en push a `main`.
+- iOS: bundle `io.plobby.plobby`, iOS 15, solo iPhone (TARGETED_DEVICE_FAMILY=1), solo vertical, CFBundleName Plobby,
+  ITSAppUsesNonExemptEncryption=false, `ios/Podfile` (platform 15 + post_install sube pods a 15), `#include?` de Pods en xcconfig.
+- Arreglos compartidos: iOS usa `CupertinoPageTransitionsBuilder` (gesto de volver); fontFamily Inter en los textStyle de
+  botones del tema (antes fuente del sistema: SF en iOS, Roboto en Android). `test/ios_platform_test.dart`.
+- NO verificado en iPhone real ni compilado para iOS (no hay macOS aquí): la primera build de Codemagic es la prueba real.

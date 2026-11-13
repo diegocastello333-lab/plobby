@@ -20,7 +20,9 @@ class PlobbyColors {
 /// Estilos de botón reutilizables (alturas 48/36, radio `md`, texto `label`).
 class AppButtonStyles {
   AppButtonStyles._();
-  static const _label = TextStyle(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600);
+  // fontFamily explícita: los botones de Material NO heredan la fuente del tema para su texto; sin ella salían en la fuente
+  // del sistema (San Francisco en iPhone, Roboto en Android) en lugar de Inter.
+  static const _label = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600, letterSpacing: 0);
   static ButtonStyle primary({bool small = false}) => FilledButton.styleFrom(
         backgroundColor: AppColors.brand, foregroundColor: AppColors.brandInk,
         disabledBackgroundColor: AppColors.surfaceSunken, disabledForegroundColor: AppColors.textDisabled,
@@ -101,7 +103,7 @@ ThemeData buildPlobbyTheme() {
     filledButtonTheme: FilledButtonThemeData(style: AppButtonStyles.primary()),
     elevatedButtonTheme: ElevatedButtonThemeData(style: AppButtonStyles.primary()),
     outlinedButtonTheme: OutlinedButtonThemeData(style: AppButtonStyles.ghost()),
-    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: AppColors.brandText, textStyle: const TextStyle(fontWeight: FontWeight.w600))),
+    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: AppColors.brandText, textStyle: const TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w600, letterSpacing: 0))),
     iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: AppColors.text, minimumSize: const Size(44, 44))),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: AppColors.brand, foregroundColor: AppColors.brandInk, elevation: 2, shape: CircleBorder()),
     inputDecorationTheme: InputDecorationTheme(
@@ -128,7 +130,7 @@ ThemeData buildPlobbyTheme() {
       backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.brand : AppColors.surfaceSunken),
       foregroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.brandInk : AppColors.textMuted),
       side: const WidgetStatePropertyAll(BorderSide(color: AppColors.surfaceSunken, width: 3)),
-      shape: const WidgetStatePropertyAll(StadiumBorder()), textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+      shape: const WidgetStatePropertyAll(StadiumBorder()), textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w600, letterSpacing: 0)),
     )),
     bottomSheetTheme: const BottomSheetThemeData(backgroundColor: AppColors.surfaceRaised, shape: RoundedRectangleBorder(borderRadius: AppRadius.sheetTop), showDragHandle: true, dragHandleColor: AppColors.border, modalBackgroundColor: AppColors.surfaceRaised),
     dialogTheme: DialogThemeData(backgroundColor: AppColors.surfaceRaised, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rLg), elevation: 8),

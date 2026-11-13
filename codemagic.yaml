@@ -1,0 +1,96 @@
+# Plobby · compilación iOS en la nube con Codemagic y subida a TestFlight.
+# Guía paso a paso (cuentas de Apple, Codemagic y GitHub): docs/ios_codemagic_testflight.md
+#
+# Nada secreto vive en este archivo: la URL y la clave publishable de Supabase llegan del grupo de variables
+# «plobby_supabase» y la firma de Apple de la integración «Plobby App Store Connect», ambos configurados en Codemagic.
+# La clave service_role de Supabase NUNCA se usa en la app ni aquí.
+
+workflows:
+  ios-testflight:
+    name: Plobby iOS → TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    # Clave de API de App Store Connect (se crea en Codemagic → Team settings → Integrations → Developer Portal).
+    # El nombre tiene que coincidir EXACTAMENTE con el que pongas allí.
+    integrations:
+      app_store_connect: Plobby App Store Connect
+
+    environment:
+      flutter: 3.50.0          # la misma versión con la que se desarrolla y se compila el APK de Android
+      xcode: latest
+      cocoapods: default
+      groups:
+        - plobby_supabase      # SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY (marcadas como «Secret»)
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: io.plobby.plobby
+
+    # Compila sola al subir cambios a «main». Cualquier otra rama se compila a mano desde Codemagic
+    # («Start new build» → elegir rama y este workflow).
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+
+    scripts:
+      - name: Configuración de Supabase (desde variables seguras de Codemagic)
+        script: |
+          set -e
+          # Sin estas variables la app arrancaría con los datos de DEMO: se detiene la compilación.
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "Faltan SUPABASE_URL o SUPABASE_PUBLISHABLE_KEY en el grupo «plobby_supabase» de Codemagic." >&2
+            exit 1
+          fi
+          # Se comprueba que NO es una clave secreta (sb_secret_… o un JWT con rol service_role) y se escribe env.json
+          # sin mostrar los valores en el registro de la compilación.
+          python3 - <<'PY'
+          import base64, json, os, sys
+          key = os.environ["SUPABASE_PUBLISHABLE_KEY"].strip()
+          role = ""
+          if key.count(".") == 2:
+              part = key.split(".")[1]
+              try:
+                  role = json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4))).get("role", "")
+              except Exception:
+                  pass
+          if key.startswith("sb_secret_") or role == "service_role":
+              sys.exit("Esa es una clave SECRETA de Supabase. Usa la publishable (sb_publishable_…) o la anon.")
+          json.dump({"SUPABASE_URL": os.environ["SUPABASE_URL"].strip(), "SUPABASE_PUBLISHABLE_KEY": key}, open("env.json", "w"))
+          PY
+
+      - name: Dependencias de Flutter
+        script: flutter pub get
+
+      - name: Análisis estático
+        script: flutter analyze --no-fatal-infos
+
+      - name: Tests
+        script: flutter test
+
+      - name: Firma de iOS (certificado y perfil de aprovisionamiento)
+        script: xcode-project use-profiles
+
+      - name: Compilar el IPA
+        script: |
+          set -e
+          VERSION=$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9.]+).*/\1/')
+          # Número de compilación = contador de Codemagic: siempre crece, que es lo que exige App Store Connect.
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define-from-file=env.json \
+            --dart-define=PLOBBY_BUILD="$VERSION-ios.$BUILD_NUMBER" \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

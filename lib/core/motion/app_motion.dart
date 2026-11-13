@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/design_tokens.dart';
@@ -58,9 +59,11 @@ class AppTransitions {
   static const duration = Duration(milliseconds: 260);
   static const reverse = Duration(milliseconds: 220);
   static const slide = 0.04; // desplazamiento horizontal discreto (fracción del ancho)
+  /// iOS usa la transición nativa de Apple: es la que trae el gesto de «deslizar desde el borde para volver», que los
+  /// usuarios de iPhone esperan en todas las apps. El resto de plataformas (Android incluido) mantiene la de Plobby.
   static const theme = PageTransitionsTheme(builders: {
     TargetPlatform.android: AppPageTransitionsBuilder(),
-    TargetPlatform.iOS: AppPageTransitionsBuilder(),
+    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.macOS: AppPageTransitionsBuilder(),
     TargetPlatform.windows: AppPageTransitionsBuilder(),
     TargetPlatform.linux: AppPageTransitionsBuilder(),
