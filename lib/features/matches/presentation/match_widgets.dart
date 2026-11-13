@@ -54,7 +54,8 @@ class PlayerAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = player.avatarUrl != null && player.avatarUrl!.isNotEmpty
-        ? ClipOval(child: Image.network(player.avatarUrl!, width: size, height: size, fit: BoxFit.cover))
+        ? ClipOval(child: Image.network(player.avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(),
+            errorBuilder: (_, __, ___) => SizedBox(width: size, height: size, child: const ColoredBox(color: AppColors.surfaceSunken))))
         : player.avatarId != null ? PlobbyAvatar(id: player.avatarId!, size: size)
         : CircleAvatar(radius: size / 2, backgroundColor: AppColors.surfaceSunken, child: Text(player.name.isEmpty ? '?' : player.name.split(' ').map((s) => s.isEmpty ? '' : s[0]).take(2).join(), style: TextStyle(fontSize: size * .34, fontWeight: FontWeight.w700)));
     return Container(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)), child: w);

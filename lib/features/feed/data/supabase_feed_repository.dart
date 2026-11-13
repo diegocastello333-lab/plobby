@@ -73,7 +73,7 @@ class SupabaseFeedRepository implements FeedRepository {
       case FeedFilter.friends: q = q.neq('user_id', _uid);
       case FeedFilter.matches: q = q.eq('activity_type', 'match');
       case FeedFilter.achievements: q = q.inFilter('activity_type', ['achievement', 'streak', 'elo']);
-      case FeedFilter.leagues: q = q.eq('activity_type', 'league');
+      case FeedFilter.leagues: q = q.inFilter('activity_type', ['league', 'tournament']);
     }
     if (before != null) q = q.lt('created_at', before.toUtc().toIso8601String());
     final rows = await q.order('created_at', ascending: false).limit(limit);
@@ -181,7 +181,13 @@ FeedPayload? feedPayloadFrom({required String type, required Map<String, dynamic
       return StreakPayload(((meta['count'] ?? meta['streak'] ?? 0) as num).toInt());
     case 'elo':
       final from = ((meta['from'] ?? 0) as num).toInt(), to = ((meta['to'] ?? 0) as num).toInt();
-      return EloPayload(from: from, to: to, headline: (meta['headline'] ?? 'Nuevo ELO') as String);
+      final h = (meta['headline'] ?? '') as String;
+      // El servidor guarda «Nuevo récord personal» al batir el mejor ELO: en la tarjeta se lee tras el nombre.
+      return EloPayload(from: from, to: to, headline: h == 'Nuevo récord personal' ? 'bate su récord personal de ELO' : (h.isEmpty ? 'sube de ELO' : h));
+    case 'tournament':
+      final id = meta['tournament_id'] as String?;
+      if (id == null) return null;
+      return TournamentPayload(tournamentId: id, name: (meta['name'] ?? '') as String, partnerName: meta['partner_name'] as String?, teams: ((meta['teams'] ?? 0) as num).toInt());
     case 'league':
       return LeaguePayload(leagueName: (meta['league_name'] ?? '') as String, headline: (meta['headline'] ?? '') as String, subtitle: (meta['subtitle'] ?? '') as String);
   }

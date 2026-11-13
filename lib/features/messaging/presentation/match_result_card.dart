@@ -71,7 +71,7 @@ class _Av extends StatelessWidget {
   Widget build(BuildContext context) {
     const s = 30.0;
     final Widget w = p.avatarUrl != null && p.avatarUrl!.isNotEmpty
-        ? Image.network(p.avatarUrl!, width: s, height: s, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _ini())
+        ? Image.network(p.avatarUrl!, width: s, height: s, fit: BoxFit.cover, cacheWidth: (s * 3).round(), errorBuilder: (_, __, ___) => _ini())
         : p.avatarId != null ? PlobbyAvatar(id: p.avatarId!, size: s) : _ini();
     return Container(width: s + 4, height: s + 4, padding: const EdgeInsets.all(1.5), decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: winner ? AppColors.lime300 : const Color(0xFF5C6660), width: 1.5)), child: ClipOval(child: w));
   }

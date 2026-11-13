@@ -14,7 +14,7 @@ class BannerImage extends StatelessWidget {
   final Alignment alignment;
   @override
   Widget build(BuildContext context) => SizedBox.expand(child: Image.asset(banner.asset(phase), fit: BoxFit.cover, alignment: alignment,
-      gaplessPlayback: true, semanticLabel: '${banner.name}: pistas de pádel, ${phase.label.toLowerCase()}',
+      gaplessPlayback: true, semanticLabel: 'Banner ${banner.name}',
       errorBuilder: (_, __, ___) => const SizedBox.shrink()));
 }
 

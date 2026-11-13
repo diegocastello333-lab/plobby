@@ -1,7 +1,7 @@
 name: plobby
 description: Plobby — social and competitive padel app.
 publish_to: none
-version: 1.4.1+7   # sube con cada APK entregado (banners dinámicos por hora local)
+version: 1.5.0+8   # sube con cada APK entregado (calidad: feed, seguridad, rendimiento)
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:

@@ -43,6 +43,14 @@ class EloPayload extends FeedPayload {
   int get delta => to - from;
 }
 
+/// Campeón de un torneo (una publicación por cada jugador de la pareja campeona).
+class TournamentPayload extends FeedPayload {
+  const TournamentPayload({required this.tournamentId, required this.name, this.partnerName, this.teams = 0});
+  final String tournamentId, name;
+  final String? partnerName;
+  final int teams;
+}
+
 class LeaguePayload extends FeedPayload {
   const LeaguePayload({required this.leagueName, required this.headline, required this.subtitle});
   final String leagueName, headline, subtitle;

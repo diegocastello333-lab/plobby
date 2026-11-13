@@ -117,7 +117,7 @@ class LeagueAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final initials = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
     final w = avatarUrl != null && avatarUrl!.isNotEmpty
-        ? ClipOval(child: Image.network(avatarUrl!, width: size, height: size, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _initials(initials)))
+        ? ClipOval(child: Image.network(avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => _initials(initials)))
         : avatarId != null ? PlobbyAvatar(id: avatarId!, size: size) : _initials(initials);
     return Container(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: highlight ? AppColors.brand : AppColors.surface, width: 2)), child: w);
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/plobby_theme.dart';
 import '../../../../core/theme/plobby_text.dart';
@@ -19,7 +20,7 @@ class ReactionBar extends ConsumerWidget {
     final names = r.recent.take(2).map((u) => u.name.split(' ').first).join(', ');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const SizedBox(height: 12),
-      Wrap(spacing: 6, runSpacing: 6, children: [for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () => ref.read(feedControllerProvider.notifier).react(post.id, t))]),
+      Wrap(spacing: 6, runSpacing: 6, children: [for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () { HapticFeedback.selectionClick(); ref.read(feedControllerProvider.notifier).react(post.id, t); })]),
       const SizedBox(height: 10),
       Row(children: [
         if (r.total > 0) ...[

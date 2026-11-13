@@ -46,6 +46,7 @@ class ActivityCard extends StatelessWidget {
         StreakPayload p => _Shell(post: post, dark: true, child: _Streak(p: p, own: post.author.id == 'me')),
         EloPayload p => _Shell(post: post, child: _Elo(post: post, p: p)),
         LeaguePayload p => _Shell(post: post, child: _League(post: post, p: p)),
+        TournamentPayload p => _Shell(post: post, dark: true, child: _Champion(post: post, p: p)),
       };
 }
 
@@ -220,7 +221,7 @@ class _Elo extends StatelessWidget {
         ]),
         const SizedBox(height: 8),
         Semantics(label: 'ELO ${p.to}', excludeSemantics: true, child: Container(height: 6, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(3)), alignment: Alignment.centerLeft,
-            child: FractionallySizedBox(widthFactor: ((p.to - 1200) / 400).clamp(0, 1).toDouble(), child: Container(decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(3)))))),
+            child: FractionallySizedBox(widthFactor: ((p.to - 800) / 1200).clamp(0, 1).toDouble(), child: Container(decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(3)))))),
       ]));
 }
 
@@ -239,4 +240,52 @@ class _League extends StatelessWidget {
           Text(p.subtitle, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
         ])),
       ]));
+}
+
+/// Campeón de torneo: la celebración más importante del feed. Trofeo que entra con rebote y un halo lima que se apaga;
+/// toca para abrir el torneo. Con «reducir movimiento» aparece directamente en su estado final.
+class _Champion extends StatefulWidget {
+  const _Champion({required this.post, required this.p});
+  final FeedPost post; final TournamentPayload p;
+  @override
+  State<_Champion> createState() => _ChampionState();
+}
+
+class _ChampionState extends State<_Champion> with SingleTickerProviderStateMixin {
+  late final c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.of(context).disableAnimations) { c.value = 1; } else if (!c.isAnimating && c.value == 0) { c.forward(); }
+  }
+  @override
+  void dispose() { c.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+    final first = widget.post.author.name.split(' ').first;
+    final partner = p.partnerName?.split(' ').first;
+    return Semantics(button: true, label: '$first, campeón del torneo ${p.name}${partner != null ? ' con $partner' : ''}. Abrir torneo', excludeSemantics: true,
+      child: InkWell(onTap: () => context.push('/tournaments/${p.tournamentId}'), borderRadius: AppRadius.rMd, child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(children: [
+          ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: AnimatedBuilder(animation: c, builder: (_, child) => Container(
+              width: 76, height: 76,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.brand,
+                  boxShadow: [BoxShadow(color: AppColors.brand.withValues(alpha: .45 * (1 - c.value) + .15), blurRadius: 26, spreadRadius: 3)]),
+              child: child), child: const Center(child: PlobbyIcon(PlobbyIcons.trophy, size: 36, strokeWidth: 1.9, color: AppColors.brandInk)))),
+          const SizedBox(width: 16),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('CAMPEÓN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.6, color: AppColors.brand)),
+            const SizedBox(height: 4),
+            Text(p.name, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 19, height: 1.15, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.ink50)),
+            const SizedBox(height: 4),
+            Text([if (partner != null) 'Con $partner', if (p.teams > 1) '${p.teams} parejas'].join(' · '),
+                style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: Color(0xC7F6F8F1))),
+          ])),
+          const PlobbyIcon(PlobbyIcons.chev, size: 16, color: Color(0x80F6F8F1)),
+        ]),
+      )));
+  }
 }

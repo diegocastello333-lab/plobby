@@ -12,7 +12,7 @@ import '../application/feed_providers.dart';
 import '../domain/feed_models.dart';
 import 'widgets/activity_cards.dart';
 
-const _filters = {FeedFilter.all: 'Todo', FeedFilter.friends: 'Amigos', FeedFilter.matches: 'Partidos', FeedFilter.achievements: 'Logros', FeedFilter.leagues: 'Ligas'};
+const _filters = {FeedFilter.all: 'Todo', FeedFilter.friends: 'Amigos', FeedFilter.matches: 'Partidos', FeedFilter.achievements: 'Logros', FeedFilter.leagues: 'Competiciones'};
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
@@ -102,7 +102,7 @@ class _Header extends ConsumerWidget {
           scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 16, 20, 4), itemCount: friends.length, separatorBuilder: (_, __) => const SizedBox(width: 14),
           itemBuilder: (_, i) {
             final p = friends[i];
-            final (icon, dark) = switch (p.payload) { MatchPayload() => (PlobbyIcons.ball, true), AchievementPayload() => (PlobbyIcons.star, false), StreakPayload() => (PlobbyIcons.flame, false), EloPayload() => (PlobbyIcons.arrup, true), LeaguePayload() => (PlobbyIcons.trophy, true) };
+            final (icon, dark) = switch (p.payload) { MatchPayload() => (PlobbyIcons.ball, true), AchievementPayload() => (PlobbyIcons.star, false), StreakPayload() => (PlobbyIcons.flame, false), EloPayload() => (PlobbyIcons.arrup, true), LeaguePayload() => (PlobbyIcons.trophy, true), TournamentPayload() => (PlobbyIcons.trophy, false) };
             final fresh = i < 5;
             return Semantics(button: true, label: '${p.author.name}, actividad reciente', excludeSemantics: true, child: GestureDetector(onTap: () => context.push('/player/${p.author.id}'), child: SizedBox(width: 62, child: Column(children: [
               Stack(clipBehavior: Clip.none, children: [

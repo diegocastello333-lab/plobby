@@ -19,9 +19,21 @@ class FeedState {
       loadingMore: loadingMore ?? this.loadingMore, pendingNew: pendingNew ?? this.pendingNew);
 }
 
+/// Un partido genera una publicación por cada jugador (cada uno la comparte con SUS amigos). Si ves a varios de ellos,
+/// el mismo partido saldría repetido: se muestra una sola vez (la primera que llega, que es la más reciente).
+List<FeedPost> collapseDuplicateMatches(List<FeedPost> shown, List<FeedPost> incoming) {
+  final seen = {for (final p in shown) if (p.payload case MatchPayload(:final matchId)) matchId};
+  final ids = {for (final p in shown) p.id};
+  return [
+    for (final p in incoming)
+      if (ids.add(p.id) && (p.payload is! MatchPayload || seen.add((p.payload as MatchPayload).matchId))) p,
+  ];
+}
+
 class FeedController extends AsyncNotifier<FeedState> {
   FeedRepository get _repo => ref.read(feedRepositoryProvider);
   StreamSubscription<FeedPost>? _sub;
+  final _reactionQueue = <String, Future<void>>{};
 
   @override
   Future<FeedState> build() async {
@@ -29,12 +41,12 @@ class FeedController extends AsyncNotifier<FeedState> {
     _sub?.cancel();
     _sub = _repo.watchNew().listen((p) {
       final s = state.valueOrNull;
-      if (s == null || s.posts.any((x) => x.id == p.id) || s.pendingNew.any((x) => x.id == p.id)) return; // sin duplicados
+      if (s == null || collapseDuplicateMatches([...s.posts, ...s.pendingNew], [p]).isEmpty) return; // sin duplicados
       state = AsyncData(s.copyWith(pendingNew: [p, ...s.pendingNew]));
     });
     ref.onDispose(() => _sub?.cancel());
     final page = await _repo.fetchPage(filter: filter);
-    return FeedState(posts: page.posts, cursor: page.nextCursor, hasMore: page.nextCursor != null);
+    return FeedState(posts: collapseDuplicateMatches(const [], page.posts), cursor: page.nextCursor, hasMore: page.nextCursor != null);
   }
 
   Future<void> refresh() async { ref.invalidateSelf(); await future; }
@@ -45,8 +57,7 @@ class FeedController extends AsyncNotifier<FeedState> {
     state = AsyncData(s.copyWith(loadingMore: true));
     try {
       final page = await _repo.fetchPage(filter: ref.read(feedFilterProvider), before: s.cursor);
-      final ids = s.posts.map((p) => p.id).toSet();
-      state = AsyncData(s.copyWith(posts: [...s.posts, ...page.posts.where((p) => !ids.contains(p.id))], cursor: page.nextCursor, clearCursor: page.nextCursor == null, hasMore: page.nextCursor != null, loadingMore: false));
+      state = AsyncData(s.copyWith(posts: [...s.posts, ...collapseDuplicateMatches(s.posts, page.posts)], cursor: page.nextCursor, clearCursor: page.nextCursor == null, hasMore: page.nextCursor != null, loadingMore: false));
     } catch (_) {
       state = AsyncData(s.copyWith(loadingMore: false)); // el fallo de red no rompe el feed ya cargado
     }
@@ -55,22 +66,25 @@ class FeedController extends AsyncNotifier<FeedState> {
   void showPending() {
     final s = state.valueOrNull;
     if (s == null || s.pendingNew.isEmpty) return;
-    state = AsyncData(s.copyWith(posts: [...s.pendingNew, ...s.posts], pendingNew: const []));
+    state = AsyncData(s.copyWith(posts: [...collapseDuplicateMatches(const [], s.pendingNew), ...collapseDuplicateMatches(s.pendingNew, s.posts)], pendingNew: const []));
   }
 
-  /// Reacción optimista (una activa por usuario): se revierte si el backend falla.
-  Future<void> react(String postId, ReactionType t) async {
+  /// Reacción optimista (una activa por usuario, única también en el servidor). Las pulsaciones seguidas sobre la misma
+  /// publicación se envían EN ORDEN (cola por publicación): el último estado que ves es el que queda guardado. Si el
+  /// servidor falla, se restaura solo esa publicación (no se pisan otros cambios del feed).
+  Future<void> react(String postId, ReactionType t) {
     final s = state.valueOrNull;
-    if (s == null) return;
-    final before = s.posts;
+    if (s == null) return Future.value();
+    final previous = s.posts.where((p) => p.id == postId).firstOrNull;
+    if (previous == null) return Future.value();
     final me = _repo.me;
     _patch(postId, (p) => p.copyWith(reactions: p.reactions.toggle(t, me)));
     final mine = state.value!.posts.firstWhere((p) => p.id == postId).reactions.mine;
-    try {
-      await _repo.setReaction(postId, mine);
-    } catch (_) {
-      state = AsyncData(state.value!.copyWith(posts: before));
-    }
+    final job = (_reactionQueue[postId] ?? Future.value()).then((_) => _repo.setReaction(postId, mine)).catchError((Object _) {
+      _patch(postId, (p) => p.copyWith(reactions: previous.reactions));
+    });
+    _reactionQueue[postId] = job;
+    return job;
   }
 
   void _patch(String id, FeedPost Function(FeedPost) f) {

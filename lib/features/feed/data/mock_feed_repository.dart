@@ -26,9 +26,12 @@ class MockFeedRepository implements FeedRepository {
     _posts.addAll([
       p(laura, 55, MatchPayload(matchId: 'm1', teamA: [laura, carlos], teamB: [pablo, sofia], sets: const [(6, 1), (6, 1)], won: true, eloDelta: 15, venue: 'Padel Chamberí'), rx: {ReactionType.fire: 3, ReactionType.heart: 1}, who: [pablo, carlos]),
       p(marcos, 125, MatchPayload(matchId: 'm2', teamA: [marcos, me], teamB: [alvaro, lucia], sets: const [(6, 3), (6, 4)], won: true, eloDelta: 18, venue: 'Club La Moraleja', leagueName: 'BÜNKER PADEL LEAGUE'), rx: {ReactionType.fire: 2, ReactionType.clap: 2}),
+      // El mismo partido m1 publicado también por Pablo (cada jugador lo comparte con sus amigos): el feed lo muestra una vez.
+      p(pablo, 56, MatchPayload(matchId: 'm1', teamA: [pablo, sofia], teamB: [laura, carlos], sets: const [(1, 6), (1, 6)], won: false, eloDelta: -15, venue: 'Padel Chamberí')),
+      p(sofia, 95, const TournamentPayload(tournamentId: 't0', name: 'Open de Otoño', partnerName: 'Irene Vega', teams: 6), rx: {ReactionType.clap: 6, ReactionType.fire: 2}, who: [laura, marcos]),
       p(marcos, 130, const AchievementPayload(achievementId: 'fire', title: 'En racha', description: '5 victorias consecutivas.'), rx: {ReactionType.fire: 4}),
       p(me, 300, const StreakPayload(5), rx: {ReactionType.fire: 2, ReactionType.strong: 1}),
-      p(pablo, 760, const EloPayload(from: 1418, to: 1468, headline: 'ha subido 50 puntos de ELO este mes')),
+      p(pablo, 760, const EloPayload(from: 1448, to: 1468, headline: 'bate su récord personal de ELO')),
       p(carla, 900, const AchievementPayload(achievementId: 'king', title: 'Rey de la pista', description: 'Ha alcanzado la primera posición en una liga.', milestone: 'CLUB LA MORALEJA · #1'), rx: {ReactionType.clap: 5}),
       p(alvaro, 1700, const StreakPayload(7), rx: {ReactionType.fire: 3}),
       p(lucia, 2500, const AchievementPayload(achievementId: 'rise', title: 'Estrella emergente', description: 'Ha mejorado su ELO en 100 puntos.', milestone: '+104 ELO')),
@@ -51,7 +54,7 @@ class MockFeedRepository implements FeedRepository {
         FeedFilter.friends => p.author.id != me.id,
         FeedFilter.matches => p.payload is MatchPayload,
         FeedFilter.achievements => p.payload is AchievementPayload || p.payload is StreakPayload,
-        FeedFilter.leagues => p.payload is LeaguePayload || (p.payload is MatchPayload && (p.payload as MatchPayload).leagueName != null),
+        FeedFilter.leagues => p.payload is LeaguePayload || p.payload is TournamentPayload || (p.payload is MatchPayload && (p.payload as MatchPayload).leagueName != null),
       };
 
   @override

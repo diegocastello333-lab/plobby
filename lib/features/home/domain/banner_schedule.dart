@@ -1,4 +1,4 @@
-/// Banners dinámicos de Inicio: dos colecciones (Banner 1 y Banner 2) de cuatro imágenes cada una. El usuario elige la
+/// Banners dinámicos de Inicio: dos colecciones (Seaside y Tropical) de cuatro imágenes cada una. El usuario elige la
 /// colección; la imagen la decide la hora LOCAL del dispositivo (su zona horaria, con horario de verano incluido).
 ///
 /// | Hora local     | Momento   |
@@ -30,12 +30,14 @@ enum DayPhase {
 }
 
 /// Colección elegida por el usuario. [id] es el valor que se guarda en `profiles.banner_id`.
+/// Los ids ('banner1'/'banner2') son los que ya están guardados en `profiles.banner_id` y las carpetas de los assets:
+/// no se renombran, solo cambia el nombre visible.
 enum HomeBanner {
-  banner1('banner1', 'Banner 1', 'Pistas junto al mar'),
-  banner2('banner2', 'Banner 2', 'Pistas entre pinos');
+  banner1('banner1', 'Seaside'),
+  banner2('banner2', 'Tropical');
 
-  const HomeBanner(this.id, this.name, this.description);
-  final String id, name, description;
+  const HomeBanner(this.id, this.name);
+  final String id, name;
 
   /// Ruta del asset de un momento del día: `assets/images/banners/<id>/<momento>.jpg`.
   String asset(DayPhase p) => 'assets/images/banners/$id/${p.name}.jpg';
@@ -44,7 +46,7 @@ enum HomeBanner {
   List<String> get assets => [for (final p in DayPhase.values) asset(p)];
 
   /// Preferencia guardada → colección. Sin preferencia, o con un valor antiguo (los banners que ya no existen),
-  /// se usa el Banner 1.
+  /// se usa Seaside.
   static HomeBanner fromId(String? id) => values.where((b) => b.id == id).firstOrNull ?? banner1;
 }
 

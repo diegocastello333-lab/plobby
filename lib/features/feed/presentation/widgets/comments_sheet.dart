@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/plobby_theme.dart';
 import '../../../../core/theme/plobby_text.dart';
@@ -20,7 +21,7 @@ class CommentsSheet extends ConsumerStatefulWidget {
 
 class _S extends ConsumerState<CommentsSheet> {
   final ctl = TextEditingController();
-  bool empty = false;
+  bool empty = false, sending = false;
   @override
   void dispose() { ctl.dispose(); super.dispose(); }
 
@@ -50,8 +51,8 @@ class _S extends ConsumerState<CommentsSheet> {
                       Text(timeAgo(c.createdAt), style: PlobbyText.help.copyWith(fontSize: 12)),
                     ])),
                     c.author.id == me.id
-                        ? small(PlobbyIcons.trash, 'Eliminar mi comentario', () => ref.read(commentsProvider(widget.postId).notifier).remove(c))
-                        : small(PlobbyIcons.flag, 'Denunciar', () { ref.read(commentsProvider(widget.postId).notifier).report(c); showPlobbySnack(context, 'Gracias. Hemos ocultado el comentario y lo revisaremos.'); }),
+                        ? small(PlobbyIcons.trash, 'Eliminar mi comentario', () => _guard(() => ref.read(commentsProvider(widget.postId).notifier).remove(c), null))
+                        : small(PlobbyIcons.flag, 'Denunciar', () => _guard(() => ref.read(commentsProvider(widget.postId).notifier).report(c), 'Gracias. Hemos ocultado el comentario y lo revisaremos.')),
                   ]),
                 )]),
         )),
@@ -61,15 +62,45 @@ class _S extends ConsumerState<CommentsSheet> {
               decoration: plobbyInputDecoration(hint: 'Añade un comentario', error: empty ? 'Escribe algo antes de enviar.' : null), onChanged: (_) => empty ? setState(() => empty = false) : null)),
           const SizedBox(width: 8),
           Tooltip(message: 'Enviar', child: Semantics(button: true, label: 'Enviar comentario', excludeSemantics: true, child: Material(color: AppColors.brand, borderRadius: AppRadius.rMd,
-              child: InkWell(borderRadius: AppRadius.rMd, onTap: _send, child: const SizedBox(width: 48, height: 48, child: Center(child: PlobbyIcon(PlobbyIcons.plane, size: 18, color: AppColors.brandInk))))))),
+              child: InkWell(borderRadius: AppRadius.rMd, onTap: sending ? null : _send, child: SizedBox(width: 48, height: 48, child: Center(child: sending
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.brandInk))
+                  : const PlobbyIcon(PlobbyIcons.plane, size: 18, color: AppColors.brandInk))))))),
         ]),
       ]),
     );
   }
 
+  /// Envía una sola vez (botón bloqueado mientras tanto). Si falla, el texto se conserva y se explica por qué, sin
+  /// mensajes técnicos.
   Future<void> _send() async {
+    if (sending) return;
     if (ctl.text.trim().isEmpty) { setState(() => empty = true); return; }
-    await ref.read(commentsProvider(widget.postId).notifier).add(ctl.text);
-    ctl.clear();
+    setState(() => sending = true);
+    try {
+      await ref.read(commentsProvider(widget.postId).notifier).add(ctl.text);
+      ctl.clear();
+      HapticFeedback.lightImpact();
+    } catch (e) {
+      if (mounted) showPlobbySnack(context, friendlyFeedError(e), error: true);
+    } finally {
+      if (mounted) setState(() => sending = false);
+    }
   }
+
+  Future<void> _guard(Future<void> Function() job, String? ok) async {
+    try {
+      await job();
+      if (ok != null && mounted) showPlobbySnack(context, ok);
+    } catch (e) {
+      if (mounted) showPlobbySnack(context, friendlyFeedError(e), error: true);
+    }
+  }
+}
+
+/// Error del servidor o de red → frase para el usuario (nunca el mensaje técnico).
+String friendlyFeedError(Object e) {
+  final s = e.toString();
+  if (s.contains('rate_limited')) return 'Vas muy rápido. Espera un momento y vuelve a intentarlo.';
+  if (s.contains('violates') || s.contains('check')) return 'El comentario no es válido (máximo 140 caracteres).';
+  return 'No se pudo completar. Revisa tu conexión e inténtalo de nuevo.';
 }

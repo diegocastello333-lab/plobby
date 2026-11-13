@@ -155,7 +155,7 @@ class _Step4 extends StatelessWidget {
     return Column(children: [
       const SizedBox(height: 24),
       Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.brand),
-          child: d.avatarUrl != null && d.avatarUrl!.isNotEmpty ? ClipOval(child: Image.network(d.avatarUrl!, width: 112, height: 112, fit: BoxFit.cover)) : PlobbyAvatar(id: d.avatarId ?? 'a1', size: 112)),
+          child: d.avatarUrl != null && d.avatarUrl!.isNotEmpty ? ClipOval(child: Image.network(d.avatarUrl!, width: 112, height: 112, fit: BoxFit.cover, cacheWidth: 336, errorBuilder: (_, __, ___) => PlobbyAvatar(id: d.avatarId ?? 'a1', size: 112))) : PlobbyAvatar(id: d.avatarId ?? 'a1', size: 112)),
       const SizedBox(height: 22),
       Text('¡Todo listo, ${d.firstName.trim().isEmpty ? 'jugador' : d.firstName.trim()}!', textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, letterSpacing: -0.46, color: AppColors.text)),
       const SizedBox(height: 8),

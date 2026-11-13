@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:plobby/core/router/app_router.dart';
 import 'package:plobby/core/theme/plobby_theme.dart';
+import 'package:plobby/core/widgets/plobby_components.dart';
 import 'package:plobby/features/home/application/banner_clock.dart';
 import 'package:plobby/features/home/domain/banner_schedule.dart';
 import 'package:plobby/features/home/presentation/banner_catalog.dart';
@@ -73,15 +74,15 @@ void main() {
   });
 
   group('Colecciones', () {
-    test('solo existen Banner 1 y Banner 2, con sus cuatro imágenes cada uno', () {
-      expect(HomeBanner.values.map((b) => b.name), ['Banner 1', 'Banner 2']);
+    test('solo existen Seaside y Tropical, con sus cuatro imágenes cada uno', () {
+      expect(HomeBanner.values.map((b) => b.name), ['Seaside', 'Tropical']);
       final all = [for (final b in HomeBanner.values) ...b.assets];
       expect(all.toSet().length, 8);
       expect(HomeBanner.banner1.assets, [for (final p in ['amanecer', 'dia', 'atardecer', 'noche']) 'assets/images/banners/banner1/$p.jpg']);
       expect(HomeBanner.banner2.assets, [for (final p in ['amanecer', 'dia', 'atardecer', 'noche']) 'assets/images/banners/banner2/$p.jpg']);
     });
 
-    test('preferencia: null o un banner antiguo → Banner 1; «banner2» → Banner 2', () {
+    test('preferencia: null o un banner antiguo → Seaside; «banner2» → Tropical', () {
       expect(HomeBanner.fromId(null), HomeBanner.banner1);
       for (final old in ['clasico', 'noche', 'lima', 'azul']) { expect(HomeBanner.fromId(old), HomeBanner.banner1); }
       expect(HomeBanner.fromId('banner2'), HomeBanner.banner2);
@@ -163,7 +164,7 @@ void main() {
       await settle(t);
     }
 
-    testWidgets('Banner 1 por defecto; el selector solo ofrece Banner 1 y 2; elegir Banner 2 se guarda y se aplica', (t) async {
+    testWidgets('Seaside por defecto; el selector solo ofrece Seaside y Tropical, sin textos técnicos; elegir Tropical se guarda y se aplica', (t) async {
       now = DateTime(2026, 11, 13, 15, 30);
       final repo = MockProfileRepository();
       await app(t, repo);
@@ -174,16 +175,23 @@ void main() {
       await t.tap(find.bySemanticsLabel('Personalizar banner'));
       await settle(t);
       expect(find.text('Banner de Inicio'), findsOneWidget);
-      expect(find.bySemanticsLabel(RegExp(r'^Banner \d,')), findsNWidgets(2));
-      expect(find.bySemanticsLabel(RegExp(r'^Banner 1, .*seleccionado$')), findsOneWidget);
-      for (final old in ['Clásico', 'Pista de noche', 'Línea lima', 'Subir una foto de la galería']) { expect(find.text(old), findsNothing); }
-      // Cada tarjeta muestra las cuatro imágenes de SU colección.
-      for (final b in HomeBanner.values) { for (final a in b.assets) { expect(_asset(a), findsWidgets, reason: a); } }
+      expect(find.bySemanticsLabel(RegExp(r'^(Seaside|Tropical)(, seleccionado)?$')), findsNWidgets(2));
+      expect(find.bySemanticsLabel('Seaside, seleccionado'), findsOneWidget);
+      expect(find.text('Seaside'), findsOneWidget);
+      expect(find.text('Tropical'), findsOneWidget);
+      // Nada de banners antiguos ni de información técnica (momentos del día, horarios).
+      for (final old in ['Clásico', 'Pista de noche', 'Subir una foto de la galería', 'Banner 1', 'Banner 2', 'Amanecer', 'Día', 'Atardecer', 'Noche']) {
+        expect(find.text(old), findsNothing, reason: old);
+      }
+      final sheet = find.ancestor(of: find.byType(SheetHeader), matching: find.byType(Column)).first;
+      expect(find.descendant(of: sheet, matching: find.textContaining(RegExp(r'\d\d:\d\d'))), findsNothing);
+      // Cada tarjeta enseña la imagen de SU colección para la hora actual (15:30 → día).
+      expect(_asset('assets/images/banners/banner2/dia.jpg'), findsOneWidget);
 
-      await t.tap(find.bySemanticsLabel(RegExp(r'^Banner 2,')));
+      await t.tap(find.bySemanticsLabel('Tropical'));
       await settle(t);
       expect((await t.runAsync(() => repo.load('me')))!.profile.bannerId, 'banner2');
-      expect(find.text('Banner 2 aplicado'), findsOneWidget);
+      expect(find.text('Tropical aplicado'), findsOneWidget);
       await settle(t, 6);
       expect(_asset('assets/images/banners/banner2/dia.jpg'), findsOneWidget);
       expect(_asset('assets/images/banners/banner1/dia.jpg'), findsNothing);

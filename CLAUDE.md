@@ -144,7 +144,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Tests: 254/254. Pendiente: probarlo en móvil con varias cuentas reales; portada se sube al bucket `avatars`.
 
 ## Banners dinámicos por hora local (13 nov 2026, v1.4.1)
-- Solo 2 colecciones (`HomeBanner.banner1/banner2`, `home/domain/banner_schedule.dart`), 4 imágenes cada una en
+- Solo 2 colecciones, visibles como **Seaside** y **Tropical** (ids internos `banner1`/`banner2`, sin cambiar) (`HomeBanner`, `home/domain/banner_schedule.dart`), 4 imágenes cada una en
   `assets/images/banners/<banner1|banner2>/<amanecer|dia|atardecer|noche>.jpg` (1376×768, del zip `Banners_Plobby.zip`).
 - Franjas (hora LOCAL del dispositivo, `DateTime.now()`): 06–08:59 amanecer, 09–17:59 día, 18–19:59 atardecer, 20–05:59 noche.
   `nextPhaseChange` usa el constructor local de DateTime (cambios de hora correctos).
@@ -155,3 +155,22 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Eliminados: 8 SVG + foto clásica, subida/encuadre de foto propia (`banner_editor.dart`), `uploadBanner`/`deleteOldBanners`.
   En la BD no había banners guardados (0 perfiles, 0 ficheros `banner_*`).
 - Tests: 261/261 (`test/home_banner_test.dart`, también con TZ=Europe/Madrid, America/New_York, Australia/Sydney).
+
+## Actualización de calidad (13 nov 2026, v1.5.0)
+- Banners: nombres Seaside/Tropical; el selector solo muestra dos tarjetas (imagen actual + nombre), sin horarios ni momentos.
+- Migraciones aplicadas con autorización: `20261125a_feed_tournament_type`, `20261125b_security_performance`,
+  `20261125c_feed_engagement`.
+  - Seguridad: `avatar_url` solo de `avatars/<uid>/` (trigger `profiles_guard`, también recorta nombre 60 / ciudad 60 /
+    club 80); reactions solo INSERT(post_id,user_id,reaction_type)/UPDATE(reaction_type); comments INSERT(post_id,user_id,content);
+    `_rate_limit` (10 comentarios/min, 40 mensajes/min, 40 solicitudes/h, 20 denuncias/h → 'rate_limited');
+    Storage `avatars_read_own` (antes cualquiera listaba todas las carpetas); anon sin permisos en torneos.
+  - Rendimiento: 28 políticas con `(select auth.uid())` (el bucle es idempotente, regex con flag 'gi'); 16 índices.
+  - Feed: `rating_history_feed` (rachas 3/5/10/15/20/25), `player_ratings_feed` (récord de ELO por cada múltiplo de 50),
+    `tournaments_feed` (campeones; se retira si cambia el campeón). Tipo de publicación nuevo `tournament`.
+- App: `collapseDuplicateMatches` (un partido = una publicación aunque lo publiquen 4 jugadores), reacciones en cola
+  por publicación (orden garantizado, reversión solo de esa publicación), `TournamentPayload` + tarjeta `_Champion`,
+  filtro «Competiciones» (ligas + torneos), comentarios con envío único y errores traducidos (`friendlyFeedError`),
+  `cacheWidth` en todos los avatares de red.
+- Pendiente: activar «Leaked password protection» en Supabase (panel); eliminación de cuenta NO existe (decidir diseño:
+  hay FKs sin cascada en partidos/torneos); push con la app cerrada sigue sin Firebase.
+- Tests: 267/267.
