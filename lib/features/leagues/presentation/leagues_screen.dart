@@ -14,21 +14,22 @@ import 'league_widgets.dart';
 /// Pestaña «Ligas» — `scLeagues` del prototipo HTML: cabecera, resumen (activas · jugados · títulos), «Mis ligas»,
 /// crear liga y «Descubrir ligas». Datos reales de `my_leagues` / `discover_leagues`.
 class LeaguesScreen extends ConsumerWidget {
-  const LeaguesScreen({super.key});
+  const LeaguesScreen({super.key, this.embedded = false});
+  /// Dentro de «Competiciones»: sin Scaffold propio y sin repetir el título grande (lo pone Competiciones).
+  /// Datos, acciones y navegación de Ligas son exactamente los mismos.
+  final bool embedded;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mine = ref.watch(leagueListProvider);
     final teasers = ref.watch(discoverTeasersProvider);
-    return Scaffold(
-      body: SafeArea(bottom: false, child: RefreshIndicator(
+    final content = RefreshIndicator(
         color: AppColors.text,
         onRefresh: () async { ref.invalidate(leagueListProvider); ref.invalidate(discoverTeasersProvider); await ref.read(leagueListProvider.future).catchError((_) => <LeagueSummary>[]); },
-        child: ListView(padding: const EdgeInsets.fromLTRB(20, 26, 20, 130), children: [
+        child: ListView(padding: EdgeInsets.fromLTRB(20, embedded ? 18 : 26, 20, 130), children: [
           // .lgh
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(crossAxisAlignment: embedded ? CrossAxisAlignment.center : CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Semantics(header: true, child: const Text('Ligas', style: PlobbyText.t1)),
-              const SizedBox(height: 6),
+              if (!embedded) ...[Semantics(header: true, child: const Text('Ligas', style: PlobbyText.t1)), const SizedBox(height: 6)],
               const Text('Compite con tu comunidad.', style: PlobbyText.sub),
             ])),
             IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
@@ -80,8 +81,8 @@ class LeaguesScreen extends ConsumerWidget {
           ),
           PlobbyButton(label: 'Ver todas las ligas', kind: PlobbyButtonKind.outline, onPressed: () => context.push('/leagues/discover')),
         ]),
-      )),
-    );
+      );
+    return embedded ? content : Scaffold(body: SafeArea(bottom: false, child: content));
   }
 }
 

@@ -31,6 +31,7 @@ import 'widgets/activity_cards.dart';
       NotificationType.directMessage => ('Nuevo mensaje', PlobbyIcons.plane),
       NotificationType.groupMessage => ('Mensaje en un grupo', PlobbyIcons.users),
       NotificationType.groupAdded => ('Nuevo grupo', PlobbyIcons.users),
+      NotificationType.tournamentAdded => ('Inscripción en un torneo', PlobbyIcons.trophy),
     };
 
 /// Notificaciones — `scFNotifs` del prototipo HTML: agrupadas por día, sin leer con fondo lima suave y punto,

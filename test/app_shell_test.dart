@@ -20,7 +20,7 @@ void main() {
   testWidgets('cada pestaña abre su sección y queda marcada como activa', (t) async {
     await pumpApp(t);
     expect(selected(t, 'Inicio'), isTrue);
-    for (final (tab, marker) in const [('Ligas', 'Compite con tu comunidad.'), ('Feed', 'Tu comunidad de pádel está jugando.'), ('Perfil', 'Diego Castello')]) {
+    for (final (tab, marker) in const [('Competiciones', 'Compite con tu comunidad.'), ('Feed', 'Tu comunidad de pádel está jugando.'), ('Perfil', 'Diego Castello')]) {
       await t.tap(find.bySemanticsLabel(tab).last);
       for (var i = 0; i < 6; i++) { await t.pump(const Duration(milliseconds: 300)); }
       expect(find.text(marker, skipOffstage: false), findsWidgets, reason: tab);
@@ -40,7 +40,7 @@ void main() {
 
   testWidgets('la barra mide 92 px como en el HTML', (t) async {
     await pumpApp(t);
-    final bar = find.ancestor(of: find.bySemanticsLabel('Ligas').last, matching: find.byType(Container)).last;
+    final bar = find.ancestor(of: find.bySemanticsLabel('Competiciones').last, matching: find.byType(Container)).last;
     expect(t.getSize(bar).height, 92);
   });
 }

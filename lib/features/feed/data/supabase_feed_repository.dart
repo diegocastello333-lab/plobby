@@ -195,7 +195,7 @@ const _types = {
   'match_disputed': NotificationType.matchDisputed, 'match_event': NotificationType.matchEvent, 'achievement': NotificationType.achievement,
   'streak': NotificationType.streak, 'elo_milestone': NotificationType.eloMilestone, 'rating_change': NotificationType.ratingChange,
   'league_invite': NotificationType.leagueInvite, 'league_starting': NotificationType.leagueStarting, 'league_position_change': NotificationType.leaguePositionChange,
-  'direct_message': NotificationType.directMessage, 'group_message': NotificationType.groupMessage, 'group_added': NotificationType.groupAdded,
+  'tournament_added': NotificationType.tournamentAdded, 'direct_message': NotificationType.directMessage, 'group_message': NotificationType.groupMessage, 'group_added': NotificationType.groupAdded,
 };
 
 /// Fila de `notifications` → [AppNotification]. Los tipos desconocidos se omiten. Puro, para poder probarlo.
@@ -212,6 +212,7 @@ AppNotification? notificationFrom(Map<String, dynamic> r, FeedUser actor) {
     NotificationType.directMessage => n > 1 ? '$who te ha enviado $n mensajes · ${body ?? ''}' : '$who: ${body ?? ''}',
     NotificationType.groupMessage => '$who en «${title ?? 'el grupo'}»: ${body ?? ''}${n > 1 ? ' (+${n - 1})' : ''}',
     NotificationType.groupAdded => '$who te añadió al grupo «${body ?? ''}»',
+    NotificationType.tournamentAdded => '$who te ha inscrito en el torneo «${body ?? ''}»',
     _ => null,
   } ?? (body?.isNotEmpty == true ? (title?.isNotEmpty == true ? '$title: $body' : body!) : switch (t) {
     NotificationType.reaction => '$whoAll reaccionó a tu actividad',

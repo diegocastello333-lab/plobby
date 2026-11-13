@@ -8,6 +8,9 @@ import '../../features/leagues/presentation/create_league_screen.dart';
 import '../../features/leagues/presentation/discover_leagues_screen.dart';
 import '../../features/leagues/presentation/league_detail_screen.dart';
 import '../../features/leagues/presentation/leagues_screen.dart';
+import '../../features/tournaments/presentation/competitions_screen.dart';
+import '../../features/tournaments/presentation/create_tournament_screen.dart';
+import '../../features/tournaments/presentation/tournament_detail_screen.dart';
 import '../../features/leagues/presentation/manage_league_screen.dart';
 import 'app_shell.dart';
 import '../../features/feed/presentation/notifications_screen.dart';
@@ -45,7 +48,7 @@ final sessionGateProvider = FutureProvider<({bool signedIn, bool onboarded})>((r
   return (signedIn: true, onboarded: d.completed);
 });
 
-/// Router único. Las 4 pestañas (Inicio, Feed, Ligas, Perfil) viven en un `StatefulShellRoute` con la barra inferior;
+/// Router único. Las 4 pestañas (Inicio, Feed, Competiciones, Perfil) viven en un `StatefulShellRoute` con la barra inferior;
 /// el resto de pantallas se abren a pantalla completa por encima.
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
@@ -78,7 +81,8 @@ final appRoutes = <RouteBase>[
     branches: [
       StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (_, __) => const HomeScreen())]),
       StatefulShellBranch(routes: [GoRoute(path: '/feed', builder: (_, __) => const FeedScreen())]),
-      StatefulShellBranch(routes: [GoRoute(path: '/leagues', builder: (_, __) => const LeaguesScreen())]),
+      // Pestaña «Competiciones» (Ligas | Torneos). Misma ruta /leagues que antes: los enlaces de ligas siguen valiendo.
+      StatefulShellBranch(routes: [GoRoute(path: '/leagues', builder: (_, __) => const CompetitionsScreen())]),
       StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen(),
           routes: [GoRoute(path: 'share', builder: (_, __) => const ShareStatsScreen())])]),
     ],
@@ -118,6 +122,9 @@ final appRoutes = <RouteBase>[
       GoRoute(path: 'info', builder: (_, s) => GroupInfoScreen(conversationId: s.pathParameters['conversationId']!)),
     ]),
   ]),
+  // Torneos (sistema independiente de Ligas). '/tournaments/new' ANTES que ':id'.
+  GoRoute(path: '/tournaments/new', builder: (_, __) => const CreateTournamentScreen()),
+  GoRoute(path: '/tournaments/:id', builder: (_, s) => TournamentDetailScreen(tournamentId: s.pathParameters['id']!)),
   // Ligas (literales ANTES que ':id')
   GoRoute(path: '/leagues/new', builder: (_, __) => const CreateLeagueScreen()),
   GoRoute(path: '/leagues/discover', builder: (_, __) => const DiscoverLeaguesScreen()),

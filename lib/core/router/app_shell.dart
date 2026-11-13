@@ -16,7 +16,7 @@ class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.shell});
   final StatefulNavigationShell shell;
 
-  static const _tabs = [(PlobbyIcons.home, 'Inicio'), (PlobbyIcons.feed, 'Feed'), (PlobbyIcons.trophy, 'Ligas'), (PlobbyIcons.user, 'Perfil')];
+  static const _tabs = [(PlobbyIcons.home, 'Inicio'), (PlobbyIcons.feed, 'Feed'), (PlobbyIcons.trophy, 'Competiciones'), (PlobbyIcons.user, 'Perfil')];
 
   void _go(int i) => shell.goBranch(i, initialLocation: i == shell.currentIndex);
 
@@ -36,8 +36,9 @@ class AppShell extends ConsumerWidget {
         child: SizedBox(height: 56, child: Padding(padding: const EdgeInsets.only(top: 2), child: Column(children: [
           PlobbyIcon(icon, size: 24, color: color),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0,
-              fontWeight: on ? FontWeight.w700 : FontWeight.w400, color: color)),
+          // «Competiciones» es más largo que el resto: se reduce lo justo para caber en su columna (sin cortarse).
+          FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0,
+              fontWeight: on ? FontWeight.w700 : FontWeight.w400, color: color))),
         ]))),
       )));
     }

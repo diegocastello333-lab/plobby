@@ -125,3 +125,21 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   Fuentes empaquetadas en vez de google_fonts. `SplashBoot.pending` (main) → solo una vez por arranque;
   `criticalWork` espera sesión/onboarding (6 s) y perfil propio (3 s); `authRedirect` deja pasar `/splash`.
 
+
+## Competiciones: Ligas + Torneos (13 nov 2026, v1.4.0)
+- La pestaña «Ligas» es ahora «Competiciones» (`tournaments/presentation/competitions_screen.dart`): Ligas (intacto,
+  `LeaguesScreen(embedded: true)` solo quita Scaffold y título) | Torneos. Rutas `/tournaments/new` y `/tournaments/:id`.
+- Migraciones `20261124a_tournament_notification` + `20261124b_tournaments` (aplicadas con autorización): tablas
+  `tournaments`, `tournament_admins` (owner/admin → coadmins futuros), `tournament_teams`, `tournament_players` (PK evita
+  duplicados), `tournament_matches` (cuadro persistido: next_match_id/next_slot, slot*_source 'A1', version).
+  RLS solo lectura (`_t_can_view`); toda escritura por RPC (`create_tournament`, `replace_tournament_teams`,
+  `update_tournament_info`, `record_tournament_result` con versión → `result_conflict`, `clear_tournament_result`,
+  `set_tournament_match_live`, `finish_tournament`, `tournament_standings`, `my_tournaments`). Broadcast `tournament`
+  por `user:<uid>` (deduplicado por transacción). Aviso `tournament_added`. Diseño en `docs/torneos.md`.
+- Formatos: eliminatoria (potencia de 2, byes a las mejores semillas, pase automático), grupos + eliminatoria (reparto
+  en serpiente, cruces A1vB2…), todos contra todos (método del círculo). Corregir un resultado anula en cascada.
+- `TournamentEngine` (Dart) replica el SQL: lo usan el mock y los tests (mismos valores que la validación SQL).
+- Validado en BD real con ROLLBACK (diego.c, antocuesta + 12 temporales): 5 parejas/3 byes, duplicados, pocas parejas,
+  set inválido, empate, conflicto de versión, avance, cambio tras empezar, participante sin permisos, UPDATE directo
+  denegado (42501), extraño ve 0, campeón, corrección en cascada, 7 parejas en grupos 3/4, RR de 3, ligas intactas.
+- Tests: 254/254. Pendiente: probarlo en móvil con varias cuentas reales; portada se sube al bucket `avatars`.

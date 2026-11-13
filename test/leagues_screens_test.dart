@@ -33,7 +33,7 @@ Future<void> _reveal(WidgetTester t, Finder f) async {
 void main() {
   testWidgets('Ligas: resumen, mis ligas con posición y descubrir; abrir una liga lleva al detalle', (t) async {
     await _app(t);
-    await t.tap(find.bySemanticsLabel('Ligas').last);
+    await t.tap(find.bySemanticsLabel('Competiciones').last);   // la pestaña «Ligas» ahora es «Competiciones» (abre Ligas por defecto)
     await _settle(t, 8);
     expect(find.text('Compite con tu comunidad.'), findsOneWidget);
     expect(find.text('ACTIVAS'), findsOneWidget);
@@ -129,7 +129,7 @@ void main() {
   for (final w in [390.0, 320.0]) {
     testWidgets('sin desbordamientos a $w px (lista, detalle, miembros, crear, descubrir, gestión)', (t) async {
       final r = await _app(t, width: w);
-      await t.tap(find.bySemanticsLabel('Ligas').last);
+      await t.tap(find.bySemanticsLabel('Competiciones').last);   // la pestaña «Ligas» ahora es «Competiciones» (abre Ligas por defecto)
       await _settle(t, 8);
       await t.drag(find.byType(Scrollable).first, const Offset(0, -1500));
       await _settle(t, 2);

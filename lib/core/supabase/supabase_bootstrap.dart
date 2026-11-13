@@ -25,6 +25,8 @@ import '../../features/rating/application/rating_providers.dart';
 import '../../features/rating/data/supabase_rating_repository.dart';
 import '../../features/social/application/social_providers.dart';
 import '../../features/social/data/supabase_social_repository.dart';
+import '../../features/tournaments/application/tournament_providers.dart';
+import '../../features/tournaments/data/supabase_tournament_repository.dart';
 
 /// Punto único de conexión con Supabase.
 ///
@@ -54,6 +56,7 @@ class SupabaseBootstrap {
         profileRepositoryProvider.overrideWithValue(SupabaseProfileRepository(c)),
         feedRepositoryProvider.overrideWithValue(SupabaseFeedRepository(c)),
         socialRepositoryProvider.overrideWithValue(SupabaseSocialRepository(c, channel: channel)),
+        tournamentRepositoryProvider.overrideWithValue(SupabaseTournamentRepository(c, channel: channel)),
         presenceServiceProvider.overrideWithValue(uid == null ? const NoPresenceService() : SupabasePresenceService(c, uid)),
         ratingRepositoryProvider.overrideWithValue(SupabaseRatingRepository(c)),
         matchRepositoryProvider.overrideWithValue(SupabaseMatchRepository(c)),

@@ -25,6 +25,12 @@ class GroupEvent extends UserEvent {
   final String? op, userId;
 }
 
+/// Cambio en un torneo del que soy organizador o jugador (triggers de torneos: un aviso por operación).
+class TournamentEvent extends UserEvent {
+  const TournamentEvent(this.tournamentId);
+  final String tournamentId;
+}
+
 /// UN solo canal privado por sesión para todo lo anterior. Debe existir una única instancia: el tema es exacto
 /// (`user:<uid>`) y dos canales con el mismo tema se cerrarían entre sí.
 class UserChannel {
@@ -35,6 +41,10 @@ class UserChannel {
             ..onBroadcast(event: 'profile', callback: (p) {
               final b = body(p);
               if (b['user_id'] is String) emit(ProfileEvent.fromJson(b));
+            })
+            ..onBroadcast(event: 'tournament', callback: (p) {
+              final id = body(p)['tournament_id'];
+              if (id is String) emit(TournamentEvent(id));
             })
             ..onBroadcast(event: 'group', callback: (p) {
               final b = body(p);

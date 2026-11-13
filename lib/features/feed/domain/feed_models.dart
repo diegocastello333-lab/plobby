@@ -103,6 +103,8 @@ enum NotificationType {
   leagueInvite, leagueStarting, leaguePositionChange,
   // mensajes (refId = id de la conversación)
   directMessage, groupMessage, groupAdded,
+  // torneos (refId = id del torneo)
+  tournamentAdded,
 }
 
 /// Destino al pulsar una notificación (se resuelve en la UI con GoRouter).
@@ -116,6 +118,7 @@ extension NotificationDestination on NotificationType {
         NotificationType.achievement || NotificationType.streak => '/profile',
         NotificationType.eloMilestone || NotificationType.ratingChange => '/rating',
         NotificationType.leagueInvite || NotificationType.leagueStarting || NotificationType.leaguePositionChange => '/leagues/${n.refId ?? ''}',
+        NotificationType.tournamentAdded => n.refId == null ? '/leagues' : '/tournaments/${n.refId}',
         NotificationType.directMessage || NotificationType.groupMessage || NotificationType.groupAdded =>
             n.refId == null ? '/messages' : '/messages/${n.refId}',
       };
