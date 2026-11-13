@@ -185,3 +185,15 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Arreglos compartidos: iOS usa `CupertinoPageTransitionsBuilder` (gesto de volver); fontFamily Inter en los textStyle de
   botones del tema (antes fuente del sistema: SF en iOS, Roboto en Android). `test/ios_platform_test.dart`.
 - NO verificado en iPhone real ni compilado para iOS (no hay macOS aquí): la primera build de Codemagic es la prueba real.
+
+## Imágenes para compartir (13 nov 2026, v1.5.2)
+- Causa de textos descentrados/solapados: coordenadas fijas, línea base adivinada (85 % vs 80 % real en Inter),
+  anchos sin medir (nombres fuera de la imagen) o «…» prematuro, fila de etiquetas encogida entera, y símbolos sin
+  glifo en las fuentes empaquetadas (▲ ▼ → ⏱).
+- `lib/core/share/canvas_text.dart`: `ShareText` (mide, reduce hasta un mínimo antes de recortar, ancla a línea base o
+  centro de mayúsculas con las métricas reales: cap Inter .7275, Unbounded .75), `ShareLayoutLog` (cajas para tests),
+  `paintTriangle/paintArrow/paintClock`. Los dos pintores (`RecapPainter`, `ShareCardPainter`) lo usan; composición
+  vertical por bloques medidos (`_flow`), etiquetas en hasta 2 filas, club/pareja y fecha/club en 2 líneas si no caben.
+- Tests: `test/share_images_layout_test.dart` (48 combinaciones × casos de `test/support/share_fixtures.dart`: sin
+  solapes, nada fuera de su caja/imagen, sin caracteres sin glifo (lee el cmap del TTF), «…» solo en textos libres del
+  caso extremo, cifras nunca). Etiqueta «ELO ANTES Y DESPUÉS» (Inter no tiene «→»). Tests: 324/324.

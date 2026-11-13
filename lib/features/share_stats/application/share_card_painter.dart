@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
+import '../../../core/share/canvas_text.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../../core/widgets/flame_paths.dart';
 
@@ -27,19 +28,15 @@ class ShareCardData {
 String _fmt(int n) => n.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
 
 class ShareCardPainter extends CustomPainter {
-  ShareCardPainter(this.d, this.tpl);
+  ShareCardPainter(this.d, this.tpl, {this.log});
   final ShareCardData d; final ShareTemplate tpl;
+  /// Solo para tests/depuración: registra la caja de cada texto y forma (ver `canvas_text.dart`).
+  final ShareLayoutLog? log;
   static const _ivory = PlobbyColors.ivory, _lime = PlobbyColors.lime, _forest = PlobbyColors.forest;
+  static const _m = 80.0; // margen lateral
 
-  double _text(Canvas c, String t, double x, double y, double fs, Color col, {FontWeight w = FontWeight.w800, double ls = 0, TextAlign al = TextAlign.left, double? width}) {
-    final tp = TextPainter(text: TextSpan(text: t, style: TextStyle(fontSize: fs, fontWeight: w, color: col, letterSpacing: ls, fontFamily: 'Inter', height: 1)),
-        textDirection: TextDirection.ltr, textAlign: al)..layout(maxWidth: width ?? double.infinity);
-    final dx = al == TextAlign.center ? x - tp.width / 2 : al == TextAlign.right ? x - tp.width : x;
-    tp.paint(c, Offset(dx, y - fs * .85));
-    return tp.width;
-  }
-
-  void _flame(Canvas c, double cx, double top, double h, Color col, Color inner, {double glow = 0}) {
+  /// Llama de [h] de alto con la parte superior en [top]; devuelve su caja (para que nada la pise).
+  Rect _flame(Canvas c, ShareText t, double cx, double top, double h, Color col, Color inner, {double glow = 0}) {
     c.save();
     final sc = h / 130;
     c.translate(cx - 50 * sc, top);
@@ -48,11 +45,15 @@ class ShareCardPainter extends CustomPainter {
     c.drawPath(flameOuter(), Paint()..color = col);
     c.drawPath(flameInner(), Paint()..color = inner.withOpacity(.85));
     c.restore();
+    final r = Rect.fromLTWH(cx - 50 * sc, top, 100 * sc, h);
+    t.obstacle(r, 'llama');
+    return r;
   }
 
   @override
   void paint(Canvas c, Size s) {
     final W = s.width, H = s.height, story = H > 1500;
+    final t = ShareText(c, log: log);
     c.drawRect(Offset.zero & s, Paint()..color = _forest);
     // pista de pádel sutil
     final line = Paint()..color = _lime.withOpacity(.13)..style = PaintingStyle.stroke..strokeWidth = 5;
@@ -62,61 +63,113 @@ class ShareCardPainter extends CustomPainter {
     c.drawLine(Offset(cx, cy - ch * .22), Offset(cx, cy - ch / 2), line);
     c.drawLine(Offset(cx, cy + ch * .22), Offset(cx, cy + ch / 2), line);
     c.drawCircle(Offset(W * .86, H * .2), 360, Paint()..color = _lime.withOpacity(.07));
-    // marca y periodo
-    final bw = _text(c, 'PLOBBY', 80, 130, 46, _ivory, ls: 10);
-    c.drawCircle(Offset(80 + bw + 30, 114), 9, Paint()..color = _lime);
-    final pw = d.periodLabel.length * 22.0 + 56;
-    c.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(W - 80 - pw, 88, pw, 56), const Radius.circular(14)), Paint()..color = _ivory.withOpacity(.12));
-    _text(c, d.periodLabel.toUpperCase(), W - 80 - pw / 2, 126, 30, _ivory, w: FontWeight.w700, ls: 4, al: TextAlign.center);
-    // jugador
-    final ay = story ? 230.0 : 210.0, r = 105.0;
-    c.drawCircle(Offset(80 + r, ay + r), r + 8, Paint()..color = _lime);
+
+    // ── cabecera: marca a la izquierda, periodo en una píldora medida a la derecha (centrados en la misma línea) ──
+    const headY = 116.0;
+    final brand = t.draw('PLOBBY', _m, headY, 46, _ivory, v: VAnchor.capCenter, weight: FontWeight.w800, tracking: .22, label: 'marca');
+    c.drawCircle(Offset(brand.right + 22, headY), 9, Paint()..color = _lime);
+    final pillMax = W - _m - (brand.right + 70) - 56;
+    final per = ShareText.fit(d.periodLabel.toUpperCase(), 30, maxWidth: pillMax, minFontSize: 22, weight: FontWeight.w700, tracking: .13, color: _ivory);
+    final pill = Rect.fromLTWH(W - _m - per.width - 56, headY - 28, per.width + 56, 56);
+    c.drawRRect(RRect.fromRectAndRadius(pill, const Radius.circular(14)), Paint()..color = _ivory.withOpacity(.12));
+    t.paintFitted(per, pill.center.dx, headY, v: VAnchor.capCenter, ax: .5, label: 'periodo', container: pill);
+
+    // ── jugador ──
+    final ay = story ? 230.0 : 210.0, r = 105.0, acx = _m + r, acy = ay + r;
+    c.drawCircle(Offset(acx, acy), r + 8, Paint()..color = _lime);
     c.save();
-    c.clipPath(Path()..addOval(Rect.fromCircle(center: Offset(80 + r, ay + r), radius: r)));
+    c.clipPath(Path()..addOval(Rect.fromCircle(center: Offset(acx, acy), radius: r)));
     if (d.avatar != null) {
-      paintImage(canvas: c, rect: Rect.fromLTWH(80, ay, r * 2, r * 2), image: d.avatar!, fit: BoxFit.cover);
+      paintImage(canvas: c, rect: Rect.fromLTWH(_m, ay, r * 2, r * 2), image: d.avatar!, fit: BoxFit.cover);
     } else {
-      c.drawRect(Rect.fromLTWH(80, ay, r * 2, r * 2), Paint()..color = PlobbyColors.sage);
+      c.drawRect(Rect.fromLTWH(_m, ay, r * 2, r * 2), Paint()..color = PlobbyColors.sage);
     }
     c.restore();
-    _text(c, d.name, 80 + r * 2 + 44, ay + 95, 68, _ivory);
-    _text(c, '@${d.username}', 80 + r * 2 + 44, ay + 148, 36, PlobbyColors.sage, w: FontWeight.w500);
-    var ty = ay + r * 2 + 60;
-    final sub = [if (d.club != null) d.club!, if (d.partner != null) 'con ${d.partner}'].join('   ·   ');
-    if (sub.isNotEmpty) { _text(c, sub, 80, ty, 34, _ivory.withOpacity(.78), w: FontWeight.w600); ty += 30; }
+    t.obstacle(Rect.fromCircle(center: Offset(acx, acy), radius: r + 8), 'avatar');
+    final nx = _m + r * 2 + 44, nW = W - _m - nx;
+    t.draw(d.name, nx, acy - 18, 68, _ivory, v: VAnchor.baseline, maxWidth: nW, minFontSize: 46, weight: FontWeight.w800, label: 'nombre');
+    t.draw('@${d.username}', nx, acy + 42, 36, PlobbyColors.sage, v: VAnchor.baseline, maxWidth: nW, minFontSize: 26, weight: FontWeight.w500, label: 'usuario');
+    var ty = ay + r * 2 + 8 + 56; // cap-top de la línea de club/pareja
+    final parts = [if (d.club != null) d.club!, if (d.partner != null) 'con ${d.partner}'];
+    if (parts.isNotEmpty) {
+      final joined = ShareText.fit(parts.join('   ·   '), 34, maxWidth: W - _m * 2, minFontSize: 28, weight: FontWeight.w600);
+      // Si club + pareja no caben en una línea sin recortar, van en dos (no se pierde información).
+      final lines = joined.truncated && parts.length == 2 ? parts : [parts.join('   ·   ')];
+      for (final l in lines) {
+        final rr = t.draw(l, _m, ty, 34, _ivory.withOpacity(.78), maxWidth: W - _m * 2, minFontSize: 26, weight: FontWeight.w600, label: 'club/pareja');
+        ty = rr.bottom + 22;
+      }
+    }
 
+    final footY = H - 40.0;
     if (tpl == ShareTemplate.performance) {
-      final by = H - 420, fs = story ? 300.0 : 200.0, blockH = 40 + fs * .75 + 90;
-      final reg0 = ty + 20, reg1 = by - 20, top = reg0 + (reg1 - reg0 - blockH) / 2;
-      _text(c, 'RATING ELO', 80, top + 30, 36, _ivory.withOpacity(.6), w: FontWeight.w700, ls: 8);
-      _text(c, _fmt(d.elo), 68, top + 40 + fs * .75, fs, _lime);
-      _text(c, '${d.eloDelta >= 0 ? '▲ +' : '▼ '}${d.eloDelta}  ·  ${d.category}', 80, top + blockH, 44, d.eloDelta >= 0 ? _lime : const Color(0xFFFF6B6F));
-      final w3 = (W - 160 - 40) / 3;
+      // Bloque inferior: tarjetas + racha. Bloque ELO centrado en el hueco que queda entre la cabecera y las tarjetas.
+      const tileH = 230.0;
+      final by = H - 420, w3 = (W - _m * 2 - 40) / 3;
+      final fs = story ? 300.0 : 200.0;
+      final label = ShareText.fit('RATING ELO', 36, weight: FontWeight.w700, tracking: .22);
+      final num = ShareText.fit(_fmt(d.elo), fs, maxWidth: W - _m * 2, family: ShareFonts.inter, weight: FontWeight.w800);
+      final delta = ShareText.fit('${d.eloDelta >= 0 ? '+' : '−'}${d.eloDelta.abs()}  ·  ${d.category}', 44, maxWidth: W - _m * 2 - 50, minFontSize: 32, weight: FontWeight.w800);
+      final g1 = 38.0, g2 = 44.0;
+      final blockH = label.cap + g1 + num.cap + g2 + delta.cap;
+      final reg0 = ty + 10, reg1 = by - 30;
+      final top = reg0 + math.max(0, (reg1 - reg0 - blockH) / 2);
+      t.paintFitted(ShareText.fit('RATING ELO', 36, weight: FontWeight.w700, tracking: .22, color: _ivory.withOpacity(.6)), _m, top, label: 'rating');
+      // La cifra grande se alinea ópticamente con el margen: su lado izquierdo tiene «aire» propio de la fuente.
+      t.paintFitted(ShareText.fit(_fmt(d.elo), num.fontSize, family: ShareFonts.inter, weight: FontWeight.w800, color: _lime), _m - num.fontSize * .04, top + label.cap + g1, label: 'elo');
+      final dy = top + label.cap + g1 + num.cap + g2;
+      final up = d.eloDelta >= 0, dc = up ? _lime : const Color(0xFFFF6B6F);
+      paintTriangle(c, Offset(_m + 14, dy + delta.cap / 2), 28, dc, up: up);
+      t.paintFitted(ShareText.fit(delta.text, delta.fontSize, maxWidth: W - _m * 2 - 50, weight: FontWeight.w800, color: dc), _m + 46, dy, label: 'delta');
+
       final tiles = [('PARTIDOS', '${d.played}'), ('VICTORIAS', '${d.winRate}%'), ('V · D', '${d.wins} · ${d.losses}')];
       for (var i = 0; i < 3; i++) {
-        final x = 80 + i * (w3 + 20), hi = i == 1;
-        c.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(x, by, w3, 230), const Radius.circular(22)), Paint()..color = hi ? _lime : _ivory.withOpacity(.1));
-        _text(c, tiles[i].$2, x + w3 / 2, by + 125, i == 2 ? 74 : 96, hi ? _forest : _ivory, al: TextAlign.center);
-        _text(c, tiles[i].$1, x + w3 / 2, by + 185, 26, (hi ? _forest : _ivory).withOpacity(.75), w: FontWeight.w700, ls: 4, al: TextAlign.center);
+        final x = _m + i * (w3 + 20), hi = i == 1, box = Rect.fromLTWH(x, by, w3, tileH);
+        c.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(22)), Paint()..color = hi ? _lime : _ivory.withOpacity(.1));
+        final fg = hi ? _forest : _ivory;
+        // cifra centrada en la parte alta de la tarjeta; etiqueta debajo con separación fija
+        t.draw(tiles[i].$2, box.center.dx, by + 96, 96, fg, v: VAnchor.capCenter, ax: .5, maxWidth: w3 - 40, minFontSize: 30, weight: FontWeight.w800, label: 'valor ${tiles[i].$1}', container: box);
+        t.draw(tiles[i].$1, box.center.dx, by + 176, 26, fg.withOpacity(.75), v: VAnchor.capCenter, ax: .5, maxWidth: w3 - 32, weight: FontWeight.w700, tracking: .15, label: 'etiqueta ${tiles[i].$1}', container: box);
       }
-      _flame(c, 123, by + 270, 60, d.streak > 0 ? _lime : PlobbyColors.sage, _forest);
-      _text(c, '${d.streak} victorias seguidas', 150, by + 322, 50, _ivory);
+      final sy = by + tileH + 62; // centro de la fila de racha
+      final fl = _flame(c, t, _m + 24, sy - 30, 60, d.streak > 0 ? _lime : PlobbyColors.sage, _forest);
+      t.draw('${d.streak} ${d.streak == 1 ? 'victoria seguida' : 'victorias seguidas'}', fl.right + 20, sy, 50, _ivory, v: VAnchor.capCenter,
+          maxWidth: W - _m - fl.right - 20, minFontSize: 36, weight: FontWeight.w800, label: 'racha');
     } else {
-      final fh = story ? 470.0 : 220.0, nf = story ? 400.0 : 210.0, gp = story ? 330.0 : 165.0, fy = ty + 30;
-      _flame(c, W / 2, fy, fh, d.streak > 0 ? _lime : PlobbyColors.sage, _forest, glow: 70);
-      final ny = fy + fh + gp;
-      _text(c, '${d.streak}', W / 2, ny, nf, _ivory, al: TextAlign.center);
-      _text(c, 'VICTORIAS SEGUIDAS', W / 2, ny + 78, 46, _lime, ls: 10, al: TextAlign.center);
-      _text(c, 'Mejor racha: ${d.bestStreak}   ·   ${d.winRate}% de victorias   ·   ELO ${_fmt(d.elo)}', W / 2, ny + 140, 34, _ivory.withOpacity(.7), w: FontWeight.w600, al: TextAlign.center);
-      final n = math.min(10, d.last.length), sz = 62.0, gap = 18.0, tw = n * sz + (n - 1) * gap, yy = story ? H - 70 - 150 : H - 190.0;
-      for (var i = 0; i < n; i++) {
-        final win = d.last[n - 1 - i], p = Offset((W - tw) / 2 + i * (sz + gap) + sz / 2, yy);
-        win ? c.drawCircle(p, sz / 2 - 3, Paint()..color = _lime)
-            : c.drawCircle(p, sz / 2 - 3, Paint()..color = PlobbyColors.sage..style = PaintingStyle.stroke..strokeWidth = 5);
+      // Pila vertical: llama → número → «VICTORIAS SEGUIDAS» → resumen, centrada en el hueco entre el jugador y los
+      // últimos partidos. Si el hueco es menor (p. ej. club y pareja en dos líneas en 4:5), la llama y el número se
+      // escalan juntos: nunca invaden la fila de abajo.
+      final n = math.min(10, d.last.length);
+      final dotsTop = n > 0 ? (story ? H - 220 : H - 190.0) - 31 : footY - 60;
+      final g0 = story ? 70.0 : 40.0, g1 = story ? 56.0 : 36.0, g2 = story ? 40.0 : 30.0;
+      final title = d.streak == 1 ? 'VICTORIA SEGUIDA' : 'VICTORIAS SEGUIDAS';
+      final titleF = ShareText.fit(title, 46, maxWidth: W - _m * 2, minFontSize: 34, weight: FontWeight.w800, tracking: .2, color: _lime);
+      final sumF = ShareText.fit('Mejor racha: ${d.bestStreak}   ·   ${d.winRate}% de victorias   ·   ELO ${_fmt(d.elo)}', 34,
+          maxWidth: W - _m * 2, minFontSize: 26, weight: FontWeight.w600, color: _ivory.withOpacity(.7));
+      final regTop = ty + 10, regBottom = dotsTop - (story ? 60 : 40);
+      final fixed = g0 + g1 + titleF.cap + g2 + sumF.cap;
+      var fh = story ? 470.0 : 220.0, nf = story ? 400.0 : 210.0;
+      final k = math.min(1.0, (regBottom - regTop - fixed) / (fh + nf * ShareFonts.capHeight(ShareFonts.inter)));
+      fh *= k; nf *= k;
+      final stackH = fh + fixed + nf * ShareFonts.capHeight(ShareFonts.inter);
+      final top = regTop + math.max(0, (regBottom - regTop - stackH) / 2);
+      final fl = _flame(c, t, W / 2, top, fh, d.streak > 0 ? _lime : PlobbyColors.sage, _forest, glow: 70 * k);
+      final n1 = t.draw('${d.streak}', W / 2, fl.bottom + g0, nf, _ivory, ax: .5, maxWidth: W - _m * 2, weight: FontWeight.w800, label: 'racha');
+      final n2 = t.paintFitted(titleF, W / 2, n1.bottom + g1, ax: .5, label: 'titulo');
+      t.paintFitted(sumF, W / 2, n2.bottom + g2, ax: .5, label: 'resumen');
+      if (n > 0) {
+        const sz = 62.0, gap = 18.0;
+        final tw = n * sz + (n - 1) * gap, yy = story ? H - 220 : H - 190.0;
+        for (var i = 0; i < n; i++) {
+          final win = d.last[n - 1 - i], p = Offset((W - tw) / 2 + i * (sz + gap) + sz / 2, yy);
+          win ? c.drawCircle(p, sz / 2 - 3, Paint()..color = _lime)
+              : c.drawCircle(p, sz / 2 - 3, Paint()..color = PlobbyColors.sage..style = PaintingStyle.stroke..strokeWidth = 5);
+        }
+        t.obstacle(Rect.fromLTWH((W - tw) / 2, yy - sz / 2, tw, sz), 'últimos partidos');
+        t.draw('ÚLTIMOS $n ${n == 1 ? 'PARTIDO' : 'PARTIDOS'}', W / 2, yy + sz / 2 + 34, 28, PlobbyColors.sage, ax: .5, weight: FontWeight.w600, tracking: .05, label: 'ultimos');
       }
-      _text(c, 'ÚLTIMOS $n PARTIDOS', W / 2, yy + (story ? 80 : 72), 28, PlobbyColors.sage, w: FontWeight.w600, al: TextAlign.center);
     }
-    _text(c, 'plobby.app  ·  Solo partidos confirmados', W / 2, H - 40, 26, _ivory.withOpacity(.5), w: FontWeight.w600, al: TextAlign.center);
+    t.draw('plobby.app  ·  Solo partidos confirmados', W / 2, footY, 26, _ivory.withOpacity(.5), v: VAnchor.baseline, ax: .5, weight: FontWeight.w600, label: 'pie');
   }
 
   @override
