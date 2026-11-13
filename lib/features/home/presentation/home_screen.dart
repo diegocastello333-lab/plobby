@@ -6,7 +6,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import 'banner_catalog.dart';
-import 'banner_editor.dart';
+import 'banner_picker.dart';
+import '../application/banner_clock.dart';
+import '../domain/banner_schedule.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/silhouette_avatar.dart';
 import '../../../core/widgets/state_views.dart';
@@ -123,6 +125,38 @@ class _SecHead extends StatelessWidget {
 }
 
 // ─────────────────────────────── Banner ───────────────────────────────
+/// Fondo del banner. Solo este widget escucha el reloj del banner: al cambiar el momento del día se reconstruye él,
+/// no la pantalla. Fundido de 900 ms entre imágenes (ya precargadas): sin parpadeos ni huecos.
+class _BannerBackdrop extends ConsumerStatefulWidget {
+  const _BannerBackdrop({required this.banner});
+  final HomeBanner banner;
+  @override
+  ConsumerState<_BannerBackdrop> createState() => _BannerBackdropState();
+}
+
+class _BannerBackdropState extends ConsumerState<_BannerBackdrop> {
+  HomeBanner? _cached;
+  void _precache() {
+    if (_cached == widget.banner) return;
+    _cached = widget.banner;
+    precacheBanner(context, widget.banner);
+  }
+  @override
+  void didChangeDependencies() { super.didChangeDependencies(); _precache(); }
+  @override
+  void didUpdateWidget(_BannerBackdrop old) { super.didUpdateWidget(old); _precache(); }
+
+  @override
+  Widget build(BuildContext context) {
+    final phase = ref.watch(bannerClockProvider);
+    // layoutBuilder con StackFit.expand: cada imagen recibe el tamaño exacto del banner (con el Stack por defecto de
+    // AnimatedSwitcher las restricciones eran sueltas y `cover` dejaba bandas).
+    return AnimatedSwitcher(duration: const Duration(milliseconds: 900), switchInCurve: Curves.easeInOut, switchOutCurve: Curves.easeInOut,
+        layoutBuilder: (current, previous) => Stack(fit: StackFit.expand, children: [...previous, if (current != null) current]),
+        child: KeyedSubtree(key: ValueKey('${widget.banner.id}|${phase.name}'), child: BannerImage(banner: widget.banner, phase: phase)));
+  }
+}
+
 class _Banner extends StatelessWidget {
   const _Banner({required this.counters, required this.profile});
   final HomeCounters counters; final PlayerProfile? profile;
@@ -134,12 +168,8 @@ class _Banner extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       child: SizedBox(height: homeBannerHeight(context), child: Stack(fit: StackFit.expand, children: [
         const ColoredBox(color: AppColors.ink900),
-        // Banner personalizable (foto propia, predeterminado o el clásico). Mantener pulsado también abre el editor.
-        // El Stack interno de AnimatedSwitcher daba restricciones «sueltas» a la imagen: `cover` no recibía el tamaño
-        // del banner y la foto se encogía dejando bandas. Ahora cada imagen ocupa exactamente todo el banner.
-        GestureDetector(onLongPress: () => showBannerSheet(context), child: AnimatedSwitcher(duration: const Duration(milliseconds: 350),
-            layoutBuilder: (current, previous) => Stack(fit: StackFit.expand, children: [...previous, if (current != null) current]),
-            child: KeyedSubtree(key: ValueKey('${profile?.bannerUrl}|${profile?.bannerId}'), child: BannerImage(profile: profile)))),
+        // Banner dinámico: colección elegida (Banner 1/2) + imagen según la hora local. Mantener pulsado abre el selector.
+        GestureDetector(onLongPress: () => showBannerSheet(context), child: _BannerBackdrop(banner: HomeBanner.fromId(profile?.bannerId))),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Color(0x94171C19), Color(0x0D171C19), Color(0x1F171C19), Color(0xC7171C19)], stops: [0, .30, .52, 1]))),
         // Logo: Unbounded 700 24px −0.03em lima, sombra 0 1 8 .55

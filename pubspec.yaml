@@ -1,7 +1,7 @@
 name: plobby
 description: Plobby — social and competitive padel app.
 publish_to: none
-version: 1.4.0+6   # sube con cada APK entregado (Competiciones: ligas + torneos)
+version: 1.4.1+7   # sube con cada APK entregado (banners dinámicos por hora local)
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
@@ -22,7 +22,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/   # home_banner.jpg: foto del banner del Home, extraída del prototipo HTML
+    # Banners dinámicos de Inicio: 2 colecciones × 4 momentos del día (amanecer, dia, atardecer, noche).
+    - assets/images/banners/banner1/
+    - assets/images/banners/banner2/
   # Fuentes del prototipo HTML, empaquetadas (OFL, ver assets/fonts/OFL-*.txt). Sin descarga en tiempo de ejecución.
   fonts:
     - family: Inter

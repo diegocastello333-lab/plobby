@@ -26,7 +26,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - `validateSets` / `_validate_sets`: el partido acaba al ganar 2 sets (bug corregido en ambos lados).
 - **`super_clipboard` eliminado** (con autorización): su dependencia nativa no compila con Gradle 9, que exige Flutter 3.50. «COPY IMAGE» ahora avisa de que no está disponible; Guardar/Compartir siguen.
 - Android: AGP 9.3 / Gradle 9.5 (plantilla de Flutter 3.50); `android/build.gradle.kts` sube a 36 el compileSdk de plugins antiguos. applicationId `io.plobby.plobby`. Deep link OAuth `io.plobby.app://login-callback/` en AndroidManifest e Info.plist. En web el OAuth vuelve a la propia URL.
-- `assets/images/home_banner.jpg` extraída del prototipo HTML.
+- Banner de Inicio: ver «Banners dinámicos» (la antigua `home_banner.jpg` se eliminó).
 
 ## Pendiente (a 12 nov 2026)
 1. **Login con Google**: Google está activado en Supabase y el cliente OAuth es válido, pero el usuario obtuvo `Error 403: org_internal` → la pantalla de consentimiento está en «Interno». Debe pasarla a **Externo**, estado «Prueba» y añadir `diegocastello333@gmail.com` como usuario de prueba (o crear el cliente en un proyecto fuera de su organización Workspace). Comprobar también que `io.plobby.app://login-callback/` está en Authentication → URL Configuration.
@@ -108,8 +108,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   repos (creado en `SupabaseBootstrap.overrides`). `core/live/presence.dart`: Presence, activo solo en primer plano.
 - `core/net/timeout_client.dart` (20 s / 60 s subidas) y `core/errors/app_errors.dart` (errores globales; en release
   un widget que falla no deja pantalla gris).
-- Banner: `home/presentation/banner_catalog.dart` (9: clásico + 8 SVG) y `banner_editor.dart` (encuadre 6:5,
-  JPEG 1200 px q82 con `package:image` en isolate, `avatars/<uid>/banner_*.jpg`). `deleteAvatarFiles` solo borra `avatar_*`.
+- (Banner personalizable de esta fase SUSTITUIDO el 13 nov por los banners dinámicos; ver abajo.)
 - Crear partido exige 3 amigos distintos (regla del servidor): con 2 cuentas no se puede por diseño.
 - Push con la app cerrada: sigue sin implementar (requiere Firebase del usuario).
 
@@ -143,3 +142,16 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   set inválido, empate, conflicto de versión, avance, cambio tras empezar, participante sin permisos, UPDATE directo
   denegado (42501), extraño ve 0, campeón, corrección en cascada, 7 parejas en grupos 3/4, RR de 3, ligas intactas.
 - Tests: 254/254. Pendiente: probarlo en móvil con varias cuentas reales; portada se sube al bucket `avatars`.
+
+## Banners dinámicos por hora local (13 nov 2026, v1.4.1)
+- Solo 2 colecciones (`HomeBanner.banner1/banner2`, `home/domain/banner_schedule.dart`), 4 imágenes cada una en
+  `assets/images/banners/<banner1|banner2>/<amanecer|dia|atardecer|noche>.jpg` (1376×768, del zip `Banners_Plobby.zip`).
+- Franjas (hora LOCAL del dispositivo, `DateTime.now()`): 06–08:59 amanecer, 09–17:59 día, 18–19:59 atardecer, 20–05:59 noche.
+  `nextPhaseChange` usa el constructor local de DateTime (cambios de hora correctos).
+- `home/application/banner_clock.dart`: `bannerClockProvider` (autoDispose) = temporizador de un disparo al siguiente
+  cambio + `resumed` del ciclo de vida + comprobación cada minuto (zona horaria/hora del sistema). `bannerNowProvider` para tests.
+- Preferencia: `profiles.banner_id` ('banner1'/'banner2'; null o valor antiguo = Banner 1) vía RPC `set_home_banner`
+  (sin cambios de esquema). `banner_url` queda en la BD sin uso (siempre NULL). Selector: `banner_picker.dart`.
+- Eliminados: 8 SVG + foto clásica, subida/encuadre de foto propia (`banner_editor.dart`), `uploadBanner`/`deleteOldBanners`.
+  En la BD no había banners guardados (0 perfiles, 0 ficheros `banner_*`).
+- Tests: 261/261 (`test/home_banner_test.dart`, también con TZ=Europe/Madrid, America/New_York, Australia/Sydney).

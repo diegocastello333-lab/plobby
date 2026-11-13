@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/models.dart';
 import 'profile_repository.dart';
@@ -12,7 +11,7 @@ class SupabaseProfileRepository implements ProfileRepository {
   String get _uid => _db.auth.currentUser!.id;
   String _resolve(String id) => id == 'me' ? _uid : id;
 
-  static const _cols = 'id, display_name, username, avatar_url, avatar_id, banner_id, banner_url, city, bio, self_declared_level, court_side, dominant_hand, habitual_club, habitual_partner_id';
+  static const _cols = 'id, display_name, username, avatar_url, avatar_id, banner_id, city, bio, self_declared_level, court_side, dominant_hand, habitual_club, habitual_partner_id';
   static const _levels = {
     'beginner': ('Iniciación', 2.0), 'intermediate': ('Intermedio', 3.0),
     'upper_intermediate': ('Intermedio alto', 4.0), 'advanced': ('Avanzado', 5.0),
@@ -48,7 +47,7 @@ class SupabaseProfileRepository implements ProfileRepository {
     final club = (p['habitual_club'] as String?)?.trim();
     final profile = PlayerProfile(
       id: playerId, fullName: (p['display_name'] ?? '') as String, username: (p['username'] ?? '') as String, location: (p['city'] ?? '') as String,
-      avatarUrl: p['avatar_url'] as String?, avatarId: p['avatar_id'] as String?, bannerId: p['banner_id'] as String?, bannerUrl: p['banner_url'] as String?, bio: (p['bio'] ?? '') as String,
+      avatarUrl: p['avatar_url'] as String?, avatarId: p['avatar_id'] as String?, bannerId: p['banner_id'] as String?, bio: (p['bio'] ?? '') as String,
       declaredLevel: level?.$1 ?? 'Sin declarar', declaredLevelValue: level?.$2 ?? 0,
       side: p['court_side'] == 'left' ? PlaySide.left : PlaySide.right,
       dominantHand: p['dominant_hand'] == 'left' ? 'Izquierda' : 'Derecha',
@@ -80,24 +79,7 @@ class SupabaseProfileRepository implements ProfileRepository {
       _db.from('profiles').update({'bio': bio.trim(), 'updated_at': DateTime.now().toUtc().toIso8601String()}).eq('id', _uid);
 
   @override
-  Future<void> setBanner({String? presetId, String? url}) => _db.rpc('set_home_banner', params: {'p_banner_id': presetId, 'p_banner_url': url});
-
-  @override
-  Future<String> uploadBanner(List<int> jpeg) async {
-    final path = '$_uid/banner_${DateTime.now().millisecondsSinceEpoch}.jpg';   // la política de Storage exige <uid>/
-    await _db.storage.from('avatars').uploadBinary(path, Uint8List.fromList(jpeg), fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: false));
-    return _db.storage.from('avatars').getPublicUrl(path);
-  }
-
-  @override
-  Future<void> deleteOldBanners({String? keepUrl}) async {
-    try {
-      final bucket = _db.storage.from('avatars');
-      final files = await bucket.list(path: _uid);
-      final stale = [for (final f in files) if (f.name.startsWith('banner_') && bucket.getPublicUrl('$_uid/${f.name}') != keepUrl) '$_uid/${f.name}'];
-      if (stale.isNotEmpty) await bucket.remove(stale);
-    } catch (_) {/* limpieza best-effort: el perfil ya no apunta a esos ficheros */}
-  }
+  Future<void> setBanner(String bannerId) => _db.rpc('set_home_banner', params: {'p_banner_id': bannerId, 'p_banner_url': null});
 
   @override
   Future<List<ClubRef>> searchClubs(String q) async {
