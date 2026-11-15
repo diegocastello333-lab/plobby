@@ -5,11 +5,14 @@ import '../motion/app_motion.dart';
 import '../theme/design_tokens.dart';
 import '../theme/plobby_text.dart';
 
-/// Pulsación: escala ≈97 % + opacidad. Envuelve cualquier control interactivo SIN cambiar su acción.
-/// Usa un Listener, así que no compite con el gesto del hijo (onTap sigue siendo del hijo).
+/// Pulsación: escala ≈97 % + opacidad, y al soltar vuelve con un pequeño rebote (easeOutBack, como un muelle).
+/// Envuelve cualquier control interactivo SIN cambiar su acción. Usa un Listener, así que no compite con el gesto del
+/// hijo (onTap sigue siendo del hijo).
 class Pressable extends StatefulWidget {
-  const Pressable({super.key, required this.child, this.enabled = true});
+  const Pressable({super.key, required this.child, this.enabled = true, this.scale = AppAnimations.pressScale});
   final Widget child; final bool enabled;
+  /// Escala al pulsar (los botones grandes ≈.97; los redondos pequeños, como el «+», pueden bajar más).
+  final double scale;
   @override
   State<Pressable> createState() => _PressableState();
 }
@@ -23,7 +26,9 @@ class _PressableState extends State<Pressable> {
     return Listener(
       onPointerDown: (_) => _set(true), onPointerUp: (_) => _set(false), onPointerCancel: (_) => _set(false),
       child: AnimatedScale(
-        scale: _down && !reduce ? AppAnimations.pressScale : 1, duration: _down ? AppAnimations.press : AppAnimations.pressRelease, curve: AppAnimations.standard,
+        scale: _down && !reduce ? widget.scale : 1,
+        duration: _down ? AppAnimations.press : AppAnimations.pressRelease,
+        curve: _down ? AppAnimations.standard : AppAnimations.release,
         child: AnimatedOpacity(opacity: _down ? .92 : 1, duration: AppAnimations.press, child: widget.child)),
     );
   }
@@ -246,6 +251,48 @@ class SlidingTabs extends StatelessWidget {
                     builder: (_, col, __) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, // etiquetas largas: se reducen en vez de cortarse
                         child: Text(labels[i], maxLines: 1, style: PlobbyText.tab.copyWith(color: col)))))))))]),
           ]);
+        }),
+      );
+}
+
+/// Selector segmentado unido a un `PageView` (patrón «plan paginado»): la píldora lima sigue al dedo en cada fotograma
+/// del desplazamiento (no salta al soltar), se estira un poco a mitad de camino y el color de cada etiqueta se mezcla
+/// según la distancia a su página. Tocar una pestaña llama a [onTap]; quien lo usa anima el `PageView`.
+/// Mismo aspecto que [SlidingTabs] (`.seg` del prototipo).
+class ScrollLinkedTabs extends StatelessWidget {
+  const ScrollLinkedTabs({super.key, required this.labels, required this.controller, required this.onTap, this.height = 46});
+  final List<String> labels;
+  final PageController controller;
+  final ValueChanged<int> onTap;
+  final double height;
+
+  double _page() {
+    if (controller.hasClients && controller.positions.length == 1 && controller.position.haveDimensions) {
+      return controller.page ?? controller.initialPage.toDouble();
+    }
+    return controller.initialPage.toDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: height < AppLayout.minTap ? AppLayout.minTap : height, padding: const EdgeInsets.all(3),
+        decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rPill),
+        child: LayoutBuilder(builder: (_, c) {
+          final w = c.maxWidth / labels.length;
+          return AnimatedBuilder(animation: controller, builder: (_, __) {
+            final p = _page().clamp(0.0, labels.length - 1.0);
+            final frac = p - p.floorToDouble();
+            final stretch = AppAnimations.reduceMotion(context) ? 0.0 : math.sin(frac * math.pi) * .1 * w;   // ≤10 % a mitad
+            return Stack(alignment: Alignment.centerLeft, children: [
+              Positioned(left: p * w - stretch / 2, width: w + stretch, top: 0, bottom: 0,
+                  child: const DecoratedBox(decoration: BoxDecoration(color: AppColors.brand, borderRadius: AppRadius.rPill))),
+              Row(children: [for (var i = 0; i < labels.length; i++) Expanded(child: Semantics(selected: p.round() == i, button: true, child: InkWell(
+                  borderRadius: AppRadius.rPill, onTap: () => onTap(i),
+                  child: Center(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown,
+                      child: Text(labels[i], maxLines: 1, style: PlobbyText.tab.copyWith(
+                          color: Color.lerp(AppColors.brandInk, AppColors.textMuted, (p - i).abs().clamp(0.0, 1.0)))))))))) ]),
+            ]);
+          });
         }),
       );
 }

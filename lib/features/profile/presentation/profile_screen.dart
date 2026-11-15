@@ -51,6 +51,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final async = ref.watch(profileViewProvider(widget.playerId));
     // Fundido entre carga y contenido (antes el perfil aparecía de golpe).
     return Scaffold(
+      // Perfil propio (pestaña): fondo vivo de la barra inferior. Perfil de otro jugador (ruta encima): marfil opaco.
+      backgroundColor: widget.playerId == 'me' ? Colors.transparent : null,
       body: AnimatedSwitcher(duration: const Duration(milliseconds: 260), switchInCurve: Curves.easeOut, child: KeyedSubtree(key: ValueKey(async.hasValue ? 'data' : async.hasError ? 'error' : 'loading'), child: async.when(
         loading: () => const Center(child: CircularProgressIndicator(color: PlobbyColors.forest)),
         error: (e, _) => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [

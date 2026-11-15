@@ -213,3 +213,20 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   `ShareText` (`gamification_share.dart`, contenido centrado con doble pasada). Perfil propio → «Progreso»; perfil de amigo →
   Head to Head; Amigos → tarjeta de ranking; Inicio → logros del servidor. Eliminado el cálculo de logros en el móvil.
 - Tests: 360/360 (motor, interfaz, imágenes y verificador de maquetación).
+
+## Movimiento premium (15 nov 2026, v1.6.1)
+- Referencia: shot de 60fps.design «Revolut Select Plan Tab Scroll Interaction» (selector segmentado paginado, color
+  ambiente que se transforma con el desplazamiento, profundidad en tarjetas). El vídeo no se pudo descargar (permiso
+  denegado); se usó la descripción oficial del shot. Red del entorno: añadidos 60fps.design y video.gumlet.io.
+- `core/widgets/ambient_background.dart`: `AmbientBackground` (3 degradados radiales de la paleta, deriva 24 s, color
+  por `position` + `offset` en vivo, RepaintBoundary, quieto con «reducir movimiento»). En `AppShell` detrás de las 4
+  pestañas (sus Scaffold son transparentes; el perfil de otro jugador no). Paletas: home, feed, leagues, tournaments,
+  profile. Tests: `AmbientBackground.driftEnabled = false` en `test/flutter_test_config.dart`.
+- `ScrollLinkedTabs` (motion_widgets): píldora ligada a `PageController.page` (se estira ≤10 % a mitad).
+  Competiciones = PageView deslizable (keep-alive, `_DepthPage` escala 94 % sin solapes), `CompetitionsScreen.page`
+  alimenta el fondo; `competitionsTabProvider` sigue siendo la fuente (cambios externos se animan).
+- `AppShell`: `_BranchFade` (fundido 240 ms al cambiar de pestaña, estructura fija para no perder estado), icono con
+  «pop» al activarse, color animado, «+» con `Pressable(scale: .9)`. `Pressable` vuelve con easeOutBack 320 ms.
+  Hojas: entrada 380 ms easeOutCubic / salida 240 ms. Chips del feed: transparentes salvo fijos sobre contenido.
+- REGLA: un envoltorio animado debe devolver SIEMPRE la misma estructura (no `return child` a veces): si no, se
+  reconstruye la sección y pierde scroll/estado. Tests: 366/366 (`test/motion_premium_test.dart`).

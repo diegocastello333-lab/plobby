@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../motion/app_motion.dart';
 import '../theme/design_tokens.dart';
 import '../theme/plobby_text.dart';
 import 'motion_widgets.dart';
@@ -401,6 +402,10 @@ class SheetListItem extends StatelessWidget {
 Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => showModalBottomSheet<T>(
       context: context, isScrollControlled: true, showDragHandle: false, backgroundColor: AppColors.bg,
       useRootNavigator: true,   // por encima de la barra inferior, como `.shs` en el HTML
+      // Entrada algo más larga y con frenada suave (sensación de muelle), salida rápida.
+      sheetAnimationStyle: AppAnimations.reduceMotion(context)
+          ? AnimationStyle.noAnimation
+          : const AnimationStyle(duration: Duration(milliseconds: 380), curve: Curves.easeOutCubic, reverseDuration: Duration(milliseconds: 240), reverseCurve: Curves.easeInCubic),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [

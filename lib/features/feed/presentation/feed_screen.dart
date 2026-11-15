@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
@@ -35,6 +36,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
     final async = ref.watch(feedControllerProvider);
     final filter = ref.watch(feedFilterProvider);
     return Scaffold(
+      backgroundColor: Colors.transparent,   // fondo vivo de la barra inferior (AmbientBackground)
       body: RefreshIndicator(
         color: AppColors.text,
         onRefresh: () => ref.read(feedControllerProvider.notifier).refresh(),
@@ -128,7 +130,9 @@ class _Chips extends SliverPersistentHeaderDelegate {
   @override double get minExtent => 58;
   @override double get maxExtent => 58;
   @override
-  Widget build(BuildContext c, double s, bool o) => Container(color: AppColors.bg, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 14, 20, 10), children: [
+  // Sin contenido debajo: transparente (se ve el fondo vivo). Fija sobre publicaciones: marfil casi opaco, con fundido.
+  Widget build(BuildContext c, double s, bool o) => AnimatedContainer(duration: AppAnimations.scaled(c, AppAnimations.tab), curve: AppAnimations.standard,
+      color: o ? const Color(0xF5F6F8F1) : const Color(0x00F6F8F1), child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 14, 20, 10), children: [
         for (final e in _filters.entries) Padding(padding: const EdgeInsets.only(right: 8), child: Semantics(button: true, selected: sel == e.key, label: e.value, excludeSemantics: true, child: Material(
           color: sel == e.key ? AppColors.brand : Colors.transparent,
           shape: sel == e.key ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(9), side: const BorderSide(color: Color(0x1A171C19))),

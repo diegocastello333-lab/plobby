@@ -10,7 +10,7 @@ import '../theme/design_tokens.dart';
 class AppAnimations {
   AppAnimations._();
   static const press = Duration(milliseconds: 120);      // 100–180 ms
-  static const pressRelease = Duration(milliseconds: 160);
+  static const pressRelease = Duration(milliseconds: 320);   // vuelta con rebote suave
   static const tab = Duration(milliseconds: 220);
   static const appear = Duration(milliseconds: 260);     // 200–300 ms
   static const appearStep = Duration(milliseconds: 40);  // retraso progresivo
@@ -23,6 +23,13 @@ class AppAnimations {
   static const emphasis = Curves.easeOutCubic;
   static const standard = Curves.easeOutCubic;
   static const settle = Curves.easeOutBack;
+  /// Soltar un botón: ligero rebote (≈muelle poco amortiguado) para que la respuesta se sienta física.
+  static const release = Curves.easeOutBack;
+  /// Cambio de página en selectores paginados (pestañas ↔ PageView).
+  static const page = Duration(milliseconds: 420);
+  static const pageCurve = Curves.easeOutCubic;
+  /// Cambio entre pestañas de la barra inferior: fundido rápido del contenido.
+  static const branch = Duration(milliseconds: 240);
 
   /// Retraso escalonado con tope, para que una lista larga no resulte lenta.
   static Duration staggerDelay(int index) {

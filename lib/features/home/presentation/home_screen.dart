@@ -55,6 +55,7 @@ class HomeScreen extends ConsumerWidget {
     final c = ref.watch(homeCountersProvider);
     final view = ref.watch(profileViewProvider('me'));
     return Scaffold(
+      backgroundColor: Colors.transparent,   // fondo vivo de la barra inferior (AmbientBackground)
       body: RefreshIndicator(
         color: AppColors.text,
         onRefresh: () async {
