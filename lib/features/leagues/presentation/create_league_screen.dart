@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +81,7 @@ class _Step1 extends ConsumerWidget {
       _label('Portada'),
       GridView.count(crossAxisCount: 3, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), mainAxisSpacing: 10, crossAxisSpacing: 10, childAspectRatio: 110 / 64, children: [
         for (final cv in leagueCovers)
-          Semantics(button: true, selected: d.cover == cv, label: 'Portada $cv', excludeSemantics: true, child: GestureDetector(onTap: () { HapticFeedback.selectionClick(); c.edit((x) => x.copyWith(cover: cv)); },
+          Semantics(button: true, selected: d.cover == cv, label: 'Portada $cv', excludeSemantics: true, child: GestureDetector(onTap: () { AppHaptics.selection(); c.edit((x) => x.copyWith(cover: cv)); },
               child: Stack(children: [
                 Positioned.fill(child: LeagueCover(cover: cv, height: 64, radius: 10)),
                 Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
@@ -146,7 +147,7 @@ class _InviteRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Semantics(checked: selected, label: '$name, $sub', excludeSemantics: true, child: Material(
         color: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: selected ? AppColors.text : const Color(0x1A171C19), width: selected ? 1.5 : 1)),
-        child: InkWell(borderRadius: BorderRadius.circular(12), onTap: () { HapticFeedback.selectionClick(); onTap(); }, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), child: Row(children: [
+        child: InkWell(borderRadius: BorderRadius.circular(12), onTap: () { AppHaptics.selection(); onTap(); }, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), child: Row(children: [
           LeagueAvatar(name: name, avatarUrl: avatarUrl, size: 36),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

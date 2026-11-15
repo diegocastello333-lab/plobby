@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
@@ -87,7 +87,7 @@ class _OptionCardState extends State<_OptionCard> {
             onTap: () {
               if (_done) return;
               _done = true;
-              HapticFeedback.selectionClick();
+              AppHaptics.selection();
               _go(context, '/match/new?type=${widget.type}');
             },
             child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 96), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18), child: Row(children: [

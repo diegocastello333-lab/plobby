@@ -79,12 +79,13 @@ class RoleBadge extends StatelessWidget {
     final org = role == LeagueRole.organizer;
     final fg = org ? AppColors.brandInk : AppColors.brand;
     return Container(
-      height: compact ? 18 : 22, padding: const EdgeInsets.symmetric(horizontal: 8),
+      constraints: BoxConstraints(minHeight: compact ? 18 : 22), padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(color: org ? AppColors.brand : AppColors.inverse, borderRadius: BorderRadius.circular(6)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
+      // Insignia: si no cabe (texto muy grande en móvil estrecho) se reduce entera en vez de desbordar.
+      child: FittedBox(fit: BoxFit.scaleDown, child: Row(mainAxisSize: MainAxisSize.min, children: [
         PlobbyIcon(org ? PlobbyIcons.star : PlobbyIcons.shield, size: compact ? 10 : 12, strokeWidth: 2.2, color: fg), const SizedBox(width: 5),
-        Text(role.label.toUpperCase(), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: compact ? 9 : 10.5, fontWeight: FontWeight.w800, letterSpacing: compact ? .72 : .84, color: fg)),
-      ]),
+        Text(role.label.toUpperCase(), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: compact ? .66 : .84, color: fg)),
+      ])),
     );
   }
 }
@@ -171,7 +172,7 @@ class MyLeagueCard extends StatelessWidget {
                   constraints: const BoxConstraints(minWidth: 74), padding: const EdgeInsets.fromLTRB(10, 9, 10, 8),
                   decoration: BoxDecoration(color: AppColors.inverse, borderRadius: BorderRadius.circular(10)),
                   child: Column(children: [
-                    const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.08, color: Color(0xB3F6F8F1))),
+                    const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.08, color: Color(0xB3F6F8F1))),
                     const SizedBox(height: 3),
                     Text(l.myRank == null ? '—' : '#${l.myRank}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 30, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.9, color: AppColors.brand)),
                     const SizedBox(height: 3),
@@ -227,11 +228,11 @@ class DiscoverLeagueCard extends StatelessWidget {
             Row(children: [
               Expanded(child: LeagueProgressBar(value: d.maxPlayers == 0 ? 0 : d.members / d.maxPlayers, semanticsLabel: 'Plazas ocupadas')),
               const SizedBox(width: 10),
-              Text('${d.members}/${d.maxPlayers} jugadores', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+              Flexible(child: Text('${d.members}/${d.maxPlayers} jugadores', textAlign: TextAlign.end, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
             ]),
             if (d.friendsIn > 0) Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
               const PlobbyIcon(PlobbyIcons.users, size: 16, color: AppColors.textMuted), const SizedBox(width: 8),
-              Text(d.friendsIn == 1 ? '1 amigo juega aquí' : '${d.friendsIn} amigos juegan aquí', style: _meta.copyWith(fontSize: 12)),
+              Expanded(child: Text(d.friendsIn == 1 ? '1 amigo juega aquí' : '${d.friendsIn} amigos juegan aquí', style: _meta.copyWith(fontSize: 12))),
             ])),
             const SizedBox(height: 14),
             PlobbyButton(

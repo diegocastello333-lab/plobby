@@ -94,7 +94,7 @@ class BracketMatchCard extends StatelessWidget {
           row(1),
           Container(height: 1, color: const Color(0x14171C19)),
           row(2),
-          if (live) const Align(alignment: Alignment.centerRight, child: Text('EN JUEGO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF1FA463)))),
+          if (live) const Align(alignment: Alignment.centerRight, child: Text('EN JUEGO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF1FA463)))),
         ]),
       ))),
     );

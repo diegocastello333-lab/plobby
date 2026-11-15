@@ -68,7 +68,8 @@ class PlobbyButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: radius, side: _outline ? const BorderSide(color: AppColors.borderStrong, width: 1.5) : BorderSide.none),
         child: InkWell(
           borderRadius: radius,
-          onTap: enabled ? () { HapticFeedback.selectionClick(); onPressed!(); } : null,
+          // Háptico solo en la acción principal (HIG: no abusar): el resto de botones responden con la animación.
+          onTap: enabled ? () { if (kind == PlobbyButtonKind.primary || kind == PlobbyButtonKind.dark) AppHaptics.tap(); onPressed!(); } : null,
           child: SizedBox(height: h, child: Padding(padding: EdgeInsets.symmetric(horizontal: _small ? 14 : 12), child: Center(widthFactor: 1, child: content))),
         ),
       ),
@@ -180,12 +181,14 @@ class PlobbyFilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
         button: true, selected: selected, label: label, excludeSemantics: true,
-        child: Pressable(child: Material(
-          color: selected ? AppColors.brand : AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.rSm, side: selected ? BorderSide.none : const BorderSide(color: Color(0x1F171C19))),
-          child: InkWell(borderRadius: AppRadius.rSm, onTap: () { HapticFeedback.selectionClick(); onTap(); },
-              child: SizedBox(height: 34, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Center(widthFactor: 1, child: Text(label, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text)))))),
+        // El fondo pasa a lima con un fundido corto (antes cambiaba de golpe) y la altura crece con el texto del sistema.
+        child: Pressable(child: AnimatedContainer(
+          duration: AppAnimations.scaled(context, AppAnimations.press * 1.5), curve: AppAnimations.standard,
+          decoration: BoxDecoration(color: selected ? AppColors.brand : AppColors.surface, borderRadius: AppRadius.rSm,
+              border: Border.all(color: selected ? AppColors.brand : const Color(0x1F171C19))),
+          child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rSm, onTap: () { if (!selected) AppHaptics.selection(); onTap(); },
+              child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 32), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),   // 32 + borde 1+1 = 34 (.fc)
+                  child: Center(widthFactor: 1, heightFactor: 1, child: Text(label, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text))))))),
         )),
       );
 }
@@ -267,7 +270,7 @@ class OptionCard extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),
               side: BorderSide(color: selected ? AppColors.text : const Color(0x1F171C19), width: selected ? 2 : 1)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(12), onTap: () { HapticFeedback.selectionClick(); onTap(); },
+            borderRadius: BorderRadius.circular(12), onTap: () { AppHaptics.selection(); onTap(); },
             child: Padding(padding: const EdgeInsets.all(14), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Container(width: 38, height: 38, decoration: BoxDecoration(color: selected ? AppColors.inverse : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(10)),
                   child: Center(child: PlobbyIcon(icon, color: selected ? AppColors.brand : AppColors.text))),
@@ -405,7 +408,7 @@ Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => sh
       // Entrada algo más larga y con frenada suave (sensación de muelle), salida rápida.
       sheetAnimationStyle: AppAnimations.reduceMotion(context)
           ? AnimationStyle.noAnimation
-          : const AnimationStyle(duration: Duration(milliseconds: 380), curve: Curves.easeOutCubic, reverseDuration: Duration(milliseconds: 240), reverseCurve: Curves.easeInCubic),
+          : const AnimationStyle(duration: Duration(milliseconds: 420), curve: AppSprings.smooth, reverseDuration: Duration(milliseconds: 240), reverseCurve: Curves.easeInCubic),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [

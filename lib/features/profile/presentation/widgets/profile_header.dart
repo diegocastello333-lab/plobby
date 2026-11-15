@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -57,7 +57,7 @@ class ProfileHeader extends ConsumerWidget {
           const SizedBox(width: 16),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Flexible(child: Text(p.fullName, overflow: TextOverflow.ellipsis,
+              Flexible(child: Text(p.fullName, maxLines: 2, overflow: TextOverflow.ellipsis,   // 2 líneas: con texto grande no se corta
                   style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink50, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
               if (p.verified) Padding(padding: const EdgeInsets.only(left: 7), child: Semantics(label: 'Perfil verificado', child: Container(width: 20, height: 20,
                   decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.lime300),
@@ -90,17 +90,22 @@ class ProfileHeader extends ConsumerWidget {
           _Chip('Nivel declarado', p.declaredLevel), _Chip('Posición', p.side == PlaySide.right ? 'Derecha' : 'Izquierda'), _Chip('Mano', p.dominantHand),
         ]),
         const SizedBox(height: 18),
-        Row(children: [
-          Expanded(flex: 100, child: isOwner
+        // Con texto grande (≥130 %) los dos botones se apilan a lo ancho en vez de recortar su etiqueta
+        // (HIG › Typography: «consider using a stacked layout»).
+        Builder(builder: (context) {
+          final first = isOwner
               ? _Btn('Editar perfil', PlobbyIcons.edit, false, () => context.push('/profile/edit'))
-              : AnimatedSwitcher(duration: const Duration(milliseconds: 220), child: _friendButton(context, ref, rel, p))),
-          const SizedBox(width: 10),
-          Expanded(flex: 125, child: isOwner
+              : AnimatedSwitcher(duration: const Duration(milliseconds: 220), child: _friendButton(context, ref, rel, p));
+          final second = isOwner
               ? _Btn('Compartir mis stats', PlobbyIcons.share, true, () => context.push('/profile/share'))
               : rel == RelationState.friend
                   ? _Btn('Enviar mensaje', PlobbyIcons.plane, true, () => context.push('/messages/with/${p.id}'))
-                  : _Btn('Compartir perfil', PlobbyIcons.share, true, () => Share.share('https://plobby.app/@${p.username}'))),
-        ]),
+                  : _Btn('Compartir perfil', PlobbyIcons.share, true, () => Share.share('https://plobby.app/@${p.username}'));
+          if (MediaQuery.textScalerOf(context).scale(14) / 14 >= 1.3) {
+            return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [second, const SizedBox(height: 10), first]);
+          }
+          return Row(children: [Expanded(flex: 100, child: first), const SizedBox(width: 10), Expanded(flex: 125, child: second)]);
+        }),
       ]),
     );
   }
@@ -113,7 +118,7 @@ Widget _friendButton(BuildContext context, WidgetRef ref, RelationState rel, Pla
   Future<void> run(Future<void> Function() job, String ok, String fail) async {
     try {
       await job();
-      HapticFeedback.mediumImpact();
+      AppHaptics.success();
       if (context.mounted) showPlobbySnack(context, ok);
     } catch (_) {
       if (context.mounted) showPlobbySnack(context, fail, error: true);
@@ -164,10 +169,10 @@ class _Btn extends StatelessWidget {
     final fg = hi ? AppColors.ink900 : AppColors.ink50;
     return Semantics(button: true, label: t, excludeSemantics: true, child: Pressable(child: Material(
       color: hi ? AppColors.lime300 : const Color(0x24F6F8F1), borderRadius: BorderRadius.circular(11),
-      child: InkWell(borderRadius: BorderRadius.circular(11), onTap: f, child: SizedBox(height: 44, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      child: InkWell(borderRadius: BorderRadius.circular(11), onTap: f, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44), child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         PlobbyIcon(i, size: 16, color: fg), const SizedBox(width: 7),
         Flexible(child: Text(t, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: fg))),
-      ]))),
+      ])))),
     )));
   }
 }

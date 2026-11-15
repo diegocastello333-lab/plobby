@@ -87,7 +87,7 @@ class _Match extends StatelessWidget {
       onTap: () => context.push('/match/${p.matchId}'),
       child: Padding(padding: const EdgeInsets.only(top: 12), child: Column(children: [
         _Team(users: p.teamA, scores: p.sets.map((s) => s.$1).toList(), win: p.won),
-        const Align(alignment: Alignment.centerLeft, child: Padding(padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: AppColors.borderStrong)))),
+        const Align(alignment: Alignment.centerLeft, child: Padding(padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: AppColors.textMuted)))),
         _Team(users: p.teamB, scores: p.sets.map((s) => s.$2).toList(), win: !p.won),
         const SizedBox(height: 10),
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

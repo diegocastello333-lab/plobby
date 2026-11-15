@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/plobby_theme.dart';
 import '../../../../core/theme/plobby_text.dart';
@@ -79,7 +79,7 @@ class _S extends ConsumerState<CommentsSheet> {
     try {
       await ref.read(commentsProvider(widget.postId).notifier).add(ctl.text);
       ctl.clear();
-      HapticFeedback.lightImpact();
+      AppHaptics.tap();
     } catch (e) {
       if (mounted) showPlobbySnack(context, friendlyFeedError(e), error: true);
     } finally {

@@ -24,10 +24,10 @@ class MatchCard extends StatelessWidget {
             child: Column(children: [
               Row(children: [
                 for (final p in [me, m.partner]) _Avatar(p),
-                const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('VS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: PlobbyColors.mute))),
+                const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('VS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: PlobbyColors.mute))),
                 for (final p in m.opponents) _Avatar(p),
-                const Spacer(),
-                _Badge(pending ? 'PENDIENTE' : (m.won ? 'VICTORIA' : 'DERROTA'), pending || !m.won),
+                // La etiqueta ocupa el hueco restante y se reduce si no cabe (texto muy grande en móvil estrecho).
+                Expanded(child: Align(alignment: Alignment.centerRight, child: FittedBox(fit: BoxFit.scaleDown, child: _Badge(pending ? 'PENDIENTE' : (m.won ? 'VICTORIA' : 'DERROTA'), pending || !m.won)))),
               ]),
               const SizedBox(height: 10),
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [

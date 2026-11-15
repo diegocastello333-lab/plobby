@@ -169,7 +169,7 @@ class _AdminBadge extends StatelessWidget {
   const _AdminBadge();
   @override
   Widget build(BuildContext context) => Container(margin: const EdgeInsets.only(left: 8), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(5)),
-      child: const Text('ADMIN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: .76, color: AppColors.brandInk)));
+      child: const Text('ADMIN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .76, color: AppColors.brandInk)));
 }
 
 /// Hoja «Nombre del grupo»: es dueña de su controlador (se libera al cerrarse la hoja). Devuelve el nombre o null.

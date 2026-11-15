@@ -123,10 +123,10 @@ class _AddLeagueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(button: true, label: 'Crear una liga nueva', excludeSemantics: true, child: Material(
         color: Colors.transparent, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong, width: 1.5)),
-        child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: const SizedBox(height: 58, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 58), child: const Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           PlobbyIcon(PlobbyIcons.plus, size: 18, strokeWidth: 2.2), SizedBox(width: 8),
-          Text('Crear una liga nueva', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
-        ]))),
+          Flexible(child: Text('Crear una liga nueva', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+        ])))),
       ));
 }
 

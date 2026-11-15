@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image/image.dart' as img;
@@ -77,7 +77,7 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
       final cover = d.coverBytes == null ? null : await repo.uploadCover(d.coverBytes!);
       final id = await repo.create(d, coverUrl: cover);
       ref.invalidate(myTournamentsProvider);
-      HapticFeedback.mediumImpact();
+      AppHaptics.success();
       if (!mounted) return;
       showPlobbySnack(context, 'Torneo creado. ¡Cuadro y partidos listos!');
       context.pushReplacement('/tournaments/$id');

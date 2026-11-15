@@ -145,7 +145,8 @@ class _Podium extends StatelessWidget {
     }
     final order = [if (rows.length > 1) (rows[1], 64.0), (rows[0], 92.0), if (rows.length > 2) (rows[2], 48.0)];
     return Semantics(container: true, label: 'Podio: ${rows.map((r) => '${r.pos(metric)}º ${r.player.name}').join(', ')}', excludeSemantics: true,
-        child: SizedBox(height: 252, child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        // 252 con texto normal; crece con Dynamic Type (nombres y victorias bajo cada avatar).
+        child: SizedBox(height: 252 + 44 * (MediaQuery.textScalerOf(context).scale(12) / 12 - 1).clamp(0.0, 2.0), child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           for (final (r, h) in order) ...[step(r, h), if (r != order.last.$1) const SizedBox(width: 10)],
         ])));
   }

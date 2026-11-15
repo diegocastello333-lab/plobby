@@ -22,9 +22,9 @@ class PlobbyText {
   /// `.sub` — entradilla bajo el título: Inter 14/400, lh 1.4, gris.
   static const sub = TextStyle(fontFamily: _s, fontSize: 14, height: 1.4, fontWeight: FontWeight.w400, letterSpacing: 0, color: AppColors.textMuted);
   /// `.eb` — etiqueta en mayúsculas («ACTIVAS», «PASO 1 DE 5»): Inter 10.5/700, +0.14em. Escribir el texto en mayúsculas.
-  static const eb = TextStyle(fontFamily: _s, fontSize: 10.5, height: 13 / 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: AppColors.textMuted);
+  static const eb = TextStyle(fontFamily: _s, fontSize: 11, height: 14 / 11, fontWeight: FontWeight.w700, letterSpacing: 1.32, color: AppColors.textMuted);
   /// `.info .k` — clave de ficha («UBICACIÓN»): Inter 10.5/700, +0.12em, mayúsculas.
-  static const key = TextStyle(fontFamily: _s, fontSize: 10.5, height: 13 / 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.26, color: AppColors.textMuted);
+  static const key = TextStyle(fontFamily: _s, fontSize: 11, height: 14 / 11, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.textMuted);
   /// `.info .vv` — valor de ficha: Inter 14/600, lh 1.3.
   static const value = TextStyle(fontFamily: _s, fontSize: 14, height: 1.3, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text);
   /// `.desc` — párrafo descriptivo: Inter 14/400, lh 1.5, tinta 700.

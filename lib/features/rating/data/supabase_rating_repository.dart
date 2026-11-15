@@ -8,9 +8,13 @@ class SupabaseRatingRepository implements RatingRepository {
   final SupabaseClient _db;
   @override
   Future<RatingDetail> myRating() async {
-    final d = await _db.from('v_my_rating_detail').select().single();
-    final cfg = await _db.from('rating_config').select().eq('id', 1).single();
-    final rows = await _db.from('v_my_rating_changes').select().order('created_at', ascending: false).limit(500);
+    // Las tres lecturas son independientes: en paralelo (1 viaje de red en vez de 3 seguidos).
+    final res = await Future.wait<dynamic>([
+      _db.from('v_my_rating_detail').select().single(),
+      _db.from('rating_config').select().eq('id', 1).single(),
+      _db.from('v_my_rating_changes').select().order('created_at', ascending: false).limit(500),
+    ]);
+    final d = res[0] as Map<String, dynamic>, cfg = res[1] as Map<String, dynamic>, rows = res[2];
     return RatingDetail(
       name: d['display_name'], username: d['username'], avatarUrl: d['avatar_url'],
       elo: d['elo'], bestElo: d['best_elo'], delta30: d['delta_30d'],

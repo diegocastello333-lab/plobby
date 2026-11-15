@@ -68,7 +68,7 @@ class UpcomingMatchCard extends ConsumerWidget {
             StatusChip(status: m.status),
           ]),
           const SizedBox(height: 14),
-          Row(children: [Expanded(child: _Team(m.team(1), uid: uid)), const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('VS', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted))), Expanded(child: _Team(m.team(2), uid: uid))]),
+          Row(children: [Expanded(child: _Team(m.team(1), uid: uid)), const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('VS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted))), Expanded(child: _Team(m.team(2), uid: uid))]),
           const Divider(height: 24),
           Row(children: [
             PlobbyIcon(m.type == MatchType.league ? PlobbyIcons.trophy : PlobbyIcons.racket, size: 14, strokeWidth: 2, color: m.type == MatchType.league ? AppColors.brandText : AppColors.textMuted), const SizedBox(width: 6),

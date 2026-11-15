@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../profile/presentation/widgets/win_streak_badge.dart';
 
@@ -7,7 +7,7 @@ import '../../profile/presentation/widgets/win_streak_badge.dart';
 /// `profileViewProvider('me').streak`). Háptico ligero al abrir (más intenso con rachas altas) y
 /// celebración (chispas) para rachas >= 5, respetando "reducir movimiento".
 Future<void> showStreakSheet(BuildContext context, {required int current, required int best}) {
-  if (current >= 5) { HapticFeedback.mediumImpact(); } else if (current > 0) { HapticFeedback.lightImpact(); }
+  if (current >= 5) { AppHaptics.success(); } else if (current > 0) { AppHaptics.tap(); }
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/domain/auth_models.dart' show isValidAvatarId;
@@ -155,7 +155,7 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
   }
 
   void _show(LiveBanner b) {
-    HapticFeedback.lightImpact();
+    AppHaptics.tap();
     _hide?.cancel();
     setState(() { _banner = b; _seq++; });
     _hide = Timer(const Duration(seconds: 4), _dismiss);

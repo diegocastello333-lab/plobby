@@ -22,7 +22,10 @@ Future<void> _openFeed(WidgetTester t, {double width = 390}) async {
 void main() {
   testWidgets('cabecera, burbujas y tarjetas de actividad', (t) async {
     await _openFeed(t);
-    expect(find.bySemanticsLabel('Plobby'), findsOneWidget);
+    // Título grande con sus acciones en la misma fila (sin el logotipo repetido).
+    expect(find.text('Feed'), findsWidgets);
+    expect(find.bySemanticsLabel('Plobby'), findsNothing);
+    expect(find.bySemanticsLabel('Mi perfil'), findsOneWidget);
     expect(find.text('Tu comunidad de pádel está jugando.'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('actividad reciente')), findsWidgets);
     expect(find.byType(ActivityCard), findsWidgets);

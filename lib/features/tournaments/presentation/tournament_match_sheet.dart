@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -49,7 +50,7 @@ class _MatchSheetState extends ConsumerState<_MatchSheet> {
     setState(() { _busy = true; _error = null; });
     try {
       await job();
-      HapticFeedback.mediumImpact();
+      AppHaptics.success();
       if (!mounted) return;
       Navigator.pop(context);
       showPlobbySnack(context, ok);

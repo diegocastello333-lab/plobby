@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import '../../gamification/presentation/gamification_widgets.dart';
 import '../../gamification/domain/gamification_models.dart';
 import '../../gamification/application/gamification_providers.dart';
@@ -277,7 +278,7 @@ class _Counters extends ConsumerWidget {
           ]))),
           const SizedBox(height: 3),
           const Text('Racha de victorias', textAlign: TextAlign.center, maxLines: 2,
-              style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9, height: 1.1, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.textMuted)),
+              style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.1, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.textMuted)),
         ]),
       )),
     ]));
@@ -345,8 +346,8 @@ class _FriendMatchesState extends ConsumerState<_FriendMatches> {
           final sel = _sel.clamp(0, latest.length - 1);
           final p = latest[sel], m = p.payload as MatchPayload;
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            // .row#stories: margin 0 −20px; padding 4px 20px 12px; gap 14
-            Transform.translate(offset: Offset.zero, child: SizedBox(height: 66 + 12 + 17 + 16, child: OverflowBox(maxWidth: MediaQuery.sizeOf(context).width, child: ListView.separated(
+            // .row#stories: margin 0 −20px; padding 4px 20px 12px; gap 14. El alto crece con el tamaño de texto del sistema.
+            Transform.translate(offset: Offset.zero, child: SizedBox(height: 66 + 12 + 18 + 17 * MediaQuery.textScalerOf(context).scale(13) / 13, child: OverflowBox(maxWidth: MediaQuery.sizeOf(context).width, child: ListView.separated(
               scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 4, 20, 12), itemCount: latest.length, separatorBuilder: (_, __) => const SizedBox(width: 14),
               itemBuilder: (_, i) => _Story(user: latest[i].author, selected: i == sel, onTap: () => setState(() => _sel = i)),
             )))),
@@ -472,9 +473,11 @@ class _Achievements extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final list = items;
-    return SizedBox(height: 76 + 10 + 33 + 18 + 4, child: OverflowBox(maxWidth: MediaQuery.sizeOf(context).width, child: ListView.separated(
-      scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 20), itemCount: list.length, separatorBuilder: (_, __) => const SizedBox(width: 12),
-      itemBuilder: (_, i) {
+    // Fila desplazable que toma el alto de su contenido (los títulos crecen con el tamaño de texto del sistema): sin
+    // alturas adivinadas. Son pocos logros (≤ 20), así que no hace falta un constructor perezoso.
+    return OverflowBox(maxWidth: MediaQuery.sizeOf(context).width, fit: OverflowBoxFit.deferToChild, child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [for (var i = 0; i < list.length; i++) Padding(padding: EdgeInsets.only(right: i == list.length - 1 ? 0 : 12), child: Builder(builder: (_) {
         final a = list[i];
         return Semantics(label: '${a.title}: ${a.unlocked ? 'conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}'}', excludeSemantics: true, child: SizedBox(width: 84, child: Column(children: [
           if (a.unlocked)
@@ -489,8 +492,8 @@ class _Achievements extends StatelessWidget {
           const SizedBox(height: 3),
           Text(a.unlocked ? 'Conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
         ])));
-      },
-    )));
+      }))]),
+    ));
   }
 }
 

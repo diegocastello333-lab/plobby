@@ -55,7 +55,9 @@ class PersonRow extends StatelessWidget {
               ])),
             ]),
           )))),
-          if (trailing != null) ...[const SizedBox(width: 10), trailing!],
+          // El botón de la derecha nunca empuja el nombre fuera de la fila (texto grande): se reduce lo justo.
+          if (trailing != null) ...[const SizedBox(width: 10), ConstrainedBox(constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * .42),
+              child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: trailing!))],
         ]),
       );
 }

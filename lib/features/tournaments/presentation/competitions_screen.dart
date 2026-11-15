@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/motion/app_motion.dart';
@@ -61,7 +60,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
         Padding(padding: const EdgeInsets.fromLTRB(20, 26, 20, 0), child: Semantics(header: true, child: const Text('Competiciones', style: PlobbyText.t1))),
         Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: ScrollLinkedTabs(labels: const ['Ligas', 'Torneos'], controller: _pc, onTap: (i) {
-              HapticFeedback.selectionClick();
+              AppHaptics.selection();
               if (ref.read(competitionsTabProvider) == i) { _goTo(i); } else { ref.read(competitionsTabProvider.notifier).state = i; }
             })),
         // Cada sección conserva su desplazamiento y sus datos al cambiar de una a otra (keep-alive).

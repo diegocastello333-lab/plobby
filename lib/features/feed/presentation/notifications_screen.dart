@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
@@ -73,7 +74,8 @@ class NotificationsScreen extends ConsumerWidget {
               itemBuilder: (_, i) {
                 final x = rows[i];
                 if (x is String) return Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 10), child: Semantics(header: true, child: Text(x.toUpperCase(), style: PlobbyText.eb)));
-                return _Row(n: x as AppNotification, onTap: () { n.markRead(x.id); context.push(x.type.route(x)); }, onRespond: (ok) => n.respond(x.id, ok));
+                // Entrada escalonada UNA vez por aviso (al llegar uno nuevo, solo ese aparece animado).
+                return AppearOnce(animationKey: 'ntf:${(x as AppNotification).id}', index: i, child: _Row(n: x, onTap: () { n.markRead(x.id); context.push(x.type.route(x)); }, onRespond: (ok) => n.respond(x.id, ok)));
               },
             );
           },

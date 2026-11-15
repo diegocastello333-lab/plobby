@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_components.dart';
@@ -75,7 +76,7 @@ class _ShareSheetState extends State<_ShareSheet> {
     try {
       final png = await widget.target.png(_fmt, _images);
       await job(png);
-      HapticFeedback.lightImpact();
+      AppHaptics.tap();
       if (mounted) showPlobbySnack(context, ok);
     } catch (_) {
       if (mounted) showPlobbySnack(context, 'No se pudo generar la imagen. Inténtalo de nuevo.', error: true);

@@ -46,8 +46,8 @@ class _EloBarState extends State<EloBar> with TickerProviderStateMixin {
               Positioned(
                 left: (c.maxWidth * (t.from - widget.scale.min) / (widget.scale.max - widget.scale.min)).clamp(0, c.maxWidth - 60).toDouble(),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(t.name, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: PlobbyColors.ivory)),
-                  Text('${t.from}', style: TextStyle(fontSize: 10, color: PlobbyColors.ivory.withOpacity(.6))),
+                  Text(t.name, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: PlobbyColors.ivory)),
+                  Text('${t.from}', style: TextStyle(fontSize: 11, color: PlobbyColors.ivory.withOpacity(.6))),
                 ]),
               ),
           ]))),

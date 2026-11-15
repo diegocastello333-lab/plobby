@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/plobby_components.dart';
@@ -44,7 +43,7 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
 
   Future<void> _run(RecapData d, RecapFormat f, Future<RecapAction> Function(RecapService, Uint8List, String) act) async {
     if (busy) return;
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     setState(() { busy = true; done = null; });
     final svc = ref.read(recapServiceProvider);
     try {
@@ -79,7 +78,7 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
           return ListView(padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.s2, AppSpacing.screenH, AppSpacing.s8), children: [
             _Preview(d: d, tpl: tpl, fmt: fmt, opts: opts, images: images, busy: busy),
             const SizedBox(height: AppSpacing.s4),
-            SizedBox(height: 44, child: _Carousel(tpl: tpl, controller: _pc, onChanged: (t) { HapticFeedback.selectionClick(); setState(() => tpl = t); })),
+            SizedBox(height: 44, child: _Carousel(tpl: tpl, controller: _pc, onChanged: (t) { AppHaptics.selection(); setState(() => tpl = t); })),
             const SizedBox(height: AppSpacing.s3),
             SlidingTabs(labels: [for (final f in RecapFormat.values) f.label], index: fmt.index, onChanged: (i) => setState(() => fmt = RecapFormat.values[i])),
             const SizedBox(height: AppSpacing.s2),

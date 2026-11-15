@@ -29,7 +29,7 @@ class MatchResultCard extends StatelessWidget {
                 const Text('plobby', style: TextStyle(fontFamily: 'Unbounded', fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -.42, color: AppColors.lime300)),
                 const Spacer(),
                 Flexible(child: Text(d.isLeague && d.leagueName != null ? '${tag.split(' · ').first} · ${d.leagueName}' : tag, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF9AA39D)))),
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF9AA39D)))),
               ]),
               const SizedBox(height: 10),
               // marcador por sets: el resultado es lo más visible

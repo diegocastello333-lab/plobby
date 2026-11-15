@@ -73,7 +73,7 @@ class _Row extends StatelessWidget {
           ? ClipOval(child: SizedBox(width: 34, height: 34, child: avatarUrl != null && avatarUrl!.isNotEmpty
               ? Image.network(avatarUrl!, fit: BoxFit.cover, cacheWidth: 102, errorBuilder: (_, __, ___) => avatar!) : avatar))
           : Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.ink900))),
-      title: Text(label, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
+      title: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: PlobbyColors.charcoal)),
         if (sub != null) Text(sub!, style: const TextStyle(fontSize: 12.5, color: PlobbyColors.mute)),

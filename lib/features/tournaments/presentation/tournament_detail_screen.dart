@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -50,7 +51,11 @@ class _TournamentDetailScreenState extends ConsumerState<TournamentDetailScreen>
     final async = ref.watch(tournamentDetailProvider(widget.tournamentId));
     return Scaffold(
       body: async.when(
-        loading: () => const SafeArea(child: Center(child: CircularProgressIndicator(color: AppColors.text))),
+        // Esqueleto con la forma final (portada + pestañas + tarjetas): algo aparece al instante (HIG › Loading).
+        loading: () => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          SkeletonBox(height: 150 + MediaQuery.paddingOf(context).top, radius: BorderRadius.zero),
+          const Padding(padding: EdgeInsets.all(20), child: Column(children: [LoadingBlock(height: 44, radius: AppRadius.pill), SizedBox(height: 16), LoadingBlock(height: 120), SizedBox(height: 12), LoadingBlock(height: 120)])),
+        ]),
         error: (e, _) => SafeArea(child: Column(children: [
           PlobbyHeaderBar(title: 'Torneo', onBack: () => context.pop()),
           Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(
@@ -77,8 +82,8 @@ class _TournamentDetailScreenState extends ConsumerState<TournamentDetailScreen>
               ])),
             ]),
             // Pestañas desplazables (en móviles estrechos no caben todas).
-            SizedBox(height: 56, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(16, 10, 16, 6), children: [
-              for (final (k, label) in _tabs(d)) Padding(padding: const EdgeInsets.only(right: 8), child: _TabChip(label: label, selected: tab == k, onTap: () => setState(() => _tab = k))),
+            SizedBox(height: 50 + 14 * MediaQuery.textScalerOf(context).scale(12.5) / 12.5, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(16, 10, 16, 6), children: [
+              for (final (k, label) in _tabs(d)) Padding(padding: const EdgeInsets.only(right: 8), child: _TabChip(label: label, selected: tab == k, onTap: () { if (tab != k) AppHaptics.selection(); setState(() => _tab = k); })),
             ])),
             Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: KeyedSubtree(key: ValueKey(tab), child: switch (tab) {
               _Tab.info => _InfoTab(d: d),
@@ -99,9 +104,10 @@ class _TabChip extends StatelessWidget {
   final String label; final bool selected; final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Semantics(button: true, selected: selected, label: label, excludeSemantics: true, child: Pressable(child: Material(
-        color: selected ? AppColors.inverse : AppColors.surface, shape: StadiumBorder(side: BorderSide(color: selected ? AppColors.inverse : const Color(0x26171C19))),
-        child: InkWell(customBorder: const StadiumBorder(), onTap: onTap, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-            child: Text(label, style: PlobbyText.tab.copyWith(color: selected ? AppColors.onInverse : AppColors.text)))),
+        // Selección en lima, como el resto de pestañas y filtros de Plobby (un color = un significado).
+        color: selected ? AppColors.brand : AppColors.surface, shape: StadiumBorder(side: BorderSide(color: selected ? AppColors.brand : const Color(0x26171C19))),
+        child: InkWell(customBorder: const StadiumBorder(), onTap: onTap, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Center(widthFactor: 1, child: Text(label, style: PlobbyText.tab.copyWith(color: selected ? AppColors.brandInk : AppColors.text)))))),
       )));
 }
 
@@ -130,7 +136,7 @@ class _InfoTab extends ConsumerWidget {
           const PlobbyIcon(PlobbyIcons.trophy, size: 30, color: AppColors.brand),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('CAMPEONES', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: Color(0x99F6F8F1))),
+            const Text('CAMPEONES', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: Color(0x99F6F8F1))),
             const SizedBox(height: 4),
             TeamLine(team: champion, bold: true, size: 26, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.lime300)),
           ])),
@@ -321,7 +327,7 @@ class _StandingsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = d.standingsOf(group);
-    const h = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: .6, color: AppColors.textMuted);
+    const h = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .6, color: AppColors.textMuted);
     const c = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text);
     Widget num(String s, {bool bold = false}) => SizedBox(width: 30, child: Text(s, textAlign: TextAlign.center, style: bold ? c.copyWith(fontWeight: FontWeight.w800) : c));
     return Container(
@@ -423,8 +429,8 @@ class _MatchRow extends StatelessWidget {
             border: Border(left: BorderSide(color: m.status == TMatchStatus.live ? const Color(0xFF1FA463) : mine ? AppColors.brand : Colors.transparent, width: 4))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Expanded(child: Text(d.matchLabel(m).toUpperCase(), style: PlobbyText.eb.copyWith(fontSize: 9.5))),
-            if (m.status == TMatchStatus.live) const Text('EN JUEGO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF1FA463))),
+            Expanded(child: Text(d.matchLabel(m).toUpperCase(), style: PlobbyText.eb.copyWith(fontSize: 11))),
+            if (m.status == TMatchStatus.live) const Text('EN JUEGO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF1FA463))),
             if (d.isAdmin && m.ready && !m.finished) const PlobbyIcon(PlobbyIcons.edit, size: 13, color: AppColors.textMuted),
           ]),
           const SizedBox(height: 6),

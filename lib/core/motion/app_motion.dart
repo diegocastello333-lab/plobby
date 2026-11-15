@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import '../theme/design_tokens.dart';
 
@@ -11,7 +12,7 @@ class AppAnimations {
   AppAnimations._();
   static const press = Duration(milliseconds: 120);      // 100–180 ms
   static const pressRelease = Duration(milliseconds: 320);   // vuelta con rebote suave
-  static const tab = Duration(milliseconds: 220);
+  static const tab = Duration(milliseconds: 320);   // con muelle: el tramo final es la frenada
   static const appear = Duration(milliseconds: 260);     // 200–300 ms
   static const appearStep = Duration(milliseconds: 40);  // retraso progresivo
   static const appearMaxDelay = Duration(milliseconds: 240);
@@ -22,12 +23,12 @@ class AppAnimations {
   static const shimmer = Duration(milliseconds: 1400);
   static const emphasis = Curves.easeOutCubic;
   static const standard = Curves.easeOutCubic;
-  static const settle = Curves.easeOutBack;
-  /// Soltar un botón: ligero rebote (≈muelle poco amortiguado) para que la respuesta se sienta física.
-  static const release = Curves.easeOutBack;
+  static const settle = AppSprings.bouncy;
+  /// Soltar un botón: muelle con un rebote apenas perceptible, como los controles de iOS.
+  static const release = AppSprings.snappy;
   /// Cambio de página en selectores paginados (pestañas ↔ PageView).
   static const page = Duration(milliseconds: 420);
-  static const pageCurve = Curves.easeOutCubic;
+  static const pageCurve = AppSprings.smooth;
   /// Cambio entre pestañas de la barra inferior: fundido rápido del contenido.
   static const branch = Duration(milliseconds: 240);
 
@@ -40,6 +41,50 @@ class AppAnimations {
   /// Respeta «reducir movimiento» del sistema: duración mínima (transición casi instantánea).
   static Duration scaled(BuildContext c, Duration d) => reduceMotion(c) ? Duration.zero : d;
   static bool reduceMotion(BuildContext c) => MediaQuery.maybeOf(c)?.disableAnimations ?? false;
+}
+
+/// Muelles al estilo de iOS (SwiftUI `.smooth`, `.snappy`, `.bouncy`), como curvas: la forma sale de una simulación
+/// física real (masa 1, rigidez y amortiguación fijas), normalizada a la duración del Animation que la usa. Así toda la
+/// app comparte la misma «física»: entra rápido, frena con suavidad y, si rebota, lo hace una vez y poco.
+class SpringCurve extends Curve {
+  const SpringCurve({required this.stiffness, required this.damping});
+  final double stiffness, damping;
+  static final _cache = <(double, double), (SpringSimulation, double)>{};
+  (SpringSimulation, double) get _sim => _cache.putIfAbsent((stiffness, damping), () {
+        final sim = SpringSimulation(SpringDescription(mass: 1, stiffness: stiffness, damping: damping), 0, 1, 0);
+        var t = 0.0;
+        while (t < 5 && !sim.isDone(t)) { t += 1 / 120; }   // tiempo hasta reposo (tolerancia por defecto)
+        return (sim, t);
+      });
+  @override
+  double transformInternal(double t) {
+    final (sim, total) = _sim;
+    return sim.x(t * total);
+  }
+}
+
+class AppSprings {
+  AppSprings._();
+  /// Sin rebote: cambios de página, hojas, navegación.
+  static const smooth = SpringCurve(stiffness: 170, damping: 26);
+  /// Respuesta de controles: un 2–3 % de rebote.
+  static const snappy = SpringCurve(stiffness: 300, damping: 26);
+  /// Celebraciones y «pop» de iconos: un rebote visible pero breve.
+  static const bouncy = SpringCurve(stiffness: 260, damping: 16);
+}
+
+/// Hápticos con UN significado cada uno (HIG › Playing haptics: «Use haptics consistently»). Nadie llama a
+/// HapticFeedback directamente: así cada vibración enseña siempre lo mismo.
+class AppHaptics {
+  AppHaptics._();
+  /// Cambiar de selección: pestañas, segmentos, filtros, interruptores.
+  static void selection() => HapticFeedback.selectionClick();
+  /// Pulsar una acción principal (crear, enviar, publicar).
+  static void tap() => HapticFeedback.lightImpact();
+  /// Acción completada con éxito (resultado guardado, amistad aceptada, logro).
+  static void success() => HapticFeedback.mediumImpact();
+  /// Acción que no se pudo completar.
+  static void error() => HapticFeedback.heavyImpact();
 }
 
 /// Tamaños y estilos de tarjetas/encabezados. Múltiplos de 4/8.
@@ -100,4 +145,4 @@ class AppearRegistry {
 }
 
 /// Feedback háptico discreto opcional (no se usa por defecto).
-void appTick() => HapticFeedback.selectionClick();
+void appTick() => AppHaptics.selection();

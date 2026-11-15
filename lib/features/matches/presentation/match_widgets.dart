@@ -135,7 +135,7 @@ class MatchStepper extends StatelessWidget {
           Expanded(child: Column(children: [
             Container(height: 4, decoration: BoxDecoration(color: i < idx ? AppColors.text : i == idx ? AppColors.brand : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 6),
-            FittedBox(fit: BoxFit.scaleDown, child: Text(steps[i], maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: .2,
+            FittedBox(fit: BoxFit.scaleDown, child: Text(steps[i], maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: .2,
                 color: i == idx ? AppColors.text : AppColors.textMuted))),
           ])),
         ],

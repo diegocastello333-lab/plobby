@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../domain/gamification_models.dart';
 
@@ -107,9 +108,10 @@ class LevelCard extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Text('NIVEL ${data.level}', style: PlobbyText.eb.copyWith(color: AppColors.brand)),
-              const Spacer(),
-              Text('${data.xp} XP', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.ink50)),
+              Expanded(child: Text('NIVEL ${data.level}', style: PlobbyText.eb.copyWith(color: AppColors.brand))),
+              // Al ganar XP la cifra cuenta desde la anterior con un destello lima (misma pieza que el ELO).
+              LiveNumber(value: data.xp, memoryKey: 'xp', format: (v) => '$v XP',
+                  style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.ink50)),
             ]),
             const SizedBox(height: 10),
             TweenAnimationBuilder<double>(

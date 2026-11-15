@@ -1,6 +1,5 @@
 import '../../features/gamification/presentation/achievements_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +40,7 @@ class AppShell extends ConsumerWidget {
       final on = shell.currentIndex == i;
       final color = on ? AppColors.text : AppColors.textMuted;
       return Expanded(child: Semantics(button: true, selected: on, label: label, excludeSemantics: true, child: InkResponse(
-        onTap: () { HapticFeedback.selectionClick(); _go(i); }, radius: 34, highlightShape: BoxShape.circle,
+        onTap: () { AppHaptics.selection(); _go(i); }, radius: 34, highlightShape: BoxShape.circle,
         child: SizedBox(height: 56, child: Padding(padding: const EdgeInsets.only(top: 2), child: TweenAnimationBuilder<Color?>(
           tween: ColorTween(end: color), duration: AppAnimations.scaled(context, AppAnimations.tab), curve: AppAnimations.standard,
           builder: (_, col, __) => Column(children: [
@@ -66,7 +65,9 @@ class AppShell extends ConsumerWidget {
         child: AchievementCelebration(child: _BranchFade(index: shell.currentIndex, child: shell)),
       ),
       extendBody: true,
-      bottomNavigationBar: Container(
+      // Como en iOS, las etiquetas de la barra de pestañas no crecen con el tamaño de texto del sistema (cada pestaña ya
+      // tiene su etiqueta para VoiceOver/TalkBack); el resto de la app sí escala.
+      bottomNavigationBar: MediaQuery.withNoTextScaling(child: Container(
         height: 66 + (bottom > 26 ? bottom : 26),
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
         decoration: const BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: Color(0x14171C19)))),
@@ -75,7 +76,7 @@ class AppShell extends ConsumerWidget {
           Expanded(child: SizedBox(height: 56, child: OverflowBox(alignment: Alignment.topCenter, maxHeight: 90, child: Transform.translate(offset: const Offset(0, -30), child: const _PlusButton())))),
           tab(2), tab(3),
         ]),
-      ),
+      )),
     );
   }
 }
@@ -95,7 +96,7 @@ class _PlusButton extends StatelessWidget {
             color: AppColors.brand, shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () { HapticFeedback.lightImpact(); HomeNav.newMatch(context); },
+              onTap: () { AppHaptics.tap(); HomeNav.newMatch(context); },
               // Icono «+» del HTML: 28 px, trazo 2.6, extremos redondeados.
               child: Center(child: SvgPicture.string('<svg viewBox="0 0 24 24" fill="none" stroke="#171C19" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
                   width: 28, height: 28)),

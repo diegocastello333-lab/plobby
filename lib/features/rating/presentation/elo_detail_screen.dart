@@ -74,7 +74,8 @@ class _Body extends ConsumerWidget {
             ])),
           ]),
           const SizedBox(height: 18),
-          Semantics(label: 'ELO ${d.elo}', excludeSemantics: true, child: Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
+          // FittedBox: la cifra gigante se reduce si no cabe (móvil estrecho o texto grande) en lugar de desbordar.
+          Semantics(label: 'ELO ${d.elo}', excludeSemantics: true, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
             TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: d.elo),
               duration: MediaQuery.of(context).disableAnimations ? Duration.zero : const Duration(milliseconds: 1200),
@@ -83,7 +84,7 @@ class _Body extends ConsumerWidget {
             ),
             const SizedBox(width: 8),
             Text('ELO', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 1.08, color: soft)),
-          ])),
+          ]))),
           const SizedBox(height: 16),
           EloBar(elo: d.elo, scale: d.scale),
         ]),

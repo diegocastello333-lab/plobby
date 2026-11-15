@@ -54,20 +54,18 @@ class _YearCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(button: true, label: 'Tu ${p.start.year} en Plobby, ${p.played} partidos', excludeSemantics: true,
       child: Pressable(child: GestureDetector(onTap: () => _open(context, p), child: Container(
-        height: 168, padding: const EdgeInsets.all(20),
+        height: 72 + 96 * MediaQuery.textScalerOf(context).scale(14) / 14, padding: const EdgeInsets.all(20),   // crece con el texto
         decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Text('PLOBBY WRAPPED', style: PlobbyText.eb.copyWith(color: AppColors.brand)),
-            const Spacer(),
+            Expanded(child: Text('PLOBBY WRAPPED', style: PlobbyText.eb.copyWith(color: AppColors.brand))),
             if (p.inProgress) const Pill('En curso', tone: PillTone.lime),
           ]),
           const Spacer(),
-          Text('Tu ${p.start.year}', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 40, height: 1, fontWeight: FontWeight.w700, letterSpacing: -1.2, color: AppColors.ink50)),
+          FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tu ${p.start.year}', maxLines: 1, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 40, height: 1, fontWeight: FontWeight.w700, letterSpacing: -1.2, color: AppColors.ink50))),
           const SizedBox(height: 8),
           Row(children: [
-            Text('${p.played} partidos', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, letterSpacing: 0, color: Color(0xB3F6F8F1))),
-            const Spacer(),
+            Expanded(child: Text('${p.played} partidos', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, letterSpacing: 0, color: Color(0xB3F6F8F1)))),
             const PlobbyIcon(PlobbyIcons.play, size: 18, color: AppColors.brand),
           ]),
         ]),
@@ -343,7 +341,7 @@ class _Bars extends StatelessWidget {
         Container(height: 90 * b.played / max, decoration: BoxDecoration(color: b == busiest ? AppColors.brand : const Color(0x40F6F8F1), borderRadius: BorderRadius.circular(4))),
         const SizedBox(height: 6),
         Text(w.kind == WrappedKind.year ? monthName(b.start.month)[0].toUpperCase() : '${b.start.day}',
-            style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, letterSpacing: 0, color: Color(0x99F6F8F1))),
+            style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: Color(0x99F6F8F1))),
       ]))),
     ]));
   }

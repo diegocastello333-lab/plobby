@@ -230,3 +230,18 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   Hojas: entrada 380 ms easeOutCubic / salida 240 ms. Chips del feed: transparentes salvo fijos sobre contenido.
 - REGLA: un envoltorio animado debe devolver SIEMPRE la misma estructura (no `return child` a veces): si no, se
   reconstruye la sección y pierde scroll/estado. Tests: 366/366 (`test/motion_premium_test.dart`).
+
+## Calidad Apple (skill apple-design, 15 nov 2026, v1.7.0)
+- Guía única: `docs/sistema_de_diseno.md` (tokens con contraste medido, tipografía, movimiento, hápticos, estados).
+- Auditoría (HIG): 28 textos <11 pt → todos ≥11 (`eb`/`key` 10,5→11); desbordes con Dynamic Type en Perfil, Feed, Inicio,
+  Mi rating, Ranking, Wrapped, ligas, torneos → alturas mínimas / `textScalerOf` / FittedBox / botones apilados ≥130 %;
+  Perfil roto a 320 pt arreglado. `test/accessibility_scaling_test.dart`: 22 pantallas × (320/390 pt, 100/135/200 %),
+  mínimo 11 pt y muelles. OJO: restaurar `FlutterError.onError` ANTES de `expect` o el test se bloquea.
+- `AppSprings` (smooth/snappy/bouncy, `SpringCurve` de SpringSimulation) y `AppHaptics` (selection/tap/success/error):
+  prohibido `HapticFeedback` directo; los botones secundarios no vibran.
+- Estados rediseñados (`state_views.dart`): EmptyStateCard/ErrorStateCard con PlobbyButton, LoadingBlock = SkeletonBox,
+  `showPlobbySnack` = cápsula tinta con icono + háptico. Perfil y torneo cargan con esqueleto.
+- Feed: sin logotipo repetido (título grande + acciones). Pestañas de torneo en lima (antes tinta). Barra inferior sin
+  escalado de texto (como iOS). `supabase_rating_repository`: 3 consultas en paralelo.
+- Pendiente: modo oscuro (tokens existen, falta aplicarlos), probar en móvil real. El «+» de la barra es una acción
+  (HIG lo desaconseja): se mantiene por identidad.

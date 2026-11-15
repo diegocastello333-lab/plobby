@@ -229,7 +229,7 @@ class _Bubble extends StatelessWidget {
       return Align(alignment: align, child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Column(crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start, children: [
         if (showSender && sender != null) _senderLabel(sender!),
         MatchResultCard(payload: m.payload!, sharerId: m.senderId, onTap: () => _openMatch(context)),
-        Padding(padding: const EdgeInsets.only(top: 3), child: Text('$time$status', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, letterSpacing: 0, color: AppColors.textMuted))),
+        Padding(padding: const EdgeInsets.only(top: 3), child: Text('$time$status', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted))),
       ])));
     }
 
@@ -257,7 +257,7 @@ class _Bubble extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
             if (showSender && sender != null) _senderLabel(sender!),
             body,
-            Padding(padding: const EdgeInsets.only(top: 3), child: Align(alignment: Alignment.centerRight, widthFactor: 1, child: Text('$time$status', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, letterSpacing: 0, color: fg.withValues(alpha: .7))))),
+            Padding(padding: const EdgeInsets.only(top: 3), child: Align(alignment: Alignment.centerRight, widthFactor: 1, child: Text('$time$status', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: fg.withValues(alpha: .7))))),
           ]),
         ),
       )),
@@ -277,6 +277,6 @@ class _Bubble extends StatelessWidget {
   Widget _senderLabel(GroupMember s) => Padding(padding: const EdgeInsets.only(bottom: 3), child: Row(mainAxisSize: MainAxisSize.min, children: [
         Text(s.name, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text)),
         if (s.isAdmin) Container(margin: const EdgeInsets.only(left: 6), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(5)),
-            child: const Text('ADMIN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: .76, color: AppColors.brandInk))),
+            child: const Text('ADMIN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .76, color: AppColors.brandInk))),
       ]));
 }

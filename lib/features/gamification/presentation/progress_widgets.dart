@@ -25,7 +25,8 @@ class ProgressSection extends ConsumerWidget {
           LevelCard(data: a, compact: true, onTap: () => context.push('/achievements')),
           if (a.unlocked.isNotEmpty) ...[
             const SizedBox(height: 14),
-            SizedBox(height: 92, child: ListView(scrollDirection: Axis.horizontal, children: [
+            // Alto según el tamaño de texto del sistema (insignia fija + dos líneas que crecen con Dynamic Type).
+            SizedBox(height: 60 + 30 * MediaQuery.textScalerOf(context).scale(11) / 11, child: ListView(scrollDirection: Axis.horizontal, children: [
               for (final x in a.unlocked.take(8)) Padding(padding: const EdgeInsets.only(right: 12), child: SizedBox(width: 72, child: Column(children: [
                 AchievementBadge(x, size: 52),
                 const SizedBox(height: 6),

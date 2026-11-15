@@ -1,6 +1,6 @@
 import '../../gamification/presentation/progress_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -69,7 +69,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           ? Text(pick.title, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle)
           : Text.rich(TextSpan(children: [
               const TextSpan(text: 'Amigos '),
-              TextSpan(text: '$count', style: const TextStyle(color: AppColors.borderStrong)),
+              TextSpan(text: '$count', style: const TextStyle(color: AppColors.textMuted)),
             ]), textAlign: TextAlign.center, style: PlobbyHeaderBar.titleStyle))),
       if (pick == null) IconSquareButton(icon: PlobbyIcons.userplus, tooltip: 'Añadir amigos', onPressed: () => context.push('/friends/add'))
       else SizedBox(width: 40, child: Text('${_sel.length}/${pick.max}', textAlign: TextAlign.right,
@@ -228,7 +228,7 @@ class _IncomingRequestState extends ConsumerState<_IncomingRequest> {
     setState(() => _busy = true);
     try {
       await ref.read(requestsProvider.notifier).respond(widget.r.id, accept);
-      if (accept) HapticFeedback.mediumImpact();
+      if (accept) AppHaptics.success();
       if (mounted) showPlobbySnack(context, accept ? 'Ahora tú y ${widget.r.player.name} sois amigos' : 'Solicitud rechazada');
     } catch (_) {
       if (mounted) { setState(() => _busy = false); showPlobbySnack(context, 'No se pudo responder a la solicitud. Inténtalo de nuevo.', error: true); }
@@ -269,7 +269,7 @@ class _FriendTile extends ConsumerWidget {
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text(elo, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.16, color: AppColors.text)),
-          const Text('ELO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10, letterSpacing: 0, color: AppColors.textMuted)),
+          const Text('ELO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
         ]),
         const SizedBox(width: 4),
         Tooltip(message: 'Opciones de ${p.name}', child: Semantics(button: true, label: 'Opciones de ${p.name}', excludeSemantics: true, child: InkResponse(
@@ -289,7 +289,7 @@ class _FriendTile extends ConsumerWidget {
           Navigator.pop(c);
           try {
             await ref.read(profileProvider('me').notifier).requestPartner(f.player.id);
-            HapticFeedback.selectionClick();
+            AppHaptics.selection();
             if (context.mounted) showPlobbySnack(context, '${f.player.name} es tu pareja habitual');
           } catch (_) {
             if (context.mounted) showPlobbySnack(context, 'No se pudo guardar la pareja habitual. Inténtalo de nuevo.', error: true);

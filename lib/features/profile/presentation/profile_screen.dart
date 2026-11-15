@@ -4,6 +4,7 @@ import '../../../core/config/build_info.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/plobby_theme.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../matches/presentation/upcoming_matches_section.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -54,12 +55,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       // Perfil propio (pestaña): fondo vivo de la barra inferior. Perfil de otro jugador (ruta encima): marfil opaco.
       backgroundColor: widget.playerId == 'me' ? Colors.transparent : null,
       body: AnimatedSwitcher(duration: const Duration(milliseconds: 260), switchInCurve: Curves.easeOut, child: KeyedSubtree(key: ValueKey(async.hasValue ? 'data' : async.hasError ? 'error' : 'loading'), child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: PlobbyColors.forest)),
-        error: (e, _) => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.wifi_off, size: 36, color: PlobbyColors.mute), const SizedBox(height: 8),
-          const Text('No se pudo cargar el perfil'), const SizedBox(height: 8),
-          FilledButton(onPressed: () => ref.invalidate(profileProvider(widget.playerId)), child: const Text('Reintentar')),
-        ])),
+        // Esqueleto con la forma del perfil (cabecera tinta + pestañas + tarjetas) en lugar de una rueda en blanco.
+        loading: () => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Container(height: 300 + MediaQuery.paddingOf(context).top, color: AppColors.inverse),
+          const Padding(padding: EdgeInsets.all(20), child: Column(children: [LoadingBlock(height: 44, radius: AppRadius.pill), SizedBox(height: 16), LoadingBlock(height: 180)])),
+        ]),
+        error: (e, _) => SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Center(child: ErrorStateCard(
+            title: 'No se pudo cargar el perfil', onRetry: () => ref.invalidate(profileProvider(widget.playerId)))))),
         data: (v) => _content(v),
       ))),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -38,7 +38,7 @@ class _BannerSheetState extends ConsumerState<_BannerSheet> {
     try {
       await ref.read(profileRepositoryProvider).setBanner(b.id);
       ref.invalidate(profileProvider('me'));
-      HapticFeedback.selectionClick();
+      AppHaptics.selection();
       if (mounted) { Navigator.of(context).pop(); showPlobbySnack(context, '${b.name} aplicado'); }
     } catch (_) {
       if (mounted) { setState(() => _busy = null); showPlobbySnack(context, 'No se pudo cambiar el banner. Revisa tu conexión.', error: true); }

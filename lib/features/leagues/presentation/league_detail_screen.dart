@@ -290,7 +290,7 @@ String agoLabel(DateTime d, DateTime now) {
   return 'hace ${x.inDays} d';
 }
 
-const _th = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.textMuted);
+const _th = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.textMuted);
 
 /// Rejilla de `.th`/`.tr`: 24 · 30 · 1fr · 22 · 22 · 22 · 42, separación 8.
 class _TableRow extends StatelessWidget {
@@ -392,7 +392,7 @@ class _Performance extends StatelessWidget {
     Widget cell(String v, String l) => Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           FittedBox(fit: BoxFit.scaleDown, child: Text(v, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 22, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.44, color: Colors.white, fontFeatures: [FontFeature.tabularFigures()]))),
           const SizedBox(height: 5),
-          FittedBox(fit: BoxFit.scaleDown, child: Text(l.toUpperCase(), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: .63, color: Color(0xADF6F8F1)))),
+          FittedBox(fit: BoxFit.scaleDown, child: Text(l.toUpperCase(), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: .63, color: Color(0xADF6F8F1)))),
         ]));
     return Semantics(
       label: r == null ? 'Aún no tienes posición en la liga' : 'Tu posición: ${r.rank} de $total. ${r.points} puntos, ${r.played} jugados, ${r.winPct}% victorias, ${r.wins} ganados, ${r.losses} perdidos, bonus ${r.bonus}.',
@@ -401,7 +401,7 @@ class _Performance extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 16), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
         child: Row(children: [
           ConstrainedBox(constraints: const BoxConstraints(minWidth: 112), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: Color(0xA6F6F8F1))),
+            const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: Color(0xA6F6F8F1))),
             const SizedBox(height: 4),
             Text(r == null ? '—' : '#${r.rank}', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 64, height: .9, fontWeight: FontWeight.w800, letterSpacing: -3.2, color: AppColors.brand)),
             if (total > 0) Padding(padding: const EdgeInsets.only(top: 8), child: Text('de $total', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: Color(0xA6F6F8F1)))),
@@ -551,7 +551,7 @@ class _LeagueMatchTile extends StatelessWidget {
           ]),
           const SizedBox(height: 12),
           team(1),
-          const Padding(padding: EdgeInsets.fromLTRB(4, 10, 0, 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: AppColors.textMuted))),
+          const Padding(padding: EdgeInsets.fromLTRB(4, 10, 0, 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: AppColors.textMuted))),
           team(2),
           if (m.club.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
             const PlobbyIcon(PlobbyIcons.pin, size: 14, color: AppColors.textMuted), const SizedBox(width: 6),

@@ -1,59 +1,91 @@
 import 'package:flutter/material.dart';
+import '../motion/app_motion.dart';
 import '../theme/design_tokens.dart';
+import '../theme/plobby_text.dart';
+import 'motion_widgets.dart';
+import 'plobby_components.dart';
+import 'plobby_icon.dart';
 
-/// Estados vacío / error / carga comunes (mismos textos y jerarquía que el prototipo: icono, título, texto y acciones).
+/// Estados vacío / error / carga / confirmación comunes. Mismo lenguaje que el resto de Plobby (PlobbyText,
+/// PlobbyButton, iconos de línea) y las pautas de Apple: el estado vacío invita a la siguiente acción, el error dice qué
+/// pasó y cómo arreglarlo sin dramatismo, y la confirmación aparece en la propia interfaz (no en una alerta).
+
+/// Estado vacío: icono en disco, título, texto y hasta dos acciones. Entra con un fundido corto.
 class EmptyStateCard extends StatelessWidget {
   const EmptyStateCard({super.key, required this.icon, required this.title, required this.text, this.primary, this.onPrimary, this.secondary, this.onSecondary});
   final IconData icon; final String title, text; final String? primary, secondary; final VoidCallback? onPrimary, onSecondary;
   @override
-  Widget build(BuildContext context) => Container(
-        width: double.infinity, padding: const EdgeInsets.fromLTRB(20, 28, 20, 22),
+  Widget build(BuildContext context) => AppearOnce(child: Container(
+        width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
         decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, boxShadow: AppShadows.card),
         child: Column(children: [
-          Container(width: 72, height: 72, decoration: const BoxDecoration(color: AppColors.surfaceSunken, shape: BoxShape.circle), child: Icon(icon, size: 34, color: AppColors.ink400)),
-          const SizedBox(height: 14),
-          Text(title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+          Container(width: 64, height: 64, decoration: const BoxDecoration(color: AppColors.brandSoft, shape: BoxShape.circle),
+              child: ExcludeSemantics(child: Icon(icon, size: 28, color: AppColors.brandText))),
+          const SizedBox(height: 16),
+          Semantics(header: true, child: Text(title, textAlign: TextAlign.center, style: PlobbyText.cardTitle.copyWith(fontSize: 17, height: 1.25))),
           const SizedBox(height: 6),
-          Text(text, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted, height: 1.4)),
-          if (primary != null || secondary != null) const SizedBox(height: 18),
-          if (primary != null) SizedBox(width: double.infinity, child: FilledButton(onPressed: onPrimary, child: Text(primary!))),
-          if (secondary != null) ...[const SizedBox(height: 8), SizedBox(width: double.infinity, child: OutlinedButton(onPressed: onSecondary, child: Text(secondary!)))],
+          Text(text, textAlign: TextAlign.center, style: PlobbyText.sub),
+          if (primary != null || secondary != null) const SizedBox(height: 20),
+          if (primary != null) PlobbyButton(label: primary!, onPressed: onPrimary),
+          if (secondary != null) ...[const SizedBox(height: 8), PlobbyButton(label: secondary!, kind: PlobbyButtonKind.outline, onPressed: onSecondary)],
         ]),
-      );
+      ));
 }
 
-/// Error de red con «Reintentar» (prototipo: «No se pudo cargar · Parece que no hay conexión…»).
+/// Error con «Reintentar»: tarjeta tranquila (no un bloque rojo), icono y título en rojo, explicación en gris y la
+/// acción para arreglarlo.
 class ErrorStateCard extends StatelessWidget {
   const ErrorStateCard({super.key, this.title = 'No se pudo cargar', this.message = 'Parece que no hay conexión. Revisa tu red e inténtalo de nuevo.', required this.onRetry});
   final String title, message; final VoidCallback onRetry;
   @override
-  Widget build(BuildContext context) => Column(children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(color: AppColors.dangerSoft, borderRadius: AppRadius.rMd),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Icon(Icons.wifi_off_rounded, color: AppColors.danger),
+  Widget build(BuildContext context) => AppearOnce(child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, border: Border.all(color: const Color(0x33C4282E))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(width: 36, height: 36, decoration: const BoxDecoration(color: AppColors.dangerSoft, shape: BoxShape.circle),
+                child: const ExcludeSemantics(child: Icon(Icons.wifi_off_rounded, size: 18, color: AppColors.danger))),
             const SizedBox(width: 12),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.danger)),
+              Text(title, style: PlobbyText.value.copyWith(color: AppColors.danger, fontWeight: FontWeight.w700)),
               const SizedBox(height: 2),
-              Text(message, style: const TextStyle(color: AppColors.danger)),
+              Text(message, style: PlobbyText.sub.copyWith(fontSize: 13.5)),
             ])),
           ]),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(width: double.infinity, child: OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Reintentar'))),
-      ]);
+          const SizedBox(height: 14),
+          PlobbyButton(label: 'Reintentar', icon: PlobbyIcons.refresh, kind: PlobbyButtonKind.outline, height: 44, onPressed: onRetry),
+        ]),
+      ));
 }
 
-/// Bloque gris de carga con la altura final (evita saltos de layout).
+/// Bloque de carga con la altura final (evita saltos de layout) y un brillo discreto.
 class LoadingBlock extends StatelessWidget {
   const LoadingBlock({super.key, this.height = 96, this.radius = AppRadius.lg});
   final double height, radius;
   @override
-  Widget build(BuildContext context) => Semantics(label: 'Cargando', child: Container(height: height, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(radius))));
+  Widget build(BuildContext context) => Semantics(label: 'Cargando', child: SkeletonBox(height: height, radius: BorderRadius.circular(radius)));
 }
 
-void showPlobbySnack(BuildContext context, String text, {bool error = false}) => ScaffoldMessenger.of(context)
-  ..hideCurrentSnackBar()
-  ..showSnackBar(SnackBar(content: Text(text), backgroundColor: error ? AppColors.danger : AppColors.inverse, behavior: SnackBarBehavior.floating));
+/// Confirmación o error en la propia interfaz: cápsula flotante tinta con icono, texto y háptico con significado
+/// (éxito / error). Se va sola a los 3 s o al tocarla, y no tapa la barra inferior.
+void showPlobbySnack(BuildContext context, String text, {bool error = false}) {
+  if (error) { AppHaptics.error(); } else { AppHaptics.success(); }
+  final m = ScaffoldMessenger.of(context);
+  m
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(
+      behavior: SnackBarBehavior.floating, elevation: 0, backgroundColor: Colors.transparent, padding: EdgeInsets.zero,
+      duration: Duration(milliseconds: error ? 4000 : 3000),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      content: GestureDetector(onTap: m.hideCurrentSnackBar, child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
+        decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd, boxShadow: AppShadows.pop),
+        child: Row(children: [
+          Container(width: 26, height: 26, decoration: BoxDecoration(color: error ? AppColors.danger : AppColors.brand, shape: BoxShape.circle),
+              child: Icon(error ? Icons.priority_high_rounded : Icons.check_rounded, size: 16, color: error ? Colors.white : AppColors.brandInk)),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: PlobbyText.value.copyWith(color: AppColors.ink50, fontWeight: FontWeight.w500, fontSize: 14))),
+        ]),
+      )),
+    ));
+}

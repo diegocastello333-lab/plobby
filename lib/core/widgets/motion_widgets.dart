@@ -73,7 +73,7 @@ class AppearOnce extends StatefulWidget {
 
 class _AppearOnceState extends State<AppearOnce> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this, duration: AppAnimations.appear);
-  late final Animation<double> _a = CurvedAnimation(parent: _c, curve: AppAnimations.standard);
+  late final Animation<double> _a = CurvedAnimation(parent: _c, curve: AppSprings.smooth);
   Timer? _t; bool _skip = false;
   @override
   void initState() {
@@ -220,7 +220,7 @@ class _BellBadgeState extends State<BellBadge> with SingleTickerProviderStateMix
             scale: widget.count > 0 ? 1 : 0, duration: AppAnimations.badge, curve: AppAnimations.settle,
             child: Container(constraints: const BoxConstraints(minWidth: 16, minHeight: 16), padding: const EdgeInsets.symmetric(horizontal: 4), alignment: Alignment.center,
                 decoration: const BoxDecoration(color: AppColors.danger, borderRadius: AppRadius.rSm),
-                child: Text(widget.count > 99 ? '99+' : '${widget.count}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white))))),
+                child: Text(widget.count > 99 ? '99+' : '${widget.count}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white))))),
       ]);
   static double _wave(double t) => math.sin(t * 6 * math.pi);
 }
@@ -242,7 +242,7 @@ class SlidingTabs extends StatelessWidget {
           final w = c.maxWidth / labels.length;
           final d = AppAnimations.scaled(context, AppAnimations.tab);
           return Stack(alignment: Alignment.centerLeft, children: [
-            AnimatedPositioned(duration: d, curve: AppAnimations.standard, left: index * w, width: w, top: 0, bottom: 0,
+            AnimatedPositioned(duration: d, curve: AppSprings.snappy, left: index * w, width: w, top: 0, bottom: 0,
                 child: const DecoratedBox(decoration: BoxDecoration(color: AppColors.brand, borderRadius: AppRadius.rPill))),
             Row(children: [for (var i = 0; i < labels.length; i++) Expanded(child: Semantics(selected: i == index, button: true, child: InkWell(
                 borderRadius: AppRadius.rPill, onTap: () => onChanged(i),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../../core/theme/plobby_text.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/silhouette_avatar.dart';
@@ -74,13 +75,11 @@ class _Header extends ConsumerWidget {
     return Padding(
       padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // .fh .r1: logotipo lima con punto · campana con contador · avatar
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(children: [
-          Semantics(label: 'Plobby', excludeSemantics: true, child: Row(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
-            const Text('PLOBBY', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 30, height: 1, fontWeight: FontWeight.w700, letterSpacing: -0.9, color: AppColors.brand)),
-            Container(width: 6, height: 6, margin: const EdgeInsets.only(left: 2, bottom: 9), decoration: const BoxDecoration(color: AppColors.brand, shape: BoxShape.circle)),
-          ])),
-          const Spacer(),
+        // Título grande en la misma fila que sus acciones (patrón de título grande de iOS). Antes había además un logotipo
+        // «PLOBBY» lima sobre marfil (≈1,2:1 de contraste) que repetía la marca ya presente en Inicio (HIG › Branding:
+        // «Resist the temptation to display your logo throughout your app»).
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          Expanded(child: Semantics(header: true, child: const Text('Feed', style: PlobbyText.t1))),
           Stack(clipBehavior: Clip.none, children: [
             IconSquareButton(icon: PlobbyIcons.bell, tooltip: unread > 0 ? 'Notificaciones, $unread sin leer' : 'Notificaciones', onPressed: () => context.push('/notifications')),
             if (unread > 0) Positioned(right: -5, top: -5, child: IgnorePointer(child: Container(
@@ -90,17 +89,17 @@ class _Header extends ConsumerWidget {
             ))),
           ]),
           const SizedBox(width: 10),
-          Semantics(button: true, label: 'Mi perfil', excludeSemantics: true, child: GestureDetector(onTap: () => context.go('/profile'), child: Container(
+          Semantics(button: true, label: 'Mi perfil', excludeSemantics: true, child: Pressable(child: GestureDetector(onTap: () => context.go('/profile'), child: Container(
+            width: 44, height: 44,
             decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
-            child: ClipOval(child: SizedBox(width: 40, height: 40, child: me?.avatarUrl != null && me!.avatarUrl!.isNotEmpty
+            child: ClipOval(child: me?.avatarUrl != null && me!.avatarUrl!.isNotEmpty
                 ? Image.network(me.avatarUrl!, fit: BoxFit.cover, cacheWidth: 120, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: me.id, size: 40))
-                : SilhouetteAvatar(seed: me?.id ?? 'me', size: 40))),
-          ))),
+                : SilhouetteAvatar(seed: me?.id ?? 'me', size: 40)),
+          )))),
         ])),
-        Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Semantics(header: true, child: const Text('Feed', style: PlobbyText.t1))),
         const Padding(padding: EdgeInsets.fromLTRB(20, 6, 20, 0), child: Text('Tu comunidad de pádel está jugando.', style: PlobbyText.sub)),
         // .bubs: burbujas de actividad reciente (aro tinta en las nuevas)
-        SizedBox(height: 101, child: ListView.separated(
+        SizedBox(height: 85 + 16 * MediaQuery.textScalerOf(context).scale(11.5) / 11.5, child: ListView.separated(   // crece con el texto
           scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 16, 20, 4), itemCount: friends.length, separatorBuilder: (_, __) => const SizedBox(width: 14),
           itemBuilder: (_, i) {
             final p = friends[i];

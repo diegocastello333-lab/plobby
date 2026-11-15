@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/plobby_theme.dart';
 import '../../../../core/theme/plobby_text.dart';
@@ -20,18 +20,19 @@ class ReactionBar extends ConsumerWidget {
     final names = r.recent.take(2).map((u) => u.name.split(' ').first).join(', ');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const SizedBox(height: 12),
-      Wrap(spacing: 6, runSpacing: 6, children: [for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () { HapticFeedback.selectionClick(); ref.read(feedControllerProvider.notifier).react(post.id, t); })]),
+      Wrap(spacing: 6, runSpacing: 6, children: [for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () { AppHaptics.selection(); ref.read(feedControllerProvider.notifier).react(post.id, t); })]),
       const SizedBox(height: 10),
       Row(children: [
         if (r.total > 0) ...[
-          InkWell(onTap: () => _who(context, ref), child: Row(children: [
+          Flexible(child: InkWell(onTap: () => _who(context, ref), child: Row(mainAxisSize: MainAxisSize.min, children: [
             SizedBox(width: 22.0 + 15 * (r.recent.length.clamp(1, 3) - 1), height: 22, child: Stack(children: [for (var i = 0; i < r.recent.length.clamp(0, 3); i++) Positioned(left: i * 15.0, child: avatar(r.recent[i], 11, ring: onDark ? AppColors.inverse : AppColors.surface))])),
             const SizedBox(width: 8),
-            Text(names.isEmpty ? '${r.total} ${r.total == 1 ? 'reacción' : 'reacciones'}' : '$names${r.total > 2 ? ' y ${r.total - 2} más' : ''}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: fg, fontWeight: FontWeight.w600)),
-          ])),
-        ] else Text('Sé el primero en reaccionar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: fg)),
-        const Spacer(),
-        TextButton(onPressed: () => showCommentsSheet(context, post), style: TextButton.styleFrom(foregroundColor: fg, minimumSize: Size.zero, padding: EdgeInsets.zero),
+            Flexible(child: Text(names.isEmpty ? '${r.total} ${r.total == 1 ? 'reacción' : 'reacciones'}' : '$names${r.total > 2 ? ' y ${r.total - 2} más' : ''}', maxLines: 2, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: fg, fontWeight: FontWeight.w600))),
+          ]))),
+        ] else Flexible(child: Text('Sé el primero en reaccionar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: fg))),
+        const SizedBox(width: 8),
+        // Zona táctil de 44 pt (antes 0: solo el texto era pulsable).
+        TextButton(onPressed: () => showCommentsSheet(context, post), style: TextButton.styleFrom(foregroundColor: fg, minimumSize: const Size(44, 44), padding: const EdgeInsets.symmetric(horizontal: 4)),
             child: Text(post.commentCount == 0 ? 'Comentar' : '${post.commentCount} ${post.commentCount == 1 ? 'comentario' : 'comentarios'}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w600, letterSpacing: 0))),
       ]),
       if (post.previewComments.isNotEmpty) ...[
