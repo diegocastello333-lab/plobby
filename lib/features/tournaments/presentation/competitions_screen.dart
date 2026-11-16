@@ -121,7 +121,7 @@ class TournamentsTab extends ConsumerWidget {
         const SizedBox(height: 12),
         mine.when(
           loading: () => const Column(children: [LoadingBlock(height: 250, radius: AppRadius.md), SizedBox(height: 14), LoadingBlock(height: 250, radius: AppRadius.md)]),
-          error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(myTournamentsProvider)),
+          error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(myTournamentsProvider)),
           data: (l) => l.isEmpty
               ? EmptyStateCard(icon: Icons.account_tree_outlined, title: 'Aún no tienes torneos',
                   text: 'Crea uno con tus amigos: Plobby genera el cuadro, los grupos y los partidos por ti.',

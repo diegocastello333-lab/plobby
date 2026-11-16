@@ -35,7 +35,7 @@ class ConversationsScreen extends ConsumerWidget {
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 8), child: SearchField(hint: 'Buscar conversaciones', onChanged: (v) => ref.read(conversationSearchProvider.notifier).state = v)),
         Expanded(child: ref.watch(conversationsProvider).when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(conversationsProvider))),
+          error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(conversationsProvider))),
           data: (all) {
             final l = all.where((c) => q.isEmpty || c.title.toLowerCase().contains(q)).toList();
             if (l.isEmpty) {

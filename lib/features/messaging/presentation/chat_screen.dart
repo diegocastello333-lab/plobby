@@ -101,7 +101,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         Expanded(child: msgs.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(title: 'No se pudo cargar la conversación', onRetry: () => ref.invalidate(chatProvider(widget.conversationId)))),
+          error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudo cargar la conversación', onRetry: () => ref.invalidate(chatProvider(widget.conversationId)))),
           data: (l) { _initialCount ??= l.length; return ListView.builder(controller: _scroll, padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), itemCount: l.length + 1, itemBuilder: (_, i) {
                   if (i == 0) {
                     return Column(children: [

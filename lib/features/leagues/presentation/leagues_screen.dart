@@ -49,7 +49,7 @@ class LeaguesScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           mine.when(
             loading: () => const Column(children: [LoadingBlock(height: 241, radius: AppRadius.md), SizedBox(height: 14), LoadingBlock(height: 241, radius: AppRadius.md)]),
-            error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(leagueListProvider)),
+            error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(leagueListProvider)),
             data: (l) => l.isEmpty
                 ? EmptyStateCard(icon: Icons.emoji_events_outlined, title: 'Todavía no estás en ninguna liga',
                     text: 'Crea una liga con tus amigos o únete a una de tu zona para empezar a competir.',

@@ -1,8 +1,9 @@
 import '../domain/match_lifecycle.dart';
 import '../domain/match_models.dart';
+import '../../../core/errors/failure.dart';
 
 class StartResult { const StartResult({required this.started, required this.startedAt, required this.startedBy}); final bool started; final DateTime startedAt; final String startedBy; }
-class LifecycleException implements Exception { LifecycleException(this.code); final String code; @override String toString() => 'LifecycleException($code)'; }
+class LifecycleException implements Exception, CodedFailure { LifecycleException(this.code); final String code; @override String toString() => 'LifecycleException($code)'; }
 
 class EditMatch {
   const EditMatch({required this.scheduledAt, required this.club, this.court, required this.players});

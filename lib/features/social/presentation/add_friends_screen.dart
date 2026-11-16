@@ -31,7 +31,7 @@ class AddFriendsScreen extends ConsumerWidget {
             const _Header('Resultados'),
             ...ref.watch(addFriendsSearchProvider).when(
               loading: () => [const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.text)))],
-              error: (_, __) => [ErrorStateCard(title: 'No se pudo buscar', message: 'Inténtalo de nuevo.', onRetry: () => ref.invalidate(addFriendsSearchProvider))],
+              error: (e, __) => [ErrorStateCard(error: e, title: 'No se pudo buscar', message: 'Inténtalo de nuevo.', onRetry: () => ref.invalidate(addFriendsSearchProvider))],
               data: (hits) => hits.isEmpty
                   ? [Padding(padding: const EdgeInsets.symmetric(vertical: 24), child: Text('No encontramos a nadie con “$q”.', textAlign: TextAlign.center, style: PlobbyText.sub))]
                   : hits.map((h) => _HitTile(h)).toList()),

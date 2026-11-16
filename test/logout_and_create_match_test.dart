@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:plobby/core/router/app_router.dart';
 import 'package:plobby/core/theme/plobby_theme.dart';
@@ -223,12 +224,12 @@ void main() {
     });
 
     testWidgets('error de red: mensaje de conexión, sin bloqueo', (t) async {
-      final repo = _Repo(clubList: const ['Club Alameda'], createError: Exception('SocketException'));
+      final repo = _Repo(clubList: const ['Club Alameda'], createError: http.ClientException('Failed host lookup'));   // fallo de red real (lo que llega en web y móvil)
       await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)]);
       await _openFriendlyForm(t);
       await _pickPlayers(t);
       await _tapCreate(t);
-      expect(find.textContaining('Comprueba tu conexión'), findsOneWidget);
+      expect(find.textContaining('No se pudo conectar con Plobby'), findsOneWidget);
       expect(find.byType(CreateMatchScreen), findsOneWidget);
     });
 

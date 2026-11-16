@@ -1,4 +1,5 @@
 import '../domain/gamification_models.dart';
+import '../../../core/errors/failure.dart';
 
 /// Acceso a Head to Head, ranking entre amigos, Wrapped, logros/XP y preferencias de avisos.
 /// En Supabase todo se calcula en el servidor (RPC sobre `player_match_stats`); la app solo lee.
@@ -15,7 +16,7 @@ abstract class GamificationRepository {
 }
 
 /// Error con código del servidor (no_friends, not_authenticated…) traducido a una frase.
-class GamificationException implements Exception {
+class GamificationException implements Exception, CodedFailure {
   GamificationException(this.code);
   final String code;
   String get message => switch (code) {

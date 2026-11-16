@@ -21,9 +21,7 @@ class SupabaseProfileRepository implements ProfileRepository {
   Future<ProfileData> load(String playerId) async {
     final uid = _resolve(playerId);
     final results = await Future.wait<dynamic>([
-      // La pareja habitual viene en la MISMA consulta (relación por habitual_partner_id): antes era una petición aparte
-      // después de las demás, un viaje de red más (≈300 ms en el móvil) cada vez que se abría un perfil con pareja.
-      _db.from('profiles').select('$_cols, partner:profiles!habitual_partner_id(id, display_name, username, avatar_url, habitual_partner_id)').eq('id', uid).single(),
+      _db.from('profiles').select(_cols).eq('id', uid).single(),
       _db.from('player_ratings').select('elo').eq('user_id', uid).maybeSingle(),
       _db.from('league_members').select('league_id').eq('user_id', uid),
       _db.rpc('get_player_history', params: {'p_user': uid}),
@@ -36,7 +34,11 @@ class SupabaseProfileRepository implements ProfileRepository {
     PartnerLink? partner;
     final partnerId = p['habitual_partner_id'] as String?;
     if (partnerId != null) {
-      final q = p['partner'] as Map<String, dynamic>?;   // null si la RLS no deja verlo (igual que antes con maybeSingle)
+      // Consulta aparte y por id (16 nov 2026): el 15 nov se pidió la pareja dentro de la misma consulta con la pista
+      // `profiles!habitual_partner_id`, pero en una relación de `profiles` consigo misma esa pista es ambigua (pareja que
+      // yo elegí / perfiles que me eligieron a mí) y la respuesta podía llegar como LISTA: el `as Map` lanzaba, el perfil
+      // entero fallaba y la tarjeta de error decía «no hay conexión». Ver test/profile_repository_test.dart.
+      final q = await _db.from('profiles').select('id, display_name, username, avatar_url, habitual_partner_id').eq('id', partnerId).maybeSingle();
       if (q != null) {
         partner = PartnerLink(
           userId: partnerId, name: (q['display_name'] ?? '') as String, username: (q['username'] ?? '') as String, avatarUrl: q['avatar_url'] as String?,

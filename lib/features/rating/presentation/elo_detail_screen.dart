@@ -28,7 +28,7 @@ class EloDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
         error: (e, _) => SafeArea(child: Column(children: [
           PlobbyHeaderBar(title: 'Mi rating', onBack: () => context.pop()),
-          Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(title: 'No se pudo cargar tu rating', onRetry: () => ref.invalidate(myRatingProvider))),
+          Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudo cargar tu rating', onRetry: () => ref.invalidate(myRatingProvider))),
         ])),
         data: (d) => _Body(d),
       ),

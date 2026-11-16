@@ -29,7 +29,7 @@ class ManageLeagueScreen extends ConsumerWidget {
         ])),
         Expanded(child: detail.when(
         loading: () => const Padding(padding: EdgeInsets.all(20), child: Column(children: [LoadingBlock(height: 80), SizedBox(height: 12), LoadingBlock(height: 200)])),
-        error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(leagueDetailProvider(leagueId)))),
+        error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(leagueDetailProvider(leagueId)))),
         data: (l) => !l.canManage
             ? Padding(padding: const EdgeInsets.all(20), child: EmptyStateCard(icon: Icons.lock_outline, title: 'Acceso restringido',
                 text: 'Solo el organizador o el administrador del club pueden gestionar esta liga.', secondary: 'Volver a la liga', onSecondary: () => context.pop()))
@@ -123,7 +123,7 @@ class _BodyState extends ConsumerState<_Body> {
       card('Solicitudes de acceso', badge: reqs.valueOrNull?.length, [
         reqs.when(
           loading: () => const LoadingBlock(height: 56, radius: AppRadius.md),
-          error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(joinRequestsProvider(l.id))),
+          error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(joinRequestsProvider(l.id))),
           data: (rs) => rs.isEmpty ? const Text('No hay solicitudes pendientes.', style: muted) : Column(children: [
             for (final r in rs) rowTile(leading: LeagueAvatar(name: r.name, avatarUrl: r.avatarUrl, size: 40), title: r.name,
                 subtitle: r.message.isEmpty ? null : r.message, trailing: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -137,7 +137,7 @@ class _BodyState extends ConsumerState<_Body> {
       card('Participantes', [
         members.when(
           loading: () => const LoadingBlock(height: 100, radius: AppRadius.md),
-          error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(standingsProvider(l.id))),
+          error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(standingsProvider(l.id))),
           data: (ms) {
             final others = ms.where((m) => m.role != LeagueRole.organizer).toList();
             return Column(children: [
@@ -158,7 +158,7 @@ class _BodyState extends ConsumerState<_Body> {
       card('Resultados en disputa', badge: disputes.valueOrNull?.length, [
         disputes.when(
           loading: () => const LoadingBlock(height: 56, radius: AppRadius.md),
-          error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(leagueMatchesProvider(l.id))),
+          error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(leagueMatchesProvider(l.id))),
           data: (ds) => ds.isEmpty ? const Text('No hay resultados en disputa.', style: muted) : Column(children: [
             for (final d in ds) rowTile(
                 leading: Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.dangerSoft, borderRadius: BorderRadius.circular(10)),
@@ -196,7 +196,7 @@ class _BodyState extends ConsumerState<_Body> {
         const SheetHeader(title: 'Invitar amigos'),
         Expanded(child: fs.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(friendsProvider))),
+          error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(friendsProvider))),
           data: (l) => l.isEmpty ? Center(child: Text('Todavía no tienes amigos para invitar.', style: PlobbyText.sub)) : ListView(children: [
             for (final f in l) CheckboxListTile(contentPadding: EdgeInsets.zero, value: picked.contains(f.player.id), activeColor: AppColors.inverse, checkColor: AppColors.brand,
                 title: Text(f.player.name, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),

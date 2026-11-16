@@ -57,7 +57,7 @@ class NotificationsScreen extends ConsumerWidget {
         ])),
         Expanded(child: async.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(notificationsProvider))),
+          error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(notificationsProvider))),
           data: (list) {
             if (list.isEmpty) {
               return const Padding(padding: EdgeInsets.all(20), child: EmptyStateCard(icon: Icons.notifications_none, title: 'Todo al día',

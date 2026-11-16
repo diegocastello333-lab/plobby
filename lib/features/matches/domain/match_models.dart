@@ -1,3 +1,4 @@
+import '../../../core/errors/failure.dart';
 /// Tipo de partido. En backend: `matches.match_type` ('league' | 'friendly'); `league_id` solo en liga.
 enum MatchType { league, friendly }
 
@@ -47,7 +48,7 @@ bool isValidSet(int a, int b) {
 
 /// Error de `create_match` traducido a un mensaje para el usuario. El repositorio Supabase lo construye a partir
 /// del mensaje del servidor (la función valida jugadores, liga/amistad y sets y lanza `raise exception`).
-class MatchCreateException implements Exception {
+class MatchCreateException implements Exception, CodedFailure {
   const MatchCreateException(this.code);
   /// `players`, `not_friend`, `not_league_member`, `league_required`, `invalid_sets`, `auth`, `network`, `unknown`.
   final String code;

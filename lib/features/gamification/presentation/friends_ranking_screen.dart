@@ -49,7 +49,7 @@ class _FriendsRankingScreenState extends ConsumerState<FriendsRankingScreen> {
         child: async.when(
           skipLoadingOnReload: true,
           loading: () => ListView(padding: const EdgeInsets.all(20), children: const [LoadingBlock(height: 210), SizedBox(height: 14), LoadingBlock(height: 280)]),
-          error: (_, __) => ListView(padding: const EdgeInsets.all(20), children: [ErrorStateCard(onRetry: () => ref.invalidate(rankingProvider((_period, _offset))))]),
+          error: (e, __) => ListView(padding: const EdgeInsets.all(20), children: [ErrorStateCard(error: e, onRetry: () => ref.invalidate(rankingProvider((_period, _offset))))]),
           data: (r) => _content(r),
         ),
       )),

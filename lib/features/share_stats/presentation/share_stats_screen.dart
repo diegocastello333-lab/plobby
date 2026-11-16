@@ -76,7 +76,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
         PlobbyHeaderBar(title: 'Compartir mis stats', onBack: () => context.pop()),
         Expanded(child: async.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(title: 'No se pudieron cargar tus datos', onRetry: () => ref.invalidate(profileProvider('me')))),
+          error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudieron cargar tus datos', onRetry: () => ref.invalidate(profileProvider('me')))),
           data: (d) {
             final size = fmt.size;
             final hasClub = d.profile.club != null, hasPartner = d.profile.partner?.status == PartnerStatus.accepted;

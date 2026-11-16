@@ -11,6 +11,7 @@ import '../../../core/widgets/state_views.dart';
 import '../application/gamification_providers.dart';
 import '../domain/gamification_models.dart';
 import 'gamification_widgets.dart';
+import '../../../core/errors/failure.dart';
 
 /// LOGROS: nivel y XP (progresión personal, no habilidad), logros conseguidos, próximos y el catálogo completo.
 class AchievementsScreen extends ConsumerWidget {
@@ -27,7 +28,7 @@ class AchievementsScreen extends ConsumerWidget {
         child: async.when(
           skipLoadingOnReload: true,
           loading: () => ListView(padding: const EdgeInsets.all(20), children: const [LoadingBlock(height: 110), SizedBox(height: 16), LoadingBlock(height: 240)]),
-          error: (_, __) => ListView(padding: const EdgeInsets.all(20), children: [ErrorStateCard(onRetry: () => ref.invalidate(achievementsProvider))]),
+          error: (e, __) => ListView(padding: const EdgeInsets.all(20), children: [ErrorStateCard(error: e, onRetry: () => ref.invalidate(achievementsProvider))]),
           data: (a) => _Body(a: a),
         ),
       )),
@@ -144,8 +145,8 @@ class _PrefsSheetState extends ConsumerState<_PrefsSheet> {
       try {
         await ref.read(gamificationRepositoryProvider).savePrefs(n);
         ref.invalidate(notificationPrefsProvider);
-      } catch (_) {
-        if (mounted) { setState(() => _p = null); showPlobbySnack(context, 'No se pudo guardar. Revisa tu conexión.', error: true); }
+      } catch (e) {
+        if (mounted) { setState(() => _p = null); showPlobbySnack(context, actionErrorText(e, fallback: 'No se pudo guardar. Inténtalo de nuevo.'), error: true); }
       }
     }
     Widget row(String title, String sub, bool v, NotificationPrefs Function(bool) f) => SwitchListTile.adaptive(

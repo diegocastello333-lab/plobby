@@ -33,7 +33,7 @@ class _PickerState extends ConsumerState<_Picker> {
       Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 10), child: SearchField(hint: 'Buscar por rival, club, liga o fecha', onChanged: (v) => setState(() => q = v.trim().toLowerCase()))),
       Expanded(child: async.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-        error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(shareableMatchesProvider))),
+        error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(shareableMatchesProvider))),
         data: (all) {
           final l = all.where((m) => q.isEmpty || _hay(m, uid).contains(q)).toList();
           if (all.isEmpty) return const _Empty('Aún no tienes partidos confirmados', 'Cuando los dos capitanes confirmen un resultado podrás compartirlo aquí.');

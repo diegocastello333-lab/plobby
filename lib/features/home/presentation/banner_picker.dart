@@ -10,6 +10,7 @@ import '../../profile/application/profile_providers.dart';
 import '../application/banner_clock.dart';
 import '../domain/banner_schedule.dart';
 import 'banner_catalog.dart';
+import '../../../core/errors/failure.dart';
 
 /// Hoja «Banner de Inicio»: el usuario elige la COLECCIÓN (Seaside o Tropical). La imagen de cada momento del día la
 /// pone Plobby sola según la hora local. La elección se guarda en el perfil (`profiles.banner_id`): se conserva al
@@ -42,8 +43,8 @@ class _BannerSheetState extends ConsumerState<_BannerSheet> {
       ref.invalidate(profileProvider('me'));
       AppHaptics.selection();
       if (mounted) { Navigator.of(context).pop(); showPlobbySnack(context, '${b.name} aplicado'); }
-    } catch (_) {
-      if (mounted) { setState(() => _busy = null); showPlobbySnack(context, 'No se pudo cambiar el banner. Revisa tu conexión.', error: true); }
+    } catch (e) {
+      if (mounted) { setState(() => _busy = null); showPlobbySnack(context, actionErrorText(e, fallback: 'No se pudo cambiar el banner. Inténtalo de nuevo.'), error: true); }
     }
   }
 

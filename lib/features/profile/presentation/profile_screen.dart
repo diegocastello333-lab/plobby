@@ -60,7 +60,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Container(height: 300 + MediaQuery.paddingOf(context).top, color: AppColors.inverse),
           const Padding(padding: EdgeInsets.all(20), child: Column(children: [LoadingBlock(height: 44, radius: AppRadius.pill), SizedBox(height: 16), LoadingBlock(height: 180)])),
         ]),
-        error: (e, _) => SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Center(child: ErrorStateCard(
+        error: (e, _) => SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Center(child: ErrorStateCard(error: e, 
             title: 'No se pudo cargar el perfil', onRetry: () => ref.invalidate(profileProvider(widget.playerId)))))),
         data: (v) => _content(v),
       ))),

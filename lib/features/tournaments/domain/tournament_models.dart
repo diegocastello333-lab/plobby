@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../core/errors/failure.dart';
 
 /// Formatos de torneo. El nombre de BD se guarda en `tournaments.format`.
 enum TournamentFormat {
@@ -313,7 +314,7 @@ int estimatedMatches(TournamentFormat f, int teams, {int groups = 1, int qualifi
 }
 
 /// Error de una operación de torneo, con mensaje para el usuario.
-class TournamentException implements Exception {
+class TournamentException implements Exception, CodedFailure {
   TournamentException(this.code);
   final String code;
   static TournamentException fromServer(String message) {

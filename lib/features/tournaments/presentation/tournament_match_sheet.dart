@@ -10,6 +10,7 @@ import '../../../core/widgets/state_views.dart';
 import '../application/tournament_providers.dart';
 import '../domain/tournament_models.dart';
 import 'tournament_widgets.dart';
+import '../../../core/errors/failure.dart';
 
 /// Hoja de un partido: parejas, resultado y estado. La organización puede registrar, corregir o anular el resultado y
 /// marcarlo «en juego». Los participantes solo lo consultan.
@@ -56,8 +57,8 @@ class _MatchSheetState extends ConsumerState<_MatchSheet> {
       showPlobbySnack(context, ok);
     } on TournamentException catch (e) {
       if (mounted) setState(() { _busy = false; _error = e.message; if (e.code == 'result_conflict') _editing = false; });
-    } catch (_) {
-      if (mounted) setState(() { _busy = false; _error = 'Sin conexión. Comprueba tu red e inténtalo de nuevo.'; });
+    } catch (e) {
+      if (mounted) setState(() { _busy = false; _error = actionErrorText(e); });
     }
   }
 

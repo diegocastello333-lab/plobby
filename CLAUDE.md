@@ -275,3 +275,19 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   se reduce a 1200 px al elegirla. main.dart.js 5,04 → 4,66 MB. Banners: se precargan franja actual + siguiente (antes 4).
 - `core/async/single_flight.dart`: acciones de partido (empezar, finalizar, aceptar/rechazar, eliminar) una sola vez por
   doble toque. Tests: `test/web_performance_test.dart`. Total 377/377.
+
+## Falsos «sin conexión» en el iPhone (16 nov 2026, rama `fix-conectividad`; anterior en `backup/web-v2-optimizacion`)
+- Causa 1 (perfil): el 15 nov el perfil pedía la pareja embebida con `profiles!habitual_partner_id`; en una relación de
+  `profiles` consigo misma la pista es ambigua y la respuesta llegaba como LISTA → `as Map` lanzaba → perfil roto con
+  Supabase respondiendo 200 (logs). Revertido a consulta aparte. `test/profile_repository_test.dart` usa el repositorio
+  REAL con un PostgREST simulado (MockClient; ojo: la respuesta debe llevar `request:`).
+- Causa 2 (mensaje): `ErrorStateCard` decía «Parece que no hay conexión» ante CUALQUIER error, y ~12 avisos decían
+  «Revisa tu conexión» igual. No había detección de conectividad alguna.
+- Ahora: `core/errors/failure.dart` (`FailureKind`: offline, noInternet, serviceUnavailable, timeout, auth, permission,
+  server, data; `classifyError`, `diagnose` con sonda, `actionErrorText` para acciones, `refreshSessionIfPossible`;
+  interfaz `CodedFailure` en las excepciones de cada funcionalidad). `core/net/network_status*.dart` (web:
+  navigator.onLine solo para «sin red», eventos online/offline para reintentar; sonda = `version.json` del propio dominio
+  sin caché, solo tras un fallo). `ErrorStateCard(error: e)` en las 41 pantallas: causa real, reintento automático al
+  volver la red (solo lecturas, una vez), renueva sesión si es `auth`. LiveSync: cápsula «Sin conexión» (también sin
+  sesión) y al volver la red renueva token caducado + refreshSocial. Las acciones nunca se reintentan solas.
+- Tests: `test/connectivity_errors_test.dart`. Total 384/384.

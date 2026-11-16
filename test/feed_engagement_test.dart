@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:plobby/core/theme/plobby_theme.dart';
 import 'package:plobby/features/feed/application/feed_providers.dart';
 import 'package:plobby/features/feed/data/mock_feed_repository.dart';
@@ -91,6 +92,8 @@ void main() {
 
   test('los errores del servidor se traducen a frases para el usuario', () {
     expect(friendlyFeedError(Exception('PostgrestException(message: rate_limited, code: P0001)')), contains('Vas muy rápido'));
-    expect(friendlyFeedError(Exception('SocketException')), contains('Revisa tu conexión'));
+    expect(friendlyFeedError(http.ClientException('Failed to fetch')), contains('No se pudo conectar'));
+    // Un fallo que NO es de red ya no se atribuye a la conexión (antes todo decía «Revisa tu conexión»).
+    expect(friendlyFeedError(Exception('algo raro')), isNot(contains('conexión')));
   });
 }

@@ -44,7 +44,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
         loading: () => const _Skeleton(),
         error: (e, _) => Column(children: [
           PlobbyHeaderBar(title: 'Liga', onBack: () => context.canPop() ? context.pop() : context.go('/leagues')),
-          Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(leagueDetailProvider(id)))),
+          Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(leagueDetailProvider(id)))),
         ]),
         data: (l) {
           final standings = ref.watch(standingsProvider(id));
@@ -80,7 +80,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   // ── Clasificación (`.fcs` + `.card2.tbl`) ──
   Widget _rank(LeagueDetail l, AsyncValue<List<StandingRow>> s, String uid) => s.when(
         loading: () => const LoadingBlock(height: 320, radius: AppRadius.md),
-        error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(standingsProvider(widget.leagueId))),
+        error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(standingsProvider(widget.leagueId))),
         data: (rows) {
           if (rows.every((r) => r.played == 0)) {
             return EmptyStateCard(icon: Icons.leaderboard_outlined, title: 'La clasificación empieza con el primer partido',
@@ -132,7 +132,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
     if (!l.isMember) return const EmptyStateCard(icon: Icons.lock_outline, title: 'Actividad solo para miembros', text: 'Únete a la liga para ver sus resultados y novedades.');
     return ref.watch(leagueMatchesProvider(l.id)).when(
       loading: () => const LoadingBlock(height: 160, radius: AppRadius.md),
-      error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(leagueMatchesProvider(l.id))),
+      error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(leagueMatchesProvider(l.id))),
       data: (ms) {
         final items = ms.where((m) => m.status == MatchStatus.confirmed || m.status == MatchStatus.disputed).toList()
           ..sort((a, b) => (b.endedAt ?? b.scheduledAt).compareTo(a.endedAt ?? a.scheduledAt));
@@ -154,7 +154,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
     if (!l.isMember) return const EmptyStateCard(icon: Icons.lock_outline, title: 'Partidos solo para miembros', text: 'Únete a la liga para ver y registrar partidos.');
     return ref.watch(leagueMatchesProvider(l.id)).when(
       loading: () => const Column(children: [MatchCardSkeleton(), SizedBox(height: 12), MatchCardSkeleton()]),
-      error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(leagueMatchesProvider(l.id))),
+      error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(leagueMatchesProvider(l.id))),
       data: (ms) {
         final upcoming = ms.where((m) => m.status.isUpcoming).toList()..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         final done = ms.where((m) => m.status == MatchStatus.confirmed).toList();
@@ -182,7 +182,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   // ── Miembros ──
   Widget _members(LeagueDetail l, AsyncValue<List<StandingRow>> s, String uid) => s.when(
         loading: () => const LoadingBlock(height: 240, radius: AppRadius.md),
-        error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(standingsProvider(l.id))),
+        error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(standingsProvider(l.id))),
         data: (rows) {
           final q = _q.trim().toLowerCase();
           final list = [...rows]..sort((a, b) => a.rank != b.rank ? a.rank - b.rank : a.name.compareTo(b.name));

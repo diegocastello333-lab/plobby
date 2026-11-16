@@ -16,6 +16,7 @@ import '../../auth/presentation/avatar_catalog.dart';
 import 'widgets/avatar_gallery_sheet.dart';
 import '../application/profile_providers.dart';
 import '../domain/models.dart';
+import '../../../core/errors/failure.dart';
 
 /// Validación pura de «Editar perfil» (mismas reglas que el servidor en save_onboarding_step). Campo → mensaje.
 Map<String, String> validateProfileEdit({required String first, required String last, required String username, required String bio}) => {
@@ -46,6 +47,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Map<String, String> _errors = const {};
   bool _busy = false, _uploading = false;
   String? _loadError, _avatarUrl, _avatarId;
+  Object? _loadErr;
 
   @override
   void initState() { super.initState(); _load(); }
@@ -71,8 +73,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _avatarUrl = d.avatarUrl ?? p.avatarUrl;
       _avatarId = isValidAvatarId(d.avatarId) ? d.avatarId : (isValidAvatarId(p.avatarId) ? p.avatarId : null);
       setState(() { _data = d; _profile = p; });
-    } catch (_) {
-      if (mounted) setState(() => _loadError = 'No se pudo cargar tu perfil.');
+    } catch (e) {
+      if (mounted) setState(() { _loadError = 'No se pudo cargar tu perfil'; _loadErr = e; });
     }
   }
 
@@ -155,11 +157,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } on AuthException catch (x) {
       if (!mounted) return;
       setState(() { _busy = false; if (x.code == 'username_taken') _errors = {'username': 'Ese usuario ya está en uso.'}; });
-      if (x.code != 'username_taken') showPlobbySnack(context, 'No se pudo guardar. Revisa tu conexión y reinténtalo.', error: true);
-    } catch (_) {
+      if (x.code != 'username_taken') showPlobbySnack(context, actionErrorText(x, fallback: 'No se pudo guardar. Inténtalo de nuevo.'), error: true);
+    } catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
-      showPlobbySnack(context, 'No se pudo guardar. Revisa tu conexión y reinténtalo.', error: true);
+      showPlobbySnack(context, actionErrorText(e, fallback: 'No se pudo guardar. Inténtalo de nuevo.'), error: true);
     }
   }
 
@@ -175,7 +177,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           const SizedBox(width: 40),
         ])),
         Expanded(child: _loadError != null
-            ? Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(message: _loadError!, onRetry: _load))
+            ? Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: _loadErr, title: _loadError!, onRetry: _load))
             : p == null
                 ? const Center(child: CircularProgressIndicator(color: AppColors.text))
                 : ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), children: [

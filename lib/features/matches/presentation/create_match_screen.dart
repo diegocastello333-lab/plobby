@@ -11,6 +11,7 @@ import '../application/match_providers.dart';
 import '../../social/application/social_providers.dart' show friendsProvider;
 import '../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
 import '../domain/match_models.dart';
+import '../../../core/errors/failure.dart';
 
 /// Formulario ÚNICO de creación de partido — hoja «Crear partido» del prototipo HTML (aquí como pantalla, misma ruta). `type` decide si pide liga (liga) o no (amistoso).
 /// `leagueId` + `resultRequired` se usan al registrar el resultado desde una liga concreta (flujo previo).
@@ -65,8 +66,8 @@ class _S extends ConsumerState<CreateMatchScreen> {
       context.pop();
     } on MatchCreateException catch (e) {
       if (mounted) setState(() { _busy = false; _error = e.message; });
-    } catch (_) {
-      if (mounted) setState(() { _busy = false; _error = 'No se pudo enviar. Comprueba tu conexión e inténtalo de nuevo.'; });
+    } catch (e) {
+      if (mounted) setState(() { _busy = false; _error = actionErrorText(e, fallback: 'No se pudo enviar. Inténtalo de nuevo.'); });
     }
   }
 

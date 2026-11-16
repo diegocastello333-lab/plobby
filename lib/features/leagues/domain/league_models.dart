@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../core/errors/failure.dart';
 
 /// Visibilidad de la liga (↔ `leagues.visibility`).
 /// public: cualquiera entra · private: con código o invitación · club: se solicita acceso y lo aprueba un gestor.
@@ -115,7 +116,7 @@ class JoinRequest {
 
 enum JoinOutcome { joined, requested, alreadyMember }
 
-class LeagueException implements Exception {
+class LeagueException implements Exception, CodedFailure {
   LeagueException(this.code);
   final String code;
   /// Mensaje en español para cada error de las RPC de liga.

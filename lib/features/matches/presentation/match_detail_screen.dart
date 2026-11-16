@@ -14,6 +14,7 @@ import '../../rating/domain/elo_calculator.dart';
 import '../domain/match_models.dart';
 import 'edit_match_sheet.dart';
 import 'match_widgets.dart';
+import '../../../core/errors/failure.dart';
 
 String errorText(Object e) => switch (e is LifecycleException ? e.code : '') {
       'stale_version' => 'El resultado cambió: revisa la nueva versión antes de aceptar.',
@@ -21,7 +22,7 @@ String errorText(Object e) => switch (e is LifecycleException ? e.code : '') {
       'league_rule_players_locked' => 'Regla de liga: no se pueden cambiar jugadores a menos de 2 h del inicio.',
       'league_rule_delete_locked' => 'Regla de liga: no se puede eliminar a menos de 2 h del inicio.',
       'not_a_participant' => 'No participas en este partido.',
-      _ => 'No se pudo completar la acción. Comprueba tu conexión.',
+      _ => actionErrorText(e, fallback: 'No se pudo completar la acción. Inténtalo de nuevo.'),
     };
 
 String _hms(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
@@ -50,7 +51,7 @@ class MatchDetailScreen extends ConsumerWidget {
         ),
         Expanded(child: async.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(message: 'No se pudo cargar el partido.', onRetry: () => ref.invalidate(matchProvider(matchId)))),
+          error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, message: 'No se pudo cargar el partido.', onRetry: () => ref.invalidate(matchProvider(matchId)))),
           data: (m) => m == null
               ? const Padding(padding: EdgeInsets.all(20), child: EmptyStateCard(icon: Icons.sports_tennis, title: 'Este partido ya no existe', text: 'Puede que se haya eliminado.'))
               : _Body(m: m, uid: uid),

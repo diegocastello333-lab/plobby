@@ -9,6 +9,7 @@ import '../../../../core/widgets/state_views.dart';
 import 'activity_cards.dart' show avatar, timeAgo;
 import '../../application/feed_providers.dart';
 import '../../domain/feed_models.dart';
+import '../../../../core/errors/failure.dart';
 
 void showCommentsSheet(BuildContext context, FeedPost post) => showPlobbySheet(context, (_) => CommentsSheet(postId: post.id));
 
@@ -37,7 +38,7 @@ class _S extends ConsumerState<CommentsSheet> {
         const SheetHeader(title: 'Comentarios'),
         Flexible(child: async.when(
           loading: () => const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.text))),
-          error: (_, __) => ErrorStateCard(title: 'No se pudieron cargar', onRetry: () => ref.invalidate(commentsProvider(widget.postId))),
+          error: (e, __) => ErrorStateCard(error: e, title: 'No se pudieron cargar', onRetry: () => ref.invalidate(commentsProvider(widget.postId))),
           data: (list) => list.isEmpty ? const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Aún no hay comentarios. Escribe el primero.', style: PlobbyText.sub))
               : ListView(shrinkWrap: true, children: [for (final c in list) Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -102,5 +103,5 @@ String friendlyFeedError(Object e) {
   final s = e.toString();
   if (s.contains('rate_limited')) return 'Vas muy rápido. Espera un momento y vuelve a intentarlo.';
   if (s.contains('violates') || s.contains('check')) return 'El comentario no es válido (máximo 140 caracteres).';
-  return 'No se pudo completar. Revisa tu conexión e inténtalo de nuevo.';
+  return actionErrorText(e);
 }

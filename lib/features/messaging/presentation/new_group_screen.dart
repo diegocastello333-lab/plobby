@@ -62,7 +62,7 @@ class _NewGroupState extends ConsumerState<NewGroupScreen> {
         PlobbyHeaderBar(title: 'Nuevo grupo', onBack: () => context.pop()),
         Expanded(child: friends.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-          error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(friendsProvider))),
+          error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(friendsProvider))),
           data: (all) {
             final l = all.where((f) => q.isEmpty || f.player.name.toLowerCase().contains(q) || f.player.username.toLowerCase().contains(q)).toList();
             return Column(children: [

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import '../../social/domain/social_models.dart';
+import '../../../core/errors/failure.dart';
 
 enum MessageKind { text, invite, match, league, profile, system }
 enum MessageStatus { sending, sent, read, failed }
@@ -59,7 +60,7 @@ class Conversation {
   }
 }
 
-class MessagingException implements Exception {
+class MessagingException implements Exception, CodedFailure {
   MessagingException(this.code);
   final String code;
   @override

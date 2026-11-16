@@ -33,8 +33,8 @@ class HeadToHeadScreen extends ConsumerWidget {
           : IconSquareButton(icon: PlobbyIcons.share, tooltip: 'Compartir comparativa', onPressed: () => showShareImageSheet(context, ShareTarget.h2h(async.value!)))),
       Expanded(child: async.when(
         loading: () => ListView(padding: const EdgeInsets.all(20), children: const [LoadingBlock(height: 220), SizedBox(height: 16), LoadingBlock(height: 300)]),
-        error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(
-            message: e.toString().contains('not_friends') ? 'Solo puedes compararte con tus amigos.' : 'Revisa tu conexión e inténtalo de nuevo.',
+        error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, 
+            message: e.toString().contains('not_friends') ? 'Solo puedes compararte con tus amigos.' : null,   // si no, la causa real
             onRetry: () => ref.invalidate(headToHeadProvider(otherId)))),
         data: (d) => _Body(d: d),
       )),

@@ -46,7 +46,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
           SliverPersistentHeader(pinned: true, delegate: _Chips(filter, (f) => ref.read(feedFilterProvider.notifier).state = f)),
           ...async.when(
             loading: () => [SliverList.builder(itemCount: 3, itemBuilder: (_, __) => const _Skeleton())],
-            error: (e, _) => [SliverFillRemaining(hasScrollBody: false, child: _ErrorView(onRetry: () => ref.invalidate(feedControllerProvider)))],
+            error: (e, _) => [SliverFillRemaining(hasScrollBody: false, child: _ErrorView(error: e, onRetry: () => ref.invalidate(feedControllerProvider)))],
             data: (s) => s.posts.isEmpty ? [SliverFillRemaining(hasScrollBody: false, child: _Empty(filter: filter))] : [
               if (s.pendingNew.isNotEmpty) SliverToBoxAdapter(child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 8), child: PlobbyButton(kind: PlobbyButtonKind.small, icon: PlobbyIcons.arrup, label: '${s.pendingNew.length} actividad nueva', onPressed: ref.read(feedControllerProvider.notifier).showPending)))),
               SliverPadding(padding: const EdgeInsets.symmetric(horizontal: 20), sliver: SliverList.builder(
@@ -173,9 +173,10 @@ class _Empty extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.onRetry});
+  const _ErrorView({required this.error, required this.onRetry});
+  final Object error;
   final VoidCallback onRetry;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 120), child: Align(alignment: Alignment.topCenter,
-      child: ErrorStateCard(title: 'No se pudo cargar el feed', onRetry: onRetry)));
+      child: ErrorStateCard(error: error, title: 'No se pudo cargar el feed', onRetry: onRetry)));
 }

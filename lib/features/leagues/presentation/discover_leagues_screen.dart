@@ -65,7 +65,7 @@ class _DiscoverLeaguesScreenState extends ConsumerState<DiscoverLeaguesScreen> {
         const SizedBox(height: 18),
         res.when(
           loading: () => const Column(children: [LoadingBlock(height: 260, radius: AppRadius.md), SizedBox(height: 14), LoadingBlock(height: 260, radius: AppRadius.md)]),
-          error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(discoverProvider)),
+          error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(discoverProvider)),
           data: (l) => l.isEmpty
               ? EmptyStateCard(icon: Icons.search_off, title: 'No hay ligas con esos filtros', text: 'Prueba con otra zona o nivel, o crea tu propia liga.',
                   primary: f.isDefault ? null : 'Borrar filtros', onPrimary: () { _q.clear(); ref.read(discoverFiltersProvider.notifier).state = const DiscoverFilters(); },

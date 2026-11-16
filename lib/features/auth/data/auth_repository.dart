@@ -1,4 +1,5 @@
 import '../domain/auth_models.dart';
+import '../../../core/errors/failure.dart';
 
 /// Acceso con Google (Supabase Auth). Una cuenta Google ↔ un único usuario: la implementación real usa
 /// `signInWithOAuth(OAuthProvider.google)` y el perfil se crea/recupera con el trigger `handle_new_user`.
@@ -18,7 +19,7 @@ abstract class AuthRepository {
   Future<void> completeOnboarding();
 }
 
-class AuthException implements Exception {
+class AuthException implements Exception, CodedFailure {
   AuthException(this.code, [this.message]);
   final String code; final String? message;
   @override

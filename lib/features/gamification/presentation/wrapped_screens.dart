@@ -23,7 +23,7 @@ class WrappedListScreen extends ConsumerWidget {
       PlobbyHeaderBar(title: 'Plobby Wrapped', onBack: () => context.pop()),
       Expanded(child: async.when(
         loading: () => ListView(padding: const EdgeInsets.all(20), children: const [LoadingBlock(height: 160), SizedBox(height: 12), LoadingBlock(height: 72)]),
-        error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(onRetry: () => ref.invalidate(wrappedPeriodsProvider))),
+        error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(wrappedPeriodsProvider))),
         data: (ps) {
           if (ps.isEmpty) {
             return Padding(padding: const EdgeInsets.all(20), child: EmptyStateCard(icon: Icons.auto_awesome, title: 'Tu primer Wrapped te espera.',
@@ -125,10 +125,10 @@ class _WrappedStoryScreenState extends ConsumerState<WrappedStoryScreen> with Si
       backgroundColor: AppColors.ink900,
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brand)),
-        error: (_, __) => SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
+        error: (e, __) => SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
           Align(alignment: Alignment.centerLeft, child: IconSquareButton(icon: PlobbyIcons.close, tooltip: 'Cerrar', onPressed: () => context.pop())),
           const SizedBox(height: 20),
-          ErrorStateCard(onRetry: () => ref.invalidate(wrappedProvider((widget.kind, widget.start)))),
+          ErrorStateCard(error: e, onRetry: () => ref.invalidate(wrappedProvider((widget.kind, widget.start)))),
         ]))),
         data: (w) {
           final slides = wrappedSlides(w);

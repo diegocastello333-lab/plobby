@@ -58,7 +58,7 @@ class _TournamentDetailScreenState extends ConsumerState<TournamentDetailScreen>
         ]),
         error: (e, _) => SafeArea(child: Column(children: [
           PlobbyHeaderBar(title: 'Torneo', onBack: () => context.pop()),
-          Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(
+          Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e,
               title: e is TournamentException && e.code == 'not_allowed' ? 'No tienes acceso a este torneo' : 'No se pudo cargar el torneo',
               onRetry: () => ref.invalidate(tournamentDetailProvider(widget.tournamentId)))),
         ])),

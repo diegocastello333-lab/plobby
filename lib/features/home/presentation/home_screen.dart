@@ -82,7 +82,7 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             view.when(
               loading: () => const Column(children: [LoadingBlock(height: 82, radius: 20), SizedBox(height: 10), LoadingBlock(height: 82, radius: 20)]),
-              error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(profileProvider('me'))),
+              error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(profileProvider('me'))),
               data: (v) {
                 final ms = v.confirmed.take(3).toList();
                 if (ms.isEmpty) {
@@ -335,7 +335,7 @@ class _FriendMatchesState extends ConsumerState<_FriendMatches> {
   @override
   Widget build(BuildContext context) => ref.watch(friendMatchesProvider).when(
         loading: () => const LoadingBlock(height: 210),
-        error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(friendMatchesProvider)),
+        error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(friendMatchesProvider)),
         data: (posts) {
           final seen = <String>{};
           final latest = [for (final p in posts) if (seen.add(p.author.id)) p].take(10).toList();

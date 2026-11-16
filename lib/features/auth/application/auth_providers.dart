@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/auth_repository.dart';
 import '../data/mock_auth_repository.dart';
 import '../domain/auth_models.dart';
+import '../../../core/errors/failure.dart';
 
 /// En main.dart sustituye por SupabaseAuthRepository (ver supabase/integration/supabase_auth_repository.dart.txt).
 final authRepositoryProvider = Provider<AuthRepository>((ref) => MockAuthRepository());
@@ -78,7 +79,7 @@ class OnboardingController extends Notifier<OnboardingState> {
       state = state.copyWith(busy: false, step: i + 1 < state.pending.length ? state.pending[i + 1] : 4);
       return true;
     } on AuthException catch (e) {
-      state = state.copyWith(busy: false, error: e.code == 'username_taken' ? 'Ese usuario ya está en uso.' : 'No se pudo guardar. Revisa tu conexión y reinténtalo.', usernameAvailable: e.code == 'username_taken' ? false : state.usernameAvailable);
+      state = state.copyWith(busy: false, error: e.code == 'username_taken' ? 'Ese usuario ya está en uso.' : actionErrorText(e, fallback: 'No se pudo guardar. Inténtalo de nuevo.'), usernameAvailable: e.code == 'username_taken' ? false : state.usernameAvailable);
       return false;
     }
   }

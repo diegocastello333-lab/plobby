@@ -20,7 +20,7 @@ class ProgressSection extends ConsumerWidget {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       async.when(
         loading: () => const LoadingBlock(height: 96),
-        error: (_, __) => ErrorStateCard(title: 'No se pudo cargar tu progreso', onRetry: () => ref.invalidate(achievementsProvider)),
+        error: (e, __) => ErrorStateCard(error: e, title: 'No se pudo cargar tu progreso', onRetry: () => ref.invalidate(achievementsProvider)),
         data: (a) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           LevelCard(data: a, compact: true, onTap: () => context.push('/achievements')),
           if (a.unlocked.isNotEmpty) ...[

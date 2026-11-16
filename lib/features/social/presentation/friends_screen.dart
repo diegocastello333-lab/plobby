@@ -15,6 +15,7 @@ import '../domain/social_models.dart';
 import 'player_tile.dart';
 import '../../matches/application/match_providers.dart' show leagueMembersProvider;
 import '../../matches/domain/match_models.dart' show PlayerOption;
+import '../../../core/errors/failure.dart';
 
 /// Petición para usar la pantalla de Amigos como selector (jugadores de un partido o pareja habitual).
 /// [max] = cuántos se pueden elegir (1 = elección única). [selected] = ya elegidos, en orden. [blocked] = ids que no se
@@ -102,7 +103,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       // Competición entre amigos: tu puesto semanal y acceso al ranking completo.
       if (all.valueOrNull?.isNotEmpty ?? false) const Padding(padding: EdgeInsets.only(bottom: 18), child: RankingCard()),
       // Solicitudes: quién la envía, aceptar/rechazar. Un error al cargarlas ya no se oculta.
-      if (reqs.hasError) Padding(padding: const EdgeInsets.only(bottom: 14), child: ErrorStateCard(title: 'No se pudieron cargar las solicitudes', onRetry: () => ref.invalidate(requestsProvider))),
+      if (reqs.hasError) Padding(padding: const EdgeInsets.only(bottom: 14), child: ErrorStateCard(error: reqs.error, title: 'No se pudieron cargar las solicitudes', onRetry: () => ref.invalidate(requestsProvider))),
       if (incoming.isNotEmpty) ...[
         _Header('Solicitudes pendientes', incoming.length),
         for (var i = 0; i < incoming.length; i++) AppearOnce(animationKey: 'req:${incoming[i].id}', index: i, child: _IncomingRequest(incoming[i])),
@@ -118,7 +119,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       ],
       ...all.when(
         loading: () => [const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator(color: AppColors.text)))],
-        error: (e, _) => [ErrorStateCard(onRetry: () => ref.invalidate(friendsProvider))],
+        error: (e, _) => [ErrorStateCard(error: e, onRetry: () => ref.invalidate(friendsProvider))],
         data: (friends) => friends.isEmpty
             ? [EmptyStateCard(icon: Icons.groups_2_outlined, title: 'Tu comunidad de pádel empieza aquí',
                 text: 'Añade a tus compañeros para ver sus partidos, hablar con ellos e invitarles a jugar.', primary: 'Buscar amigos', onPrimary: () => context.push('/friends/add'))]
@@ -138,7 +139,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
   }
 
   Future<void> _run(Future<void> Function() f) async {
-    try { await f(); } catch (_) { if (mounted) showPlobbySnack(context, 'No se pudo completar. Revisa tu conexión e inténtalo de nuevo.', error: true); }
+    try { await f(); } catch (e) { if (mounted) showPlobbySnack(context, actionErrorText(e), error: true); }
   }
 
   // ───────────── Modo selección ─────────────
@@ -150,7 +151,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
     final q = _q.trim().toLowerCase();
     return source.when(
       loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
-      error: (_, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(title: 'No se pudieron cargar los jugadores',
+      error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudieron cargar los jugadores',
           onRetry: () => pick.leagueId == null ? ref.invalidate(friendsProvider) : ref.invalidate(leagueMembersProvider(pick.leagueId!)))),
       data: (all) {
         if (all.isEmpty) {

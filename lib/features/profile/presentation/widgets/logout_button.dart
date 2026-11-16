@@ -8,6 +8,7 @@ import '../../../../core/widgets/plobby_components.dart';
 import '../../../../core/widgets/plobby_icon.dart';
 import '../../../../core/widgets/state_views.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../../../core/errors/failure.dart';
 
 /// «Cerrar sesión» al final del perfil propio: separado del resto, discreto (texto rojo con borde suave) y con
 /// confirmación. Solo cierra la sesión del dispositivo (`supabase.auth.signOut()` vía [AuthRepository.signOut]); la cuenta
@@ -31,10 +32,10 @@ class _LogoutButtonState extends ConsumerState<LogoutButton> {
     setState(() => _busy = true);
     try {
       await ref.read(authRepositoryProvider).signOut();
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() => _busy = false);
-        showPlobbySnack(context, 'No se pudo cerrar sesión. Revisa tu conexión e inténtalo de nuevo.', error: true);
+        showPlobbySnack(context, actionErrorText(e, fallback: 'No se pudo cerrar sesión. Inténtalo de nuevo.'), error: true);
       }
       return;
     }

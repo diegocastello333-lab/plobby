@@ -119,7 +119,7 @@ class _Step2State extends ConsumerState<_Step2> {
       const SizedBox(height: 12),
       friends.when(
         loading: () => const LoadingBlock(height: 120, radius: AppRadius.md),
-        error: (_, __) => ErrorStateCard(onRetry: () => ref.invalidate(friendsProvider)),
+        error: (e, __) => ErrorStateCard(error: e, onRetry: () => ref.invalidate(friendsProvider)),
         data: (fs) {
           final list = fs.where((f) => _q.isEmpty || f.player.name.toLowerCase().contains(_q) || f.player.username.toLowerCase().contains(_q)).toList();
           if (fs.isEmpty) return Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text('Todavía no tienes amigos en Plobby. Podrás invitar con el código cuando crees la liga.', style: PlobbyText.sub));

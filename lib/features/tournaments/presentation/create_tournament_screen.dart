@@ -16,6 +16,7 @@ import '../application/tournament_providers.dart';
 import '../domain/tournament_models.dart';
 import 'pair_picker_sheet.dart';
 import 'tournament_widgets.dart';
+import '../../../core/errors/failure.dart';
 
 /// «Crear torneo» en 4 pasos. Nada se guarda en Supabase hasta pulsar «Crear torneo» en el resumen; entonces se crea
 /// todo de una vez (torneo, parejas y estructura) en una única operación del servidor.
@@ -70,8 +71,8 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
       context.pushReplacement('/tournaments/$id');
     } on TournamentException catch (x) {
       if (mounted) setState(() { _busy = false; _error = x.message; });
-    } catch (_) {
-      if (mounted) setState(() { _busy = false; _error = 'No se pudo crear el torneo. Comprueba tu conexión e inténtalo de nuevo.'; });
+    } catch (e) {
+      if (mounted) setState(() { _busy = false; _error = actionErrorText(e, fallback: 'No se pudo crear el torneo. Inténtalo de nuevo.'); });
     }
   }
 
