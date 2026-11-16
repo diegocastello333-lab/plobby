@@ -94,3 +94,12 @@ cd build/web && python3 -m http.server 8080   # http://localhost:8080
 | Vibración (hápticos) | Safari en iPhone no permite vibrar: no hay vibración; la respuesta visual se mantiene. |
 | Notificaciones con la app cerrada | No (tampoco en la app nativa: falta Firebase/APNs). Dentro de la app, los avisos llegan en tiempo real. iOS 16.4+ admitiría Web Push en la PWA instalada; requiere un servidor de envío que aún no existe. |
 | Iniciar sesión | Google, igual que en el móvil. No hay registro con correo y contraseña ni recuperación de contraseña: la app solo tiene Google. |
+
+## 8. Problemas frecuentes al desplegar
+
+- **`404 DEPLOYMENT_NOT_FOUND`**: la URL no corresponde a ningún despliegue (por ejemplo, se abrió la de ejemplo
+  `plobby-xxxx.vercel.app`). Usa la URL que muestra Vercel en *Deployments* / *Domains*.
+- **«No deployments found for "web-version"»** al elegir esa rama como producción: Vercel solo compila una rama cuando
+  recibe un `push` después de conectar el proyecto. Basta con un commit nuevo en `web-version`: aparecerá en
+  *Deployments* como «Preview»; cuando termine, ya se puede elegir la rama (o pulsar *⋯ → Promote to Production* en ese
+  despliegue).
