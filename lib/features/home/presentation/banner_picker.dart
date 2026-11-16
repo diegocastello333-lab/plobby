@@ -28,7 +28,9 @@ class _BannerSheetState extends ConsumerState<_BannerSheet> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    for (final b in HomeBanner.values) { precacheBanner(context, b); }   // las 8 miniaturas, sin parpadeos
+    // El selector muestra cada colección con su imagen de la franja ACTUAL: solo esas dos, sin parpadeos.
+    final now = dayPhaseAt(DateTime.now());
+    for (final b in HomeBanner.values) { precacheBanner(context, b, phases: [now]); }
   }
 
   Future<void> _choose(HomeBanner b, HomeBanner current) async {

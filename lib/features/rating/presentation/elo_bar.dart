@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../domain/rating_models.dart';
 
@@ -25,7 +26,7 @@ class _EloBarState extends State<EloBar> with TickerProviderStateMixin {
     if (r != _reduced || !_fill.isAnimating && _fill.value == 0) {
       _reduced = r;
       if (r) { _fill.value = 1; _glow.stop(); }
-      else { _fill.forward(); _glow.repeat(); }
+      else { _fill.forward(); IdleMotion.loop(_glow); }   // en la web el brillo pasa unas veces y se detiene fuera de la barra
     }
   }
 

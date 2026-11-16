@@ -200,7 +200,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 
 ## Gamificación: Head to Head, Friends Ranking, Wrapped, logros y niveles (13 nov 2026, v1.6.0)
 - Diseño y reglas: `docs/gamificacion.md`. Migraciones `20261126a_gamification_notification_types` (enum ranking/level_up/
-  wrapped) + `20261126b_gamification` — **PENDIENTES DE APLICAR EN PRODUCCIÓN** (el conector de Supabase falló con 502 en esa
+  wrapped) + `20261126b_gamification` — APLICADAS EN PRODUCCIÓN el 16 nov 2026 (con autorización; antes pendientes porque el conector dio 502 en esa
   sesión). Validadas en una réplica local: PostgreSQL 16 en /var/lib/postgresql/plobby_pg (puerto 5499) con
   `supabase/tests/local_supabase_stub.sql`; `supabase/tests/run_local.sh <socket> 5499` → 55/55.
 - Fuente única `player_match_stats` (trigger al confirmar/desconfirmar y al cambiar sets) → RPC `head_to_head`,
@@ -260,3 +260,18 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Verificado en Chromium con emulación de iPhone: build real → bienvenida, authorize de Supabase con PKCE y
   redirect_to correcto, SW activo sin datos de Supabase en caché; build demo → 16 pantallas, descarga PNG, Web Share
   simulado con NotAllowedError → hoja de reintento → compartido. NO verificado en Safari real ni con sesión real.
+
+## Optimización web (16 nov 2026, rama `web-optimizacion`; estable anterior en `backup/web-v1-estable`)
+- BD (con autorización): aplicadas `20261126a/b` (gamificación: los logs mostraban 404 reales en head_to_head,
+  my_achievements, friends_ranking, wrapped_periods), `20261127_fk_indexes` (7 índices de FK) y
+  `20261127b_gamification_search_path`. Validación en BD real: transacción + `raise exception` final (deshace todo y
+  devuelve los resultados en el mensaje).
+- Postgres no es el cuello de botella (notifications 1,5 ms, get_my_profile 5,5 ms en pg_stat_statements); en el móvil
+  cuesta el viaje de red (~300 ms): optimizar NÚMERO de peticiones en serie. Perfil: pareja embebida
+  (`partner:profiles!habitual_partner_id(...)`); LiveSync: recarga social al volver solo tras ≥10 s oculta.
+- Web en reposo: `IdleMotion.loop` (app_motion) limita bucles decorativos a 3 ciclos en web; `AmbientBackground` sin
+  deriva en web. Medido (Playwright, rAF/s en reposo): Inicio/Feed/Competiciones 5–9 → 0, Perfil 11 → 0, Mi rating 17 → 0.
+- `image` (≈230 KB, 7,7 % del JS) en carga diferida (`tournament_cover_image.dart`, `deferred as cover`); en web la foto
+  se reduce a 1200 px al elegirla. main.dart.js 5,04 → 4,66 MB. Banners: se precargan franja actual + siguiente (antes 4).
+- `core/async/single_flight.dart`: acciones de partido (empezar, finalizar, aceptar/rechazar, eliminar) una sola vez por
+  doble toque. Tests: `test/web_performance_test.dart`. Total 377/377.

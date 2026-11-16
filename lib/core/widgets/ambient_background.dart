@@ -70,7 +70,9 @@ class _AmbientBackgroundState extends State<AmbientBackground> with TickerProvid
   void didChangeDependencies() {
     super.didChangeDependencies();
     _reduce = AppAnimations.reduceMotion(context);
-    if (_reduce || !AmbientBackground.driftEnabled) {
+    // En la web la deriva lenta no compensa: obligaría a repintar toda la pantalla en cada fotograma sin parar (ver
+    // IdleMotion). El color sigue cambiando con suavidad al cambiar de pestaña o deslizar.
+    if (_reduce || !AmbientBackground.driftEnabled || IdleMotion.limitLoops) {
       _drift.stop();
     } else if (!_drift.isAnimating) {
       _drift.repeat();

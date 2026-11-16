@@ -47,6 +47,9 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
   StreamSubscription<ChatMessage>? _incoming;
   StreamSubscription<ProfileEvent>? _profiles;
   Timer? _peopleDebounce, _healTimer;
+  DateTime? _hiddenAt;
+  /// Ausencia mínima para recargar los datos sociales al volver a la app.
+  static const resumeRefreshAfter = Duration(seconds: 10);
   LiveBanner? _banner;
   Timer? _hide;
   int _seq = 0;
@@ -82,9 +85,18 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
       case AppLifecycleState.resumed:
         ref.read(presenceServiceProvider).setActive(true);
         // Realtime no reenvía lo ocurrido mientras la app estaba en segundo plano: se recarga lo que puede haber cambiado.
-        refreshSocial(ref);
-        ref.invalidate(chatProvider);
+        // Solo tras una ausencia real (≥ [resumeRefreshAfter] oculta): en la web «resumed» llega también al recuperar el
+        // foco (cerrar la hoja de compartir, volver de otra pestaña un segundo…) y cada vez se recargaban ~8 fuentes de
+        // datos (≈12 peticiones). En ausencias cortas la conexión de tiempo real sigue viva y, si se cortó, el canal
+        // compartido ya hace su propia resincronización al reconectar.
+        final away = _hiddenAt == null ? Duration.zero : DateTime.now().difference(_hiddenAt!);
+        _hiddenAt = null;
+        if (away >= resumeRefreshAfter) {
+          refreshSocial(ref);
+          ref.invalidate(chatProvider);
+        }
       case AppLifecycleState.paused || AppLifecycleState.hidden || AppLifecycleState.detached:
+        _hiddenAt ??= DateTime.now();
         ref.read(presenceServiceProvider).setActive(false);   // en segundo plano o cerrada → «Desconectado»
       case AppLifecycleState.inactive:
         break;   // transitorio (llamada, persiana de notificaciones): no cambia la presencia

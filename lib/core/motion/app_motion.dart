@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
@@ -85,6 +86,28 @@ class AppHaptics {
   static void success() => HapticFeedback.mediumImpact();
   /// Acción que no se pudo completar.
   static void error() => HapticFeedback.heavyImpact();
+}
+
+/// Animaciones decorativas en bucle (llama de racha, brillo de la barra de ELO, punto «en directo»).
+///
+/// En la WEB se limitan a unos ciclos y después quedan quietas en su pose de reposo: una animación infinita obliga al
+/// navegador a volver a pintar TODA la pantalla en cada fotograma aunque nadie toque nada (medido en Chromium: de 5 a 17
+/// fotogramas/s en reposo en Inicio, Feed, Competiciones, Perfil y Mi rating; 0 en las demás). En un iPhone eso es batería y
+/// calor. En Android e iOS nativos el comportamiento no cambia.
+class IdleMotion {
+  IdleMotion._();
+  static bool limitLoops = kIsWeb;   // modificable en tests
+  static const cycles = 3;
+
+  /// Igual que `c.repeat(reverse: …)`, pero en la web se detiene tras [cycles] ciclos y vuelve a [rest] (si se da).
+  static void loop(AnimationController c, {bool reverse = false, double? rest}) {
+    if (!limitLoops) { c.repeat(reverse: reverse); return; }
+    c.repeat(reverse: reverse, count: cycles * (reverse ? 2 : 1)).whenCompleteOrCancel(() {
+      if (rest != null && c.status != AnimationStatus.dismissed && c.value != rest) {
+        try { c.animateTo(rest, duration: const Duration(milliseconds: 300)); } catch (_) {/* ya eliminado */}
+      }
+    });
+  }
 }
 
 /// Tamaños y estilos de tarjetas/encabezados. Múltiplos de 4/8.

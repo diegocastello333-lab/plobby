@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
@@ -12,23 +11,11 @@ import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../profile/application/profile_providers.dart';
+import '../application/tournament_cover_image.dart' deferred as cover;
 import '../application/tournament_providers.dart';
 import '../domain/tournament_models.dart';
 import 'pair_picker_sheet.dart';
 import 'tournament_widgets.dart';
-
-/// Portada 16:9 recortada al centro, 1200 px como mucho y JPEG 82 (en un isolate): ligera y sin deformar.
-Uint8List prepareTournamentCover(Uint8List raw) {
-  var im = img.decodeImage(raw);
-  if (im == null) throw const FormatException('imagen no válida');
-  im = img.bakeOrientation(im);
-  const ratio = 16 / 9;
-  var w = im.width, h = (im.width / ratio).round();
-  if (h > im.height) { h = im.height; w = (im.height * ratio).round(); }
-  im = img.copyCrop(im, x: (im.width - w) ~/ 2, y: (im.height - h) ~/ 2, width: w, height: h);
-  if (im.width > 1200) im = img.copyResize(im, width: 1200, height: (1200 / ratio).round(), interpolation: img.Interpolation.cubic);
-  return Uint8List.fromList(img.encodeJpg(im, quality: 82));
-}
 
 /// «Crear torneo» en 4 pasos. Nada se guarda en Supabase hasta pulsar «Crear torneo» en el resumen; entonces se crea
 /// todo de una vez (torneo, parejas y estructura) en una única operación del servidor.
@@ -89,11 +76,14 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
   }
 
   Future<void> _pickCover() async {
-    final x = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 2400, imageQuality: 92);
+    // En la web el navegador reduce la foto a 1200 px al elegirla (rápido, nativo): luego hay 4 veces menos píxeles que
+    // procesar en Dart, que allí corre en el hilo principal. El resultado final es el mismo (≤ 1200 px, 16:9).
+    final x = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: kIsWeb ? 1200 : 2400, imageQuality: 92);
     if (x == null || !mounted) return;
     setState(() => _coverBusy = true);
     try {
-      final bytes = await compute(prepareTournamentCover, await x.readAsBytes());
+      await cover.loadLibrary();   // descarga diferida del código de imagen (solo la primera vez)
+      final bytes = await compute(cover.prepareTournamentCover, await x.readAsBytes());
       if (mounted) setState(() { _d = _d.copyWith(coverBytes: bytes); _coverBusy = false; });
     } catch (_) {
       if (mounted) { setState(() => _coverBusy = false); showPlobbySnack(context, 'No se pudo usar esa imagen.', error: true); }

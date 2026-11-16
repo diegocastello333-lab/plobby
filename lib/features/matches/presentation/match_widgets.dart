@@ -1,5 +1,6 @@
 import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
@@ -40,7 +41,9 @@ class StatusChip extends StatelessWidget {
 
 class _Pulse extends StatefulWidget { const _Pulse(); @override State<_Pulse> createState() => _PulseState(); }
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat(reverse: true);
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+  @override
+  void initState() { super.initState(); IdleMotion.loop(_c, reverse: true, rest: 1); }   // web: late unas veces y queda encendido
   @override
   void dispose() { _c.dispose(); super.dispose(); }
   @override

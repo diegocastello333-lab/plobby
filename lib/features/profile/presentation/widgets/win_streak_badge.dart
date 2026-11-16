@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/motion/app_motion.dart';
 import '../../../../core/theme/plobby_theme.dart';
 import '../../../../core/widgets/flame_paths.dart';
 
@@ -23,7 +24,7 @@ class _WinStreakBadgeState extends State<WinStreakBadge> with TickerProviderStat
   void _syncLoop() {
     if (_level == 0) { _loop.stop(); return; }
     _loop.duration = _period;
-    if (!_loop.isAnimating) _loop.repeat(reverse: true);
+    if (!_loop.isAnimating) IdleMotion.loop(_loop, reverse: true, rest: 0);   // en la web: unos ciclos y quieta
   }
 
   @override

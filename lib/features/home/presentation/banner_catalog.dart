@@ -18,7 +18,15 @@ class BannerImage extends StatelessWidget {
       errorBuilder: (_, __, ___) => const SizedBox.shrink()));
 }
 
-/// Decodifica de antemano las cuatro imágenes de una colección: los cambios amanecer → día → atardecer → noche (y el
-/// cambio de colección) son instantáneos, sin cargas visibles.
-Future<void> precacheBanner(BuildContext context, HomeBanner b) =>
-    Future.wait([for (final a in b.assets) precacheImage(AssetImage(a), context, onError: (_, __) {})]);
+/// Franjas que Inicio decodifica por adelantado: la actual y la siguiente (noche → amanecer al dar la vuelta).
+List<DayPhase> bannerPhasesToPrecache(DayPhase now) => [now, DayPhase.values[(now.index + 1) % DayPhase.values.length]];
+
+/// Decodifica de antemano las imágenes de una colección para que los cambios de franja sean instantáneos.
+///
+/// Por defecto solo la franja actual y la SIGUIENTE (la que se mostrará al cambiar de hora): antes se decodificaban las
+/// cuatro (≈1 MB de descarga en la web y ≈16 MB de memoria decodificada, 1376×768×4 bytes cada una) aunque solo se ve
+/// una. En Safari de iPhone esa memoria importa: si la página usa demasiada, iOS la recarga.
+Future<void> precacheBanner(BuildContext context, HomeBanner b, {List<DayPhase>? phases}) {
+  final list = phases ?? bannerPhasesToPrecache(dayPhaseAt(DateTime.now()));
+  return Future.wait([for (final p in list) precacheImage(AssetImage(b.asset(p)), context, onError: (_, __) {})]);
+}

@@ -130,5 +130,5 @@ Grupo = tú + tus amigos aceptados. Periodos: semana (lunes a domingo), mes, añ
 3. **Comprobar** como usuario autenticado: `select public.my_achievements();` y `select public.friends_ranking('all');`.
 4. **Publicar la app** (APK 1.6.0 o la siguiente compilación de iOS).
 
-> Mientras las migraciones no estén aplicadas, las pantallas nuevas mostrarán «No se pudo cargar» con Supabase real.
+> Migraciones aplicadas en producción el 16 nov 2026.
 > El resto de la app no se ve afectado.

@@ -1,3 +1,4 @@
+import '../../../core/async/single_flight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -78,8 +79,10 @@ Future<void> _confirmDelete(BuildContext context, WidgetRef ref, LifecycleMatch 
         ]),
       ]));
   if (ok != true) return;
-  try { await ref.read(lifecycleActionsProvider).cancel(m.id); if (context.mounted) { showPlobbySnack(context, 'Partido eliminado'); context.pop(); } }
-  catch (e) { if (context.mounted) showPlobbySnack(context, errorText(e), error: true); }
+  await SingleFlight.run(('match-action', m.id), () async {
+    try { await ref.read(lifecycleActionsProvider).cancel(m.id); if (context.mounted) { showPlobbySnack(context, 'Partido eliminado'); context.pop(); } }
+    catch (e) { if (context.mounted) showPlobbySnack(context, errorText(e), error: true); }
+  });
 }
 
 class _Body extends ConsumerWidget {
@@ -89,7 +92,10 @@ class _Body extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final perms = MatchPerms(m, uid), act = ref.read(lifecycleActionsProvider);
     void snack(String t, {bool error = false}) => showPlobbySnack(context, t, error: error);
-    Future<void> run(Future<void> Function() f) async { try { await f(); } catch (e) { if (context.mounted) snack(errorText(e), error: true); } }
+    // Una sola acción a la vez por partido: un doble toque ya no envía la petición dos veces (ver SingleFlight).
+    Future<void> run(Future<void> Function() f) => SingleFlight.run(('match-action', m.id), () async {
+          try { await f(); } catch (e) { if (context.mounted) snack(errorText(e), error: true); }
+        });
     final w = m.winnerTeam;
     Widget cta(Widget button, [String? help]) => Padding(padding: const EdgeInsets.symmetric(vertical: 18), child: Column(children: [
           button,
