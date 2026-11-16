@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/gamification_models.dart';
 import 'gamification_repository.dart';
@@ -19,6 +20,8 @@ class SupabaseGamificationRepository implements GamificationRepository {
       final code = RegExp(r'(not_friends|not_authenticated|invalid_player|invalid_period)').firstMatch(e.message)?.group(1) ?? 'server';
       throw GamificationException(code);
     } on SocketException {
+      throw GamificationException('network');
+    } on http.ClientException {   // en la web (y en http 1.x) los fallos de red llegan así
       throw GamificationException('network');
     } on TimeoutException {
       throw GamificationException('network');

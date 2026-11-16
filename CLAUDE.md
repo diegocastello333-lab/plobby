@@ -245,3 +245,18 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   escalado de texto (como iOS). `supabase_rating_repository`: 3 consultas en paralelo.
 - Pendiente: modo oscuro (tokens existen, falta aplicarlos), probar en móvil real. El «+» de la barra es una acción
   (HIG lo desaconseja): se mantiene por identidad.
+
+## Versión web / PWA (16 nov 2026, rama `web-version`)
+- Guía: `docs/web_pwa.md` (Vercel, variables, Redirect URLs de Supabase, añadir a pantalla de inicio, privacidad).
+- `scripts/build_web.sh` (descarga Flutter 3.50.0 si falta; rechaza claves secretas; `--no-web-resources-cdn`; inyecta
+  BUILD_ID en sw.js) + `vercel.json` (rewrites SPA, no-cache para index/sw/main.dart.js, noindex, cabeceras seguras).
+- `web/`: index.html (viewport-fit=cover → Flutter 3.50 lee env(safe-area-inset-*), splash lima, aviso de versión
+  nueva), manifest (Plobby, lima/marfil, iconos del logo), `sw.js` PROPIO (solo la app en caché por despliegue; nada de
+  Supabase), `flutter_bootstrap.js` sin el SW de Flutter (es un stub que se da de baja y borraría el nuestro).
+- `lib/core/share/image_io*.dart`: export condicional (nativo: gal + archivo temporal; web: Web Share con File,
+  Clipboard API, descarga). `image_actions.dart`: si Safari da NotAllowedError (sin gesto reciente) → hoja «Tu imagen
+  está lista» con botón. «Copiar» solo se muestra donde funciona (web). `core/net/image_fetch.dart` (http en vez de
+  HttpClient de dart:io). Repos: `on http.ClientException` = error de red. OAuth web: redirectTo = origen actual.
+- Verificado en Chromium con emulación de iPhone: build real → bienvenida, authorize de Supabase con PKCE y
+  redirect_to correcto, SW activo sin datos de Supabase en caché; build demo → 16 pantallas, descarga PNG, Web Share
+  simulado con NotAllowedError → hoja de reintento → compartido. NO verificado en Safari real ni con sesión real.

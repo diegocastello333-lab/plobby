@@ -20,6 +20,9 @@ import 'auth_repository.dart';
 
 const kAuthRedirect = 'io.plobby.app://login-callback/';
 
+/// Raíz del sitio web actual (sin ruta ni #): Supabase devuelve ahí la sesión tras el inicio de sesión con Google.
+String webAuthRedirect() => '${Uri.base.origin}/';
+
 class SupabaseAuthRepository implements AuthRepository {
   SupabaseAuthRepository(this._c);
   final sb.SupabaseClient _c;
@@ -34,8 +37,10 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithGoogle() async {
-    // Móvil: vuelve a la app por el esquema io.plobby.app. Web: vuelve a la misma URL de la app (redirect null).
-    final ok = await _c.auth.signInWithOAuth(sb.OAuthProvider.google, redirectTo: kIsWeb ? null : kAuthRedirect,
+    // Móvil: vuelve a la app por el esquema io.plobby.app. Web: vuelve al dominio desde el que se abrió Plobby
+    // (p. ej. https://plobby.vercel.app/), que debe estar en Supabase → Authentication → URL Configuration → Redirect
+    // URLs. Antes era null (= «Site URL» de Supabase, que puede apuntar a otro sitio).
+    final ok = await _c.auth.signInWithOAuth(sb.OAuthProvider.google, redirectTo: kIsWeb ? webAuthRedirect() : kAuthRedirect,
         authScreenLaunchMode: kIsWeb ? sb.LaunchMode.platformDefault : sb.LaunchMode.externalApplication);
     if (!ok) throw AuthException('oauth_cancelled');
   }

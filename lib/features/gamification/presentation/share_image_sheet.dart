@@ -1,6 +1,6 @@
+import '../../../core/share/image_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_components.dart';
@@ -70,14 +70,16 @@ class _ShareSheetState extends State<_ShareSheet> {
     loadShareImages(widget.target.players).then((i) { if (mounted && i.isNotEmpty) setState(() => _images = i); });
   }
 
-  Future<void> _run(Future<void> Function(Uint8List) job, String ok) async {
+  /// [job] devuelve el texto de confirmación (null: la hoja del sistema ya es la confirmación).
+  Future<void> _run(Future<String?> Function(Uint8List) job, {required String label}) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
       final png = await widget.target.png(_fmt, _images);
-      await job(png);
-      AppHaptics.tap();
-      if (mounted) showPlobbySnack(context, ok);
+      if (!mounted) return;
+      String? ok;
+      final out = await runImageAction(context, png, () async => ok = await job(png), label: label);
+      if (mounted && out == ImageActionOutcome.done && ok != null) showPlobbySnack(context, ok!);
     } catch (_) {
       if (mounted) showPlobbySnack(context, 'No se pudo generar la imagen. Inténtalo de nuevo.', error: true);
     } finally {
@@ -98,10 +100,10 @@ class _ShareSheetState extends State<_ShareSheet> {
       const SizedBox(height: 16),
       Row(children: [
         Expanded(child: PlobbyButton(label: 'Guardar', kind: PlobbyButtonKind.outline, icon: PlobbyIcons.archive,
-            onPressed: _busy ? null : () => _run((p) => svc.saveToGallery(p, name), 'Imagen guardada en tu galería'))),
+            onPressed: _busy ? null : () => _run((p) async => saveMessage(await svc.saveToGallery(p, name)), label: 'Guardar imagen'))),
         const SizedBox(width: 10),
         Expanded(child: PlobbyButton(label: 'Compartir', icon: PlobbyIcons.share, busy: _busy,
-            onPressed: _busy ? null : () => _run((p) => svc.share(p, name), 'Listo para compartir'))),
+            onPressed: _busy ? null : () => _run((p) async { await svc.share(p, name); return null; }, label: 'Compartir'))),
       ]),
     ]);
   }

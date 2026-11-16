@@ -1,20 +1,12 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:gal/gal.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import '../../../core/share/image_io.dart';
 
+/// Guardar y compartir imágenes generadas. Delega en [ImageIO], que elige la implementación nativa (galería + hoja del
+/// sistema) o la web (Web Share API / descarga) al compilar.
 class ShareService {
-  /// Guarda en la galería (requiere permiso; `gal` lo solicita).
-  Future<void> saveToGallery(Uint8List png, String name) async {
-    if (!await Gal.hasAccess()) await Gal.requestAccess();
-    await Gal.putImageBytes(png, name: name);
-  }
+  /// Galería en el móvil (pide permiso mediante `gal`); en la web, hoja del sistema («Guardar imagen») o descarga.
+  Future<ImageSaveResult> saveToGallery(Uint8List png, String name) => ImageIO.save(png, name);
 
-  /// Abre el menú nativo de compartir con el PNG adjunto.
-  Future<void> share(Uint8List png, String name) async {
-    final dir = await getTemporaryDirectory();
-    final f = File('${dir.path}/$name.png')..writeAsBytesSync(png);
-    await Share.shareXFiles([XFile(f.path, mimeType: 'image/png')], text: 'Mis stats en Plobby');
-  }
+  /// Hoja de compartir con el PNG adjunto.
+  Future<void> share(Uint8List png, String name, {String? text}) => ImageIO.share(png, name, text: text);
 }

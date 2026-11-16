@@ -16,6 +16,7 @@ dependencies:
   flutter_svg: ^2.3.4
   http: ^1.6.0
   image: ^4.12.0
+  web: ^1.1.0           # versión web: Web Share API, portapapeles y descargas (dart:js_interop)
 dev_dependencies:
   flutter_test: {sdk: flutter}
   flutter_lints: ^4.0.0

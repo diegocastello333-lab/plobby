@@ -27,3 +27,7 @@ supabase/.branches/
 
 # Entregables locales (APK, capturas)
 /dist/
+
+# Flutter descargado por scripts/build_web.sh (Vercel) y carpeta local de Vercel
+.flutter-sdk/
+.vercel

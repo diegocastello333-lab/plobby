@@ -46,7 +46,9 @@ void main() {
 
   testWidgets('Notificaciones: agrupadas por día, acciones en línea y marcar leídas', (t) async {
     await _app(t, '/notifications');
-    expect(find.text('HOY'), findsOneWidget);
+    // Los avisos de demostración son «de hace X minutos»: justo después de medianoche caen en «AYER». Lo que se
+    // comprueba es que estén agrupados por día, no la hora a la que se ejecuta la prueba.
+    expect(find.text('HOY').evaluate().length + find.text('AYER').evaluate().length, greaterThanOrEqualTo(1));
     expect(find.text('Solicitud de amistad'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('Sin leer')), findsWidgets);
     await t.tap(find.text('Marcar leídas'));

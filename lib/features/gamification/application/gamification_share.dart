@@ -1,4 +1,4 @@
-import 'dart:io';
+import '../../../core/net/image_fetch.dart';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -273,14 +273,8 @@ class RankingSharePainter extends CustomPainter {
 Future<ShareImages> loadShareImages(Iterable<GPlayer> players) async {
   final out = <String, ui.Image>{};
   await Future.wait([for (final p in players) if (p.avatarUrl != null && p.avatarUrl!.isNotEmpty) () async {
-    try {
-      final client = HttpClient()..connectionTimeout = const Duration(seconds: 6);
-      final res = await (await client.getUrl(Uri.parse(p.avatarUrl!))).close().timeout(const Duration(seconds: 8));
-      if (res.statusCode != 200) return;
-      final bytes = await res.fold<BytesBuilder>(BytesBuilder(), (b, x) => b..add(x));
-      final codec = await ui.instantiateImageCodec(bytes.takeBytes(), targetWidth: 400);
-      out[p.id] = (await codec.getNextFrame()).image;
-    } catch (_) {/* sin foto: iniciales */}
+    final img = await fetchUiImage(p.avatarUrl!, targetWidth: 400);   // null → sin foto: iniciales
+    if (img != null) out[p.id] = img;
   }()]);
   return out;
 }

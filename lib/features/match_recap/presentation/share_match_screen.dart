@@ -1,3 +1,5 @@
+import '../../../core/share/image_actions.dart';
+import '../../../core/share/image_io.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,13 +50,17 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
     final svc = ref.read(recapServiceProvider);
     try {
       final png = await svc.render(d, tpl, f, opts, images);
-      final r = await act(svc, png, recapFileName(d, tpl, f));
       if (!mounted) return;
-      setState(() => done = switch (r) {
+      RecapAction? r;
+      // En la web, si Safari pide un toque nuevo, se ofrece con la imagen ya generada (ver runImageAction).
+      final out = await runImageAction(context, png, () async => r = await act(svc, png, recapFileName(d, tpl, f)), label: 'Continuar');
+      if (!mounted) return;
+      setState(() => done = out == ImageActionOutcome.cancelled ? null : switch (r) {
             RecapAction.saved => 'Imagen guardada en tu galería',
-            RecapAction.copied => 'Imagen copiada',
+            RecapAction.downloaded => 'Imagen descargada',
+            RecapAction.copied => 'Imagen copiada: pégala donde quieras',
             RecapAction.copyUnsupported => 'Copiar imagen no está disponible: usa Guardar o Compartir',
-            RecapAction.shared => null,
+            RecapAction.shared || null => null,
           });
     } catch (_) {
       if (mounted) setState(() => done = 'No se pudo completar la acción');
@@ -95,8 +101,11 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
             const SizedBox(height: AppSpacing.s2),
             Row(children: [
               Expanded(child: _Act(PlobbyIcons.arrdn, 'SAVE IMAGE', busy, () => _run(d, fmt, (s, b, n) => s.save(b, n)))),
-              const SizedBox(width: AppSpacing.s2),
-              Expanded(child: _Act(PlobbyIcons.copy, 'COPY IMAGE', busy, () => _run(d, fmt, (s, b, _) => s.copy(b)))),
+              // «Copiar» solo donde funciona de verdad (navegador con Clipboard API); en la app nativa no se muestra.
+              if (ImageIO.canCopy) ...[
+                const SizedBox(width: AppSpacing.s2),
+                Expanded(child: _Act(PlobbyIcons.copy, 'COPY IMAGE', busy, () => _run(d, fmt, (s, b, _) => s.copy(b)))),
+              ],
             ]),
             AnimatedSwitcher(duration: AppAnimations.scaled(context, AppAnimations.appear), child: done == null ? const SizedBox(key: ValueKey('n'), height: 0)
                 : Padding(key: ValueKey(done), padding: const EdgeInsets.only(top: AppSpacing.s3), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

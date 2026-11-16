@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' show SocketException;
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'match_repository.dart';
 import '../domain/match_models.dart';
@@ -47,6 +48,8 @@ class SupabaseMatchRepository implements MatchRepository {
     } on AuthException {
       throw const MatchCreateException('auth');
     } on SocketException {
+      throw const MatchCreateException('network');
+    } on http.ClientException {   // en la web (y en http 1.x) los fallos de red llegan así
       throw const MatchCreateException('network');
     } on TimeoutException {
       throw const MatchCreateException('network');

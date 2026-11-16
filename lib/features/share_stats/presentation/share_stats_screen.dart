@@ -1,3 +1,4 @@
+import '../../../core/share/image_actions.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -47,11 +48,15 @@ class _State extends ConsumerState<ShareStatsScreen> {
 
   Future<Uint8List> _png(ProfileData d) => ShareCardPainter.toPng(_data(d), tpl, fmt);
 
-  Future<void> _run(ProfileData d, Future<void> Function(Uint8List) action, String ok) async {
+  /// [action] devuelve el texto de confirmación (o null si la propia hoja del sistema ya lo es).
+  Future<void> _run(ProfileData d, Future<String?> Function(Uint8List) action, {required String label}) async {
     setState(() => busy = true);
     try {
-      await action(await _png(d));
-      if (mounted) showPlobbySnack(context, ok);
+      final png = await _png(d);
+      if (!mounted) return;
+      String? ok;
+      final out = await runImageAction(context, png, () async => ok = await action(png), label: label);
+      if (mounted && out == ImageActionOutcome.done && ok != null) showPlobbySnack(context, ok!);
     } catch (_) {
       if (mounted) showPlobbySnack(context, 'No se pudo generar la imagen', error: true);
     } finally {
@@ -94,9 +99,9 @@ class _State extends ConsumerState<ShareStatsScreen> {
               const SizedBox(height: 20),
               Row(children: [
                 Expanded(child: PlobbyButton(label: 'Guardar PNG', kind: PlobbyButtonKind.outline, busy: busy, icon: PlobbyIcons.arrdn,
-                    onPressed: () => _run(d, (b) => _service.saveToGallery(b, 'plobby-stats-${DateTime.now().millisecondsSinceEpoch}'), 'Imagen guardada'))),
+                    onPressed: () => _run(d, (b) async => saveMessage(await _service.saveToGallery(b, 'plobby-stats-${DateTime.now().millisecondsSinceEpoch}')), label: 'Guardar imagen'))),
                 const SizedBox(width: 10),
-                Expanded(child: PlobbyButton(label: 'Compartir', icon: PlobbyIcons.share, onPressed: busy ? null : () => _run(d, (b) => _service.share(b, 'plobby-stats'), 'Compartido'))),
+                Expanded(child: PlobbyButton(label: 'Compartir', icon: PlobbyIcons.share, onPressed: busy ? null : () => _run(d, (b) async { await _service.share(b, 'plobby-stats', text: 'Mis stats en Plobby'); return null; }, label: 'Compartir'))),
               ]),
             ]);
           },

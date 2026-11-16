@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase/user_channel.dart';
@@ -21,6 +22,8 @@ class SupabaseTournamentRepository implements TournamentRepository {
     } on PostgrestException catch (e) {
       throw TournamentException.fromServer(e.message);
     } on SocketException {
+      throw TournamentException('network');
+    } on http.ClientException {   // en la web (y en http 1.x) los fallos de red llegan así
       throw TournamentException('network');
     } on TimeoutException {
       throw TournamentException('network');
