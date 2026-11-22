@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,7 +106,7 @@ class WrappedStoryScreen extends ConsumerStatefulWidget {
 
 class _WrappedStoryScreenState extends ConsumerState<WrappedStoryScreen> with SingleTickerProviderStateMixin {
   final _page = PageController();
-  late final _timer = AnimationController(vsync: this, duration: const Duration(seconds: 6))..addStatusListener((s) { if (s == AnimationStatus.completed) _next(); });
+  late final _timer = AnimationController(vsync: this, duration: const Duration(seconds: 6))..addStatusListener((s) { if (s == AnimationStatus.completed) _next(); });  // timing
   var _index = 0, _count = 1;
 
   @override
@@ -113,14 +114,14 @@ class _WrappedStoryScreenState extends ConsumerState<WrappedStoryScreen> with Si
 
   void _go(int i) {
     if (i < 0 || i >= _count) return;
-    _page.animateToPage(i, duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
+    _page.animateToPage(i, duration: Motion.emphasis, curve: Motion.enter);
   }
   void _next() => _index < _count - 1 ? _go(_index + 1) : _timer.stop();
 
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(wrappedProvider((widget.kind, widget.start)));
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = Motion.reduced(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(value: SystemUiOverlayStyle.light, child: Scaffold(
       backgroundColor: AppColors.ink900,
       body: async.when(
@@ -310,8 +311,8 @@ class _BigNumber extends StatelessWidget {
   final int value;
   @override
   Widget build(BuildContext context) => FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: value.toDouble()), duration: MediaQuery.of(context).disableAnimations ? Duration.zero : const Duration(milliseconds: 900),
-        curve: Curves.easeOutCubic,
+        tween: Tween(begin: 0, end: value.toDouble()), duration: Motion.reduced(context) ? Duration.zero : Motion.celebration,
+        curve: Motion.enter,
         builder: (_, v, __) => Text('${v.round()}', style: _Slide._big.copyWith(fontSize: 120, color: AppColors.brand))));
 }
 
@@ -322,7 +323,7 @@ class _Meter extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         ClipRRect(borderRadius: BorderRadius.circular(6), child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: value), duration: const Duration(milliseconds: 900), curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0, end: value), duration: Motion.celebration, curve: Motion.enter,
             builder: (_, v, __) => LinearProgressIndicator(value: v, minHeight: 12, color: AppColors.brand, backgroundColor: const Color(0x24F6F8F1)))),
         const SizedBox(height: 10),
         Text(label, style: _Slide._lead.copyWith(color: AppColors.ink50)),

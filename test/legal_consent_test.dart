@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plobby/core/motion/app_motion.dart';
 import 'package:plobby/core/router/app_router.dart';
 import 'package:plobby/features/auth/application/auth_providers.dart';
 import 'package:plobby/features/auth/data/mock_auth_repository.dart';
@@ -98,7 +99,7 @@ void main() {
     expect(find.text('Hemos actualizado nuestras condiciones'), findsOneWidget);
   });
 
-  testWidgets('Privacidad y datos: secciones, marketing y borrado protegido con «ELIMINAR»', (t) async {
+  testWidgets('Ajustes y privacidad: vibración, secciones, marketing y borrado protegido con «ELIMINAR»', (t) async {
     final repo = MockAuthRepository();
     tall(t);
     await t.pumpWidget(app(repo, const PrivacySettingsScreen()));
@@ -106,7 +107,16 @@ void main() {
     for (final s in ['Descargar mis datos', 'Cerrar sesión en todos los dispositivos', 'Eliminar mi cuenta', 'Comunicaciones comerciales', 'Política de Privacidad']) {
       expect(find.text(s), findsWidgets, reason: s);
     }
-    await t.tap(find.byType(Switch));
+    // Vibración (primer interruptor): se puede apagar y volver a encender
+    expect(find.text('Vibración'), findsOneWidget);
+    await t.tap(find.byType(Switch).first);
+    await t.pumpAndSettle();
+    expect(AppHaptics.enabled, isFalse);
+    await t.tap(find.byType(Switch).first);
+    await t.pumpAndSettle();
+    expect(AppHaptics.enabled, isTrue);
+    // Comunicaciones comerciales (segundo interruptor)
+    await t.tap(find.byType(Switch).at(1));
     await t.pumpAndSettle();
     expect(repo.legal.marketing, isTrue);
     await t.ensureVisible(find.text('Eliminar mi cuenta'));

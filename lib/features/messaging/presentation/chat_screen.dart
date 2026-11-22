@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,7 +45,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _toEnd() => WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scroll.hasClients) _scroll.animateTo(_scroll.position.maxScrollExtent, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+        if (_scroll.hasClients) _scroll.animateTo(_scroll.position.maxScrollExtent, duration: Motion.normal, curve: Motion.enter);
       });
 
   @override
@@ -82,13 +83,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 if (isGroup) GroupAvatar(url: conv!.groupAvatarUrl, bytes: conv.groupAvatarBytes, presetId: conv.groupAvatarId, size: 40)
                 else if (other != null) Stack(clipBehavior: Clip.none, children: [
                   PlayerAvatar(other, size: 40),
-                  Positioned(right: -1, bottom: -1, child: AnimatedContainer(duration: const Duration(milliseconds: 250), width: 12, height: 12,
+                  Positioned(right: -1, bottom: -1, child: AnimatedContainer(duration: Motion.normal, width: 12, height: 12,
                       decoration: BoxDecoration(color: online ? _onlineGreen : const Color(0xFFB9C0BB), shape: BoxShape.circle, border: Border.all(color: AppColors.bg, width: 2)))),
                 ]),
                 const SizedBox(width: 10),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(conv?.title ?? widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
-                  AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: Text(
+                  AnimatedSwitcher(duration: Motion.normal, child: Text(
                       isGroup ? '${conv!.memberCount} participantes · toca para ver info' : (online ? 'En línea' : 'Desconectado'),
                       key: ValueKey(isGroup ? 'g${conv!.memberCount}' : '$online'), maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0,
@@ -188,9 +189,9 @@ class _NewMessage extends StatelessWidget {
   final Widget child; final bool fromRight;
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).disableAnimations) return child;
+    if (Motion.reduced(context)) return child;
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1), duration: const Duration(milliseconds: 240), curve: Curves.easeOutCubic, child: child,
+      tween: Tween(begin: 0, end: 1), duration: Motion.normal, curve: Motion.enter, child: child,
       builder: (_, t, c) => Opacity(opacity: t, child: Transform.translate(offset: Offset((fromRight ? 12 : -12) * (1 - t), 8 * (1 - t)), child: c)),
     );
   }
@@ -245,7 +246,7 @@ class _Bubble extends StatelessWidget {
     };
     return Align(
       alignment: align,
-      child: AnimatedOpacity(opacity: m.status == MessageStatus.sending ? .7 : 1, duration: const Duration(milliseconds: 200), child: GestureDetector(
+      child: AnimatedOpacity(opacity: m.status == MessageStatus.sending ? .7 : 1, duration: Motion.normal, child: GestureDetector(
         onTap: m.status == MessageStatus.failed ? onRetry : null,
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 4), padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),

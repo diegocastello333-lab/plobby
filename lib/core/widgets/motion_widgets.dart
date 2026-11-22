@@ -177,7 +177,7 @@ class PopOnEvent extends StatefulWidget {
 }
 
 class _PopOnEventState extends State<PopOnEvent> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
+  late final AnimationController _c = AnimationController(vsync: this, duration: Motion.emphasis);
   @override
   void didUpdateWidget(PopOnEvent old) {
     super.didUpdateWidget(old);
@@ -189,7 +189,7 @@ class _PopOnEventState extends State<PopOnEvent> with SingleTickerProviderStateM
   Widget build(BuildContext context) => AnimatedBuilder(
       animation: _c, child: widget.child,
       builder: (_, child) {
-        final t = _c.value, s = 1 + .12 * Curves.easeOut.transform(t < .5 ? t * 2 : (1 - t) * 2), g = (t < .5 ? t * 2 : (1 - t) * 2);
+        final t = _c.value, s = 1 + .12 * Motion.enter.transform(t < .5 ? t * 2 : (1 - t) * 2), g = (t < .5 ? t * 2 : (1 - t) * 2);
         return Transform.scale(scale: s, child: DecoratedBox(
             decoration: widget.glow && _c.isAnimating ? BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: AppColors.brand.withOpacity(.55 * g), blurRadius: 18 * g)]) : const BoxDecoration(),
             child: child));
@@ -205,7 +205,7 @@ class BellBadge extends StatefulWidget {
 }
 
 class _BellBadgeState extends State<BellBadge> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 520));
+  late final AnimationController _c = AnimationController(vsync: this, duration: Motion.emphasis);
   @override
   void didUpdateWidget(BellBadge old) {
     super.didUpdateWidget(old);
@@ -315,7 +315,7 @@ class LiveNumber extends StatefulWidget {
 
 class _LiveNumberState extends State<LiveNumber> with SingleTickerProviderStateMixin {
   late int _from = LiveNumber._last[widget.memoryKey] ?? (widget.value * .92).round();
-  late final AnimationController _glow = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+  late final AnimationController _glow = AnimationController(vsync: this, duration: Motion.celebration);
 
   @override
   void initState() {
@@ -346,7 +346,7 @@ class _LiveNumberState extends State<LiveNumber> with SingleTickerProviderStateM
     return TweenAnimationBuilder<double>(
       key: ValueKey(_from),
       tween: Tween(begin: _from.toDouble(), end: widget.value.toDouble()),
-      duration: const Duration(milliseconds: 700), curve: Curves.easeOutCubic,
+      duration: Motion.celebration, curve: Motion.enter,
       builder: (_, v, __) => AnimatedBuilder(
         animation: _glow,
         builder: (_, child) {

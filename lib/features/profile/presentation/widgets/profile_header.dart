@@ -95,7 +95,7 @@ class ProfileHeader extends ConsumerWidget {
         Builder(builder: (context) {
           final first = isOwner
               ? _Btn('Editar perfil', PlobbyIcons.edit, false, () => context.push('/profile/edit'))
-              : AnimatedSwitcher(duration: const Duration(milliseconds: 220), child: _friendButton(context, ref, rel, p));
+              : AnimatedSwitcher(duration: Motion.normal, child: _friendButton(context, ref, rel, p));
           final second = isOwner
               ? _Btn('Compartir mis stats', PlobbyIcons.share, true, () => context.push('/profile/share'))
               : rel == RelationState.friend

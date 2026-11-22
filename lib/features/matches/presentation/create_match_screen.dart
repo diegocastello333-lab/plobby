@@ -31,7 +31,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
   /// Club escrito a mano cuando la tabla `clubs` está vacía o no se pudo leer (antes: `clubs.first` sobre una lista
   /// vacía lanzaba «Bad state: No element» al construir la pantalla → pantalla gris/negra en la APK).
   final _clubText = TextEditingController();
-  late DateTime _when = DateTime.now().add(const Duration(hours: 2));
+  late DateTime _when = DateTime.now().add(const Duration(hours: 2));  // timing
   final _sets = List.generate(3, (_) => [TextEditingController(), TextEditingController()]);
   String? _error;
   bool _busy = false;

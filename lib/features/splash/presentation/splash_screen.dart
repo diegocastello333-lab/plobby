@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -30,7 +31,7 @@ class SplashScreen extends StatefulWidget {
   static const markHeight = 120.0;
 
   /// Duración de la animación de entrada.
-  static const introDuration = Duration(milliseconds: 2100);
+  static const introDuration = Duration(milliseconds: 2100);  // timing
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -38,7 +39,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late final AnimationController _intro = AnimationController(vsync: this, duration: SplashScreen.introDuration);
-  late final AnimationController _loader = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+  late final AnimationController _loader = AnimationController(vsync: this, duration: Motion.celebration);
   bool _started = false;
   bool _finished = false;
 
@@ -54,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     final ready = (widget.ready ?? Future<void>.value()).catchError((Object _) {});
     if (reduceMotion) {
       _intro.value = 1;
-      await Future.wait([ready, Future<void>.delayed(const Duration(milliseconds: 700))]);
+      await Future.wait([ready, Future<void>.delayed(const Duration(milliseconds: 700))]);  // timing
     } else {
       unawaited(_loader.repeat());
       await Future.wait([ready, _intro.forward().orCancel.catchError((Object _) {})]);
@@ -162,16 +163,16 @@ class SplashTimeline {
   static double dot(double t, int i) => 1 + .7 * math.sin(math.pi * _iv(t, .38 + i * .025, .54 + i * .025));
 
   /// Cuánto sube la marca (dp) para dejar sitio al nombre.
-  static double lift(double t) => 56 * Curves.easeInOutCubic.transform(_iv(t, .45, .72));
+  static double lift(double t) => 56 * Motion.move.transform(_iv(t, .45, .72));
 
   /// Aparición del wordmark «plobby».
-  static double title(double t) => Curves.easeOutCubic.transform(_iv(t, .56, .80));
+  static double title(double t) => Motion.enter.transform(_iv(t, .56, .80));
 
   /// Aparición de la frase.
-  static double tagline(double t) => Curves.easeOutCubic.transform(_iv(t, .68, .92));
+  static double tagline(double t) => Motion.enter.transform(_iv(t, .68, .92));
 
   /// Trazado de las líneas de la pista de fondo.
-  static double court(double t) => Curves.easeInOutCubic.transform(_iv(t, .08, .85));
+  static double court(double t) => Motion.move.transform(_iv(t, .08, .85));
 
   /// Aparición del indicador de carga.
   static double loader(double t) => _iv(t, .80, 1);

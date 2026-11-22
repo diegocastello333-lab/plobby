@@ -80,7 +80,7 @@ class _S extends ConsumerState<CommentsSheet> {
     try {
       await ref.read(commentsProvider(widget.postId).notifier).add(ctl.text);
       ctl.clear();
-      AppHaptics.tap();
+      AppHaptics.light();
     } catch (e) {
       if (mounted) showPlobbySnack(context, friendlyFeedError(e), error: true);
     } finally {

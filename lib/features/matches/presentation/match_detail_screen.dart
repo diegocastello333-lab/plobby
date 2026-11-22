@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import '../../../core/async/single_flight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -341,7 +342,7 @@ class _MatchEventLogState extends State<MatchEventLog> {
         Semantics(button: true, expanded: _open, child: InkWell(borderRadius: AppRadius.rMd, onTap: () => setState(() => _open = !_open), child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(children: [
-            AnimatedRotation(turns: _open ? .25 : 0, duration: const Duration(milliseconds: 150), child: const PlobbyIcon(PlobbyIcons.chev, size: 14, strokeWidth: 2.4)),
+            AnimatedRotation(turns: _open ? .25 : 0, duration: Motion.fast, child: const PlobbyIcon(PlobbyIcons.chev, size: 14, strokeWidth: 2.4)),
             const SizedBox(width: 6),
             Text('Historial de cambios (${m.events.length})', style: base.copyWith(fontWeight: FontWeight.w700)),
           ]),

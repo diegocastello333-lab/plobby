@@ -44,8 +44,8 @@ class AmbientBackground extends StatefulWidget {
 
   /// Los tests lo desactivan (una animación infinita impediría `pumpAndSettle`).
   static bool driftEnabled = true;
-  static const driftPeriod = Duration(seconds: 24);
-  static const moveDuration = Duration(milliseconds: 650);
+  static const driftPeriod = Motion.ambientDrift;
+  static const moveDuration = Motion.celebration;
 
   @override
   State<AmbientBackground> createState() => _AmbientBackgroundState();
@@ -60,7 +60,7 @@ class _AmbientBackgroundState extends State<AmbientBackground> with TickerProvid
   double get _live => widget.offset?.value ?? 0;
 
   double _effective() {
-    final t = Curves.easeInOutCubic.transform(_move.value);
+    final t = Motion.move.transform(_move.value);
     return _from + (widget.position + _live - _from) * t;
   }
 
@@ -84,7 +84,7 @@ class _AmbientBackgroundState extends State<AmbientBackground> with TickerProvid
     super.didUpdateWidget(old);
     if (old.position != widget.position || old.offset != widget.offset) {
       // Parte del color que se ve ahora (con el desplazamiento anterior) para que no haya saltos.
-      final t = Curves.easeInOutCubic.transform(_move.value);
+      final t = Motion.move.transform(_move.value);
       _from = _from + (old.position + (old.offset?.value ?? 0) - _from) * t;
       if (_reduce) {
         _move.value = 1;

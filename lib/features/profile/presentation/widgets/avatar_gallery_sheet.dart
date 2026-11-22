@@ -1,3 +1,4 @@
+import '../../../../core/motion/app_motion.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -30,7 +31,7 @@ class AvatarGallerySheet extends StatelessWidget {
           for (final id in avatarIds)
             Semantics(button: true, selected: selectedId == id, label: 'Avatar ${avatarName(id)}', excludeSemantics: true,
                 child: InkWell(customBorder: const CircleBorder(), onTap: () => Navigator.of(context).pop(id),
-                    child: AnimatedContainer(duration: const Duration(milliseconds: 150), padding: const EdgeInsets.all(2),
+                    child: AnimatedContainer(duration: Motion.fast, padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: selectedId == id ? AppColors.text : Colors.transparent, width: 2.5)),
                         child: Stack(fit: StackFit.expand, children: [
                           LayoutBuilder(builder: (_, c) => PlobbyAvatar(id: id, size: c.maxWidth)),

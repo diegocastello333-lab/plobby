@@ -194,8 +194,8 @@ class _PickRow extends StatelessWidget {
       child: PersonRow(
         leading: PlayerAvatar(player), title: player.name, subtitle: sub.isEmpty ? null : sub,
         onTap: disabled ? null : onTap,
-        trailing: GestureDetector(onTap: disabled ? null : onTap, child: AnimatedScale(scale: on ? 1 : .9, duration: const Duration(milliseconds: 180), curve: Curves.easeOutBack, child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150), width: 26, height: 26, alignment: Alignment.center,
+        trailing: GestureDetector(onTap: disabled ? null : onTap, child: AnimatedScale(scale: on ? 1 : .9, duration: Motion.fast, curve: Motion.spring, child: AnimatedContainer(
+          duration: Motion.fast, width: 26, height: 26, alignment: Alignment.center,
           decoration: BoxDecoration(shape: BoxShape.circle, color: on ? AppColors.brand : null, border: on ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
           child: on ? (single ? const PlobbyIcon(PlobbyIcons.check, size: 14, strokeWidth: 3, color: AppColors.brandInk)
               : Text('${order + 1}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brandInk))) : null,
@@ -241,7 +241,7 @@ class _IncomingRequestState extends ConsumerState<_IncomingRequest> {
     return PersonRow(
       leading: PlayerAvatar(p), title: p.name, subtitle: '@${p.username} quiere ser tu amigo',
       onTap: () => context.push('/player/${p.id}'),
-      trailing: AnimatedSwitcher(duration: const Duration(milliseconds: 180), child: _busy ? const SizedBox(key: ValueKey('busy'), width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)) : Row(key: const ValueKey('actions'), mainAxisSize: MainAxisSize.min, children: [
+      trailing: AnimatedSwitcher(duration: Motion.fast, child: _busy ? const SizedBox(key: ValueKey('busy'), width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)) : Row(key: const ValueKey('actions'), mainAxisSize: MainAxisSize.min, children: [
         PlobbyButton(label: 'Aceptar', kind: PlobbyButtonKind.small, onPressed: () => _respond(true)),
         const SizedBox(width: 6),
         PlobbyButton(label: 'Rechazar', kind: PlobbyButtonKind.smallOutline, onPressed: () => _respond(false)),
@@ -290,7 +290,7 @@ class _FriendTile extends ConsumerWidget {
           Navigator.pop(c);
           try {
             await ref.read(profileProvider('me').notifier).requestPartner(f.player.id);
-            AppHaptics.selection();
+            AppHaptics.light();
             if (context.mounted) showPlobbySnack(context, '${f.player.name} es tu pareja habitual');
           } catch (_) {
             if (context.mounted) showPlobbySnack(context, 'No se pudo guardar la pareja habitual. Inténtalo de nuevo.', error: true);

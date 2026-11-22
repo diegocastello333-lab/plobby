@@ -83,9 +83,9 @@ class _TournamentDetailScreenState extends ConsumerState<TournamentDetailScreen>
             ]),
             // Pestañas desplazables (en móviles estrechos no caben todas).
             SizedBox(height: 50 + 14 * MediaQuery.textScalerOf(context).scale(12.5) / 12.5, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(16, 10, 16, 6), children: [
-              for (final (k, label) in _tabs(d)) Padding(padding: const EdgeInsets.only(right: 8), child: _TabChip(label: label, selected: tab == k, onTap: () { if (tab != k) AppHaptics.selection(); setState(() => _tab = k); })),
+              for (final (k, label) in _tabs(d)) Padding(padding: const EdgeInsets.only(right: 8), child: _TabChip(label: label, selected: tab == k, onTap: () { if (tab != k) AppHaptics.light(); setState(() => _tab = k); })),
             ])),
-            Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: KeyedSubtree(key: ValueKey(tab), child: switch (tab) {
+            Expanded(child: AnimatedSwitcher(duration: Motion.normal, child: KeyedSubtree(key: ValueKey(tab), child: switch (tab) {
               _Tab.info => _InfoTab(d: d),
               _Tab.teams => _TeamsTab(d: d),
               _Tab.groups => _GroupsTab(d: d, onMatch: _openMatch),
@@ -339,7 +339,7 @@ class _StandingsTable extends StatelessWidget {
           const SizedBox(width: 30, child: Text('PTS', textAlign: TextAlign.center, style: h)),
         ])),
         for (final s in rows) Semantics(container: true, label: '${s.pos}.º ${d.team(s.teamId)?.name}: ${s.played} jugados, ${s.won} ganados, ${s.lost} perdidos, ${s.points} puntos', excludeSemantics: true,
-          child: AnimatedContainer(duration: const Duration(milliseconds: 300),
+          child: AnimatedContainer(duration: Motion.normal,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: d.myTeam?.id == s.teamId ? AppColors.brandSoft : null,

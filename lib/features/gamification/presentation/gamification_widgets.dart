@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
@@ -56,8 +57,8 @@ class VersusBar extends StatelessWidget {
   final double height;
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-        tween: Tween(begin: .5, end: share), duration: MediaQuery.of(context).disableAnimations ? Duration.zero : const Duration(milliseconds: 700),
-        curve: Curves.easeOutCubic,
+        tween: Tween(begin: .5, end: share), duration: Motion.reduced(context) ? Duration.zero : Motion.celebration,
+        curve: Motion.enter,
         builder: (_, v, __) => ClipRRect(borderRadius: BorderRadius.circular(height), child: SizedBox(height: height, child: Row(children: [
           // SizedBox.expand: un ColoredBox sin hijo mide 0 de alto si la fila no le impone altura (las barras no se veían).
           Expanded(flex: (v * 1000).round().clamp(1, 999), child: SizedBox.expand(child: ColoredBox(color: leader == H2HLeader.me ? AppColors.text : const Color(0x33171C19)))),
@@ -115,8 +116,8 @@ class LevelCard extends StatelessWidget {
             ]),
             const SizedBox(height: 10),
             TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: data.levelProgress), duration: MediaQuery.of(context).disableAnimations ? Duration.zero : const Duration(milliseconds: 900),
-              curve: Curves.easeOutCubic,
+              tween: Tween(begin: 0, end: data.levelProgress), duration: Motion.reduced(context) ? Duration.zero : Motion.celebration,
+              curve: Motion.enter,
               builder: (_, v, __) => ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: v, minHeight: 8,
                   color: AppColors.brand, backgroundColor: const Color(0x24F6F8F1))),
             ),

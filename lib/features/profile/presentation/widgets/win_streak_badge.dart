@@ -16,10 +16,10 @@ class WinStreakBadge extends StatefulWidget {
 
 class _WinStreakBadgeState extends State<WinStreakBadge> with TickerProviderStateMixin {
   late final AnimationController _loop = AnimationController(vsync: this);
-  late final AnimationController _pop = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+  late final AnimationController _pop = AnimationController(vsync: this, duration: Motion.celebration);
 
   int get _level => widget.streak >= 10 ? 4 : widget.streak >= 5 ? 3 : widget.streak >= 3 ? 2 : widget.streak >= 1 ? 1 : 0;
-  Duration get _period => Duration(milliseconds: const [0, 1800, 1400, 1100, 850][_level]);
+  Duration get _period => Duration(milliseconds: const [0, 1800, 1400, 1100, 850][_level]);  // timing
 
   void _syncLoop() {
     if (_level == 0) { _loop.stop(); return; }
@@ -42,14 +42,14 @@ class _WinStreakBadgeState extends State<WinStreakBadge> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = Motion.reduced(context);
     return Semantics(
       label: 'Racha de ${widget.streak} victorias',
       child: AnimatedBuilder(
         animation: Listenable.merge([_loop, _pop]),
         builder: (_, __) {
-          final t = reduce ? 0.0 : Curves.easeInOut.transform(_loop.value);
-          final pop = reduce ? 1.0 : (_pop.isAnimating ? 1 + 0.4 * Curves.elasticOut.transform(_pop.value) - 0.4 * _pop.value : 1.0);
+          final t = reduce ? 0.0 : Motion.move.transform(_loop.value);
+          final pop = reduce ? 1.0 : (_pop.isAnimating ? 1 + 0.4 * Motion.springBounce.transform(_pop.value) - 0.4 * _pop.value : 1.0);
           final glow = _level == 0 ? 0.0 : 6.0 + _level * 4;
           return Row(mainAxisSize: MainAxisSize.min, children: [
             Transform(

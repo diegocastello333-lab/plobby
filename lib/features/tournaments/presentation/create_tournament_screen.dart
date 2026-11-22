@@ -105,13 +105,13 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
           Padding(padding: const EdgeInsets.fromLTRB(20, 6, 20, 0), child: Row(children: [
             for (var i = 0; i < _steps.length; i++) ...[
               if (i > 0) const SizedBox(width: 6),
-              Expanded(child: AnimatedContainer(duration: const Duration(milliseconds: 250), height: 4,
+              Expanded(child: AnimatedContainer(duration: Motion.normal, height: 4,
                   decoration: BoxDecoration(color: i <= _step ? AppColors.text : const Color(0x1F171C19), borderRadius: BorderRadius.circular(2)))),
             ],
           ])),
           Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 0), child: Align(alignment: Alignment.centerLeft,
               child: Text('PASO ${_step + 1} DE ${_steps.length} · ${_steps[_step].toUpperCase()}', style: PlobbyText.eb))),
-          Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 220),
+          Expanded(child: AnimatedSwitcher(duration: Motion.normal,
               transitionBuilder: (c, a) => FadeTransition(opacity: a, child: SlideTransition(position: Tween(begin: const Offset(.04, 0), end: Offset.zero).animate(a), child: c)),
               child: KeyedSubtree(key: ValueKey(_step), child: ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), children: switch (_step) {
                 0 => _info(),
@@ -277,7 +277,7 @@ class _FormatCard extends StatelessWidget {
     };
     return Padding(padding: const EdgeInsets.only(bottom: 10), child: Semantics(button: true, selected: selected, label: '${format.label}. $text', excludeSemantics: true,
       child: Material(color: selected ? AppColors.brandSoft : AppColors.surface, borderRadius: AppRadius.rMd, child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap,
-        child: AnimatedContainer(duration: const Duration(milliseconds: 180), padding: const EdgeInsets.all(14),
+        child: AnimatedContainer(duration: Motion.fast, padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(borderRadius: AppRadius.rMd, border: Border.all(color: selected ? AppColors.text : const Color(0x1F171C19), width: selected ? 2 : 1)),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(width: 38, height: 38, decoration: BoxDecoration(color: selected ? AppColors.inverse : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(10)),

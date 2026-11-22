@@ -187,7 +187,7 @@ class _AchievementCelebrationState extends ConsumerState<AchievementCelebration>
     if (_showing || items.isEmpty || !mounted) return;
     _showing = true;
     _celebrated.addAll(items.map((a) => a.id));
-    AppHaptics.success();
+    AppHaptics.medium();
     await showPlobbySheet<void>(context, (_) => _CelebrationSheet(items: items));
     try { await ref.read(gamificationRepositoryProvider).markAchievementsSeen(); } catch (_) {/* se reintentará la próxima vez */}
     ref.invalidate(achievementsProvider);

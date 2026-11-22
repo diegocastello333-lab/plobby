@@ -46,7 +46,7 @@ class _DiscoverLeaguesScreenState extends ConsumerState<DiscoverLeaguesScreen> {
         const Text('Encuentra tu próxima competición.', style: PlobbyText.sub),
         const SizedBox(height: 16),
         SearchField(hint: 'Buscar por nombre, club o zona', controller: _q,
-            onChanged: (v) { _debounce?.cancel(); _debounce = Timer(const Duration(milliseconds: 350), () => _set((x) => x.copyWith(query: v.trim()))); }),
+            onChanged: (v) { _debounce?.cancel(); _debounce = Timer(const Duration(milliseconds: 350), () => _set((x) => x.copyWith(query: v.trim()))); }),  // timing
         const SizedBox(height: 12),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final k in const [(DiscoverKind.all, 'Todas'), (DiscoverKind.friends, 'Amigos'), (DiscoverKind.public, 'Públicas'), (DiscoverKind.club, 'Clubes')])

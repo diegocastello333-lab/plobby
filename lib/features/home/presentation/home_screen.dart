@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import '../../gamification/presentation/gamification_widgets.dart';
 import '../../gamification/domain/gamification_models.dart';
@@ -155,7 +156,7 @@ class _BannerBackdropState extends ConsumerState<_BannerBackdrop> {
     final phase = ref.watch(bannerClockProvider);
     // layoutBuilder con StackFit.expand: cada imagen recibe el tamaño exacto del banner (con el Stack por defecto de
     // AnimatedSwitcher las restricciones eran sueltas y `cover` dejaba bandas).
-    return AnimatedSwitcher(duration: const Duration(milliseconds: 900), switchInCurve: Curves.easeInOut, switchOutCurve: Curves.easeInOut,
+    return AnimatedSwitcher(duration: Motion.celebration, switchInCurve: Motion.move, switchOutCurve: Motion.move,
         layoutBuilder: (current, previous) => Stack(fit: StackFit.expand, children: [...previous, if (current != null) current]),
         child: KeyedSubtree(key: ValueKey('${widget.banner.id}|${phase.name}'), child: BannerImage(banner: widget.banner, phase: phase)));
   }
@@ -365,7 +366,7 @@ class _Story extends StatelessWidget {
   Widget build(BuildContext context) {
     final first = user.name.split(' ').first;
     return Semantics(button: true, selected: selected, label: 'Ver el partido de $first', excludeSemantics: true, child: GestureDetector(onTap: onTap, child: SizedBox(width: 68, child: Column(children: [
-      AnimatedContainer(duration: const Duration(milliseconds: 200), width: 66, height: 66, padding: const EdgeInsets.all(3),
+      AnimatedContainer(duration: Motion.normal, width: 66, height: 66, padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.ink900, width: 2), color: selected ? AppColors.ink900 : Colors.transparent),
           child: ClipOval(child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
               ? Image.network(user.avatarUrl!, fit: BoxFit.cover, cacheWidth: 168, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: user.id, size: 56))

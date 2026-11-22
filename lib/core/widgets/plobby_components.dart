@@ -69,7 +69,7 @@ class PlobbyButton extends StatelessWidget {
         child: InkWell(
           borderRadius: radius,
           // Háptico solo en la acción principal (HIG: no abusar): el resto de botones responden con la animación.
-          onTap: enabled ? () { if (kind == PlobbyButtonKind.primary || kind == PlobbyButtonKind.dark) AppHaptics.tap(); onPressed!(); } : null,
+          onTap: enabled ? () { if (kind == PlobbyButtonKind.primary || kind == PlobbyButtonKind.dark) AppHaptics.light(); onPressed!(); } : null,
           child: SizedBox(height: h, child: Padding(padding: EdgeInsets.symmetric(horizontal: _small ? 14 : 12), child: Center(widthFactor: 1, child: content))),
         ),
       ),
@@ -186,7 +186,7 @@ class PlobbyFilterChip extends StatelessWidget {
           duration: AppAnimations.scaled(context, AppAnimations.press * 1.5), curve: AppAnimations.standard,
           decoration: BoxDecoration(color: selected ? AppColors.brand : AppColors.surface, borderRadius: AppRadius.rSm,
               border: Border.all(color: selected ? AppColors.brand : const Color(0x1F171C19))),
-          child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rSm, onTap: () { if (!selected) AppHaptics.selection(); onTap(); },
+          child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rSm, onTap: () { if (!selected) AppHaptics.light(); onTap(); },
               child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 32), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),   // 32 + borde 1+1 = 34 (.fc)
                   child: Center(widthFactor: 1, heightFactor: 1, child: Text(label, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text))))))),
         )),
@@ -270,7 +270,7 @@ class OptionCard extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),
               side: BorderSide(color: selected ? AppColors.text : const Color(0x1F171C19), width: selected ? 2 : 1)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(12), onTap: () { AppHaptics.selection(); onTap(); },
+            borderRadius: BorderRadius.circular(12), onTap: () { AppHaptics.light(); onTap(); },
             child: Padding(padding: const EdgeInsets.all(14), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Container(width: 38, height: 38, decoration: BoxDecoration(color: selected ? AppColors.inverse : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(10)),
                   child: Center(child: PlobbyIcon(icon, color: selected ? AppColors.brand : AppColors.text))),
@@ -302,7 +302,7 @@ class StepBar extends StatelessWidget {
         child: Row(children: [
           for (var i = 1; i <= total; i++) ...[
             if (i > 1) const SizedBox(width: 5),
-            Expanded(child: AnimatedContainer(duration: const Duration(milliseconds: 220), height: 4,
+            Expanded(child: AnimatedContainer(duration: Motion.normal, height: 4,
                 decoration: BoxDecoration(color: i <= step ? AppColors.text : const Color(0x24171C19), borderRadius: BorderRadius.circular(2)))),
           ],
         ]),
@@ -408,7 +408,7 @@ Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => sh
       // Entrada algo más larga y con frenada suave (sensación de muelle), salida rápida.
       sheetAnimationStyle: AppAnimations.reduceMotion(context)
           ? AnimationStyle.noAnimation
-          : const AnimationStyle(duration: Duration(milliseconds: 420), curve: AppSprings.smooth, reverseDuration: Duration(milliseconds: 240), reverseCurve: Curves.easeInCubic),
+          : const AnimationStyle(duration: Motion.emphasis, curve: AppSprings.smooth, reverseDuration: Motion.normal, reverseCurve: Motion.exit),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [

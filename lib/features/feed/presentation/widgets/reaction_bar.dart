@@ -20,7 +20,7 @@ class ReactionBar extends ConsumerWidget {
     final names = r.recent.take(2).map((u) => u.name.split(' ').first).join(', ');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const SizedBox(height: 12),
-      Wrap(spacing: 6, runSpacing: 6, children: [for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () { AppHaptics.selection(); ref.read(feedControllerProvider.notifier).react(post.id, t); })]),
+      Wrap(spacing: 6, runSpacing: 6, children: [for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () { AppHaptics.medium(); ref.read(feedControllerProvider.notifier).react(post.id, t); })]),
       const SizedBox(height: 10),
       Row(children: [
         if (r.total > 0) ...[
@@ -62,7 +62,7 @@ class _Pill extends StatefulWidget {
 }
 
 class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
-  late final c = AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
+  late final c = AnimationController(vsync: this, duration: Motion.emphasis);
   @override
   void didUpdateWidget(covariant _Pill o) { super.didUpdateWidget(o); if (widget.selected && !o.selected) c.forward(from: 0); }
   @override
@@ -73,10 +73,10 @@ class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
     return Semantics(button: true, selected: sel, label: 'Reaccionar con ${widget.t.emoji}', child: GestureDetector(
       onTap: widget.onTap,
       child: AnimatedBuilder(animation: c, builder: (_, child) {
-        final s = 1 + .3 * Curves.elasticOut.transform(c.value) * (1 - c.value);
+        final s = 1 + .3 * Motion.spring.transform(c.value) * (1 - c.value);
         return Transform.scale(scale: c.isAnimating ? s : 1, child: child);
       }, child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150), height: 32, constraints: const BoxConstraints(minWidth: 40), padding: const EdgeInsets.symmetric(horizontal: 10),
+        duration: Motion.fast, height: 32, constraints: const BoxConstraints(minWidth: 40), padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : const Color(0x0F171C19)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.text, width: 1.5) : null),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(widget.t.emoji, style: const TextStyle(fontSize: 15)),

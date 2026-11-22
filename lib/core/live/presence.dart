@@ -26,8 +26,8 @@ class NoPresenceService implements PresenceService {
 }
 
 /// Cada cuánto se renueva la presencia propia (heartbeat) y a partir de cuánto se considera caducada la de un amigo.
-const presenceHeartbeat = Duration(seconds: 30);
-const presenceExpiry = Duration(seconds: 75);
+const presenceHeartbeat = Duration(seconds: 30);  // timing
+const presenceExpiry = Duration(seconds: 75);  // timing
 
 class SupabasePresenceService implements PresenceService {
   SupabasePresenceService(this._db, this._me);
@@ -114,7 +114,7 @@ class _Watch {
         // Sin conexión no sabemos si sigue en línea: mejor «Desconectado» que un dato antiguo.
         if (s != RealtimeSubscribeStatus.subscribed) { _lastSeen = null; _set(false); }
       });
-    _expiry = Timer.periodic(const Duration(seconds: 15), (_) => _evaluate());
+    _expiry = Timer.periodic(const Duration(seconds: 15), (_) => _evaluate());  // timing
   }
 
   void _close() {

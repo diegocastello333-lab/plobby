@@ -75,9 +75,9 @@ class _OptionCardState extends State<_OptionCard> {
   Widget build(BuildContext context) {
     final bg = widget.dark ? AppColors.inverse : AppColors.brand;
     final fg = widget.dark ? AppColors.bg : AppColors.brandInk;
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = Motion.reduced(context);
     return Semantics(button: true, label: '${widget.title}. ${widget.text}', excludeSemantics: true, child: AnimatedScale(
-      scale: _down ? .97 : 1, duration: reduce ? Duration.zero : const Duration(milliseconds: 180), curve: const Cubic(.2, .8, .2, 1),
+      scale: _down ? .97 : 1, duration: reduce ? Duration.zero : Motion.fast, curve: Motion.enter,
       child: DecoratedBox(
         decoration: const BoxDecoration(borderRadius: AppRadius.rLg, boxShadow: AppShadows.card),
         child: Material(
@@ -87,7 +87,7 @@ class _OptionCardState extends State<_OptionCard> {
             onTap: () {
               if (_done) return;
               _done = true;
-              AppHaptics.selection();
+              AppHaptics.light();
               _go(context, '/match/new?type=${widget.type}');
             },
             child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 96), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18), child: Row(children: [

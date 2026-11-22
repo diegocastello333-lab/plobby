@@ -7,7 +7,7 @@ import '../../profile/presentation/widgets/win_streak_badge.dart';
 /// `profileViewProvider('me').streak`). Háptico ligero al abrir (más intenso con rachas altas) y
 /// celebración (chispas) para rachas >= 5, respetando "reducir movimiento".
 Future<void> showStreakSheet(BuildContext context, {required int current, required int best}) {
-  if (current >= 5) { AppHaptics.success(); } else if (current > 0) { AppHaptics.tap(); }
+  if (current >= 5) { AppHaptics.success(); } else if (current > 0) { AppHaptics.light(); }
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,

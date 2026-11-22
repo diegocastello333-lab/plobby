@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import '../domain/auth_models.dart';
 
@@ -94,7 +95,7 @@ class AvatarPicker extends StatelessWidget {
       GridView.count(crossAxisCount: 4, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), mainAxisSpacing: 12, crossAxisSpacing: 12, children: [
         for (final id in avatarIds)
           Semantics(button: true, selected: data.avatarId == id && !hasPhoto, label: 'Avatar ${avatarName(id)}',
-              child: GestureDetector(onTap: () => onAvatar(id), child: AnimatedContainer(duration: const Duration(milliseconds: 150),
+              child: GestureDetector(onTap: () => onAvatar(id), child: AnimatedContainer(duration: Motion.fast,
                   decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: data.avatarId == id && !hasPhoto ? const Color(0xFF171C19) : Colors.transparent, width: 2.5)),
                   padding: const EdgeInsets.all(2), child: PlobbyAvatar(id: id, size: 64)))),
       ]),

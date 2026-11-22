@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/errors/app_errors.dart';
 import 'core/live/live_sync.dart';
+import 'core/motion/app_motion.dart';
 import 'core/router/app_router.dart';
 import 'features/splash/application/splash_boot.dart';
 import 'core/supabase/supabase_bootstrap.dart';
@@ -13,6 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppErrors.install();
   SplashBoot.pending = true;   // pantalla de carga en este arranque (una sola vez)   // errores no controlados: registrados y sin pantallas grises/negras en la APK
+  await AppHaptics.load();   // preferencia «Vibración» de Ajustes, antes del primer toque
   final client = await SupabaseBootstrap.init();
   runApp(client == null
       ? const ProviderScope(child: PlobbyApp())

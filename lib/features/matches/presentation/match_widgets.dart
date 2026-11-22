@@ -41,7 +41,7 @@ class StatusChip extends StatelessWidget {
 
 class _Pulse extends StatefulWidget { const _Pulse(); @override State<_Pulse> createState() => _PulseState(); }
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+  late final _c = AnimationController(vsync: this, duration: Motion.loopPulse);
   @override
   void initState() { super.initState(); IdleMotion.loop(_c, reverse: true, rest: 1); }   // web: late unas veces y queda encendido
   @override

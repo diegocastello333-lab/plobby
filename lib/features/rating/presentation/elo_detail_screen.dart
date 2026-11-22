@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -78,8 +79,8 @@ class _Body extends ConsumerWidget {
           Semantics(label: 'ELO ${d.elo}', excludeSemantics: true, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
             TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: d.elo),
-              duration: MediaQuery.of(context).disableAnimations ? Duration.zero : const Duration(milliseconds: 1200),
-              curve: Curves.easeOutCubic,
+              duration: Motion.reduced(context) ? Duration.zero : Motion.celebrationLong,
+              curve: Motion.enter,
               builder: (_, v, __) => Text(_n(v), style: const TextStyle(fontFamily: AppTypography.displayFamily, color: AppColors.brand, fontSize: 64, height: 1, fontWeight: FontWeight.w700, letterSpacing: -2.56)),
             ),
             const SizedBox(width: 8),

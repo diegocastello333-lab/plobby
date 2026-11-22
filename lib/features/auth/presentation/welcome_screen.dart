@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -30,7 +31,7 @@ class _S extends ConsumerState<WelcomeScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = Motion.reduced(context);
     return Scaffold(
       backgroundColor: AppColors.inverse,
       body: Stack(children: [
@@ -83,14 +84,14 @@ class _Float extends StatefulWidget {
 }
 
 class _FloatState extends State<_Float> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000));
+  late final _c = AnimationController(vsync: this, duration: Motion.loopAmbient);
   @override
   void initState() { super.initState(); if (widget.enabled) _c.repeat(reverse: true); }
   @override
   void dispose() { _c.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: _c, builder: (_, child) =>
-      Transform.translate(offset: Offset(0, -8 * Curves.easeInOut.transform(_c.value)), child: child), child: widget.child);
+      Transform.translate(offset: Offset(0, -8 * Motion.move.transform(_c.value)), child: child), child: widget.child);
 }
 
 /// «G» de Google dibujada con texto de marca (sustituye por el asset oficial de Google Sign-In en producción).

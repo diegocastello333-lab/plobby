@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,7 @@ class FinalResultScreen extends ConsumerWidget {
     if (m == null) return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
     final w = m.winnerTeam, mine = m.player(uid)?.team;
     String hm(DateTime? d) => d == null ? '—' : '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = Motion.reduced(context);
     return Scaffold(body: Column(children: [
       PlobbyHeaderBar(title: 'Resultado final', onBack: () => context.pop()),
       Expanded(child: ListView(padding: EdgeInsets.fromLTRB(20, 16, 20, 40 + MediaQuery.paddingOf(context).bottom), children: [
@@ -32,7 +33,7 @@ class FinalResultScreen extends ConsumerWidget {
             Text('${mine == w ? 'VICTORIA' : 'DERROTA'} · CONFIRMADO', textAlign: TextAlign.center, style: PlobbyText.eb.copyWith(color: AppColors.brand)),
             const SizedBox(height: 14),
             Semantics(label: 'Sets: ${m.sets.map((s) => '${s.a}-${s.b}').join(', ')}', excludeSemantics: true, child: Wrap(alignment: WrapAlignment.center, spacing: 10, children: [
-              for (var i = 0; i < m.sets.length; i++) _SetIn(delay: reduce ? Duration.zero : Duration(milliseconds: 100 * i), animate: !reduce, child: Text('${m.sets[i].a}-${m.sets[i].b}',
+              for (var i = 0; i < m.sets.length; i++) _SetIn(delay: reduce ? Duration.zero : Duration(milliseconds: 100 * i), animate: !reduce, child: Text('${m.sets[i].a}-${m.sets[i].b}',  // timing
                   style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 34, letterSpacing: -0.68, color: Colors.white, fontFeatures: [FontFeature.tabularFigures()]))),
             ])),
             const SizedBox(height: 10),
@@ -85,12 +86,12 @@ class _SetIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!animate) return child;
-    final total = const Duration(milliseconds: 500) + delay;
+    final total = Motion.emphasis + delay;
     final start = delay.inMilliseconds / total.inMilliseconds;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1), duration: total,
       builder: (_, v, c) {
-        final t = Curves.easeOutBack.transform(((v - start) / (1 - start)).clamp(0.0, 1.0));
+        final t = Motion.springBounce.transform(((v - start) / (1 - start)).clamp(0.0, 1.0));
         return Opacity(opacity: t.clamp(0.0, 1.0), child: Transform.scale(scale: .6 + .4 * t, child: c));
       },
       child: child,

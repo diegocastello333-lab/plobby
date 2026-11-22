@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,7 +20,7 @@ class OnboardingScreen extends ConsumerWidget {
     final st = ref.watch(onboardingProvider), c = ref.read(onboardingProvider.notifier);
     if (!st.loaded) return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
     final n = st.pending.length - 1;  // el paso 4 (bienvenida) no cuenta en el progreso
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = Motion.reduced(context);
     return Scaffold(
       body: SafeArea(child: Column(children: [
         // .ob-h: atrás · logotipo · «n / total»; debajo, barra de progreso lima de 4 px
@@ -30,9 +31,9 @@ class OnboardingScreen extends ConsumerWidget {
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Semantics(label: 'Paso ${st.position} de ${st.pending.length}', excludeSemantics: true, child: Container(
           height: 4, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(2)), alignment: Alignment.centerLeft,
-          child: TweenAnimationBuilder<double>(tween: Tween(end: st.position / st.pending.length), duration: reduce ? Duration.zero : const Duration(milliseconds: 350),
+          child: TweenAnimationBuilder<double>(tween: Tween(end: st.position / st.pending.length), duration: reduce ? Duration.zero : Motion.emphasis,
               builder: (_, v, __) => FractionallySizedBox(widthFactor: v.clamp(0, 1), child: Container(decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(2)))))))),
-        Expanded(child: AnimatedSwitcher(duration: reduce ? Duration.zero : const Duration(milliseconds: 250), child: KeyedSubtree(key: ValueKey(st.step), child: ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 24), children: [
+        Expanded(child: AnimatedSwitcher(duration: reduce ? Duration.zero : Motion.normal, child: KeyedSubtree(key: ValueKey(st.step), child: ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 24), children: [
           switch (st.step) { 1 => _Step1(st: st), 2 => _Step2(st: st), 3 => _Step3(st: st), _ => _Step4(st: st) },
         ])))),
         Container(

@@ -40,14 +40,14 @@ class AppShell extends ConsumerWidget {
       final on = shell.currentIndex == i;
       final color = on ? AppColors.text : AppColors.textMuted;
       return Expanded(child: Semantics(button: true, selected: on, label: label, excludeSemantics: true, child: InkResponse(
-        onTap: () { AppHaptics.selection(); _go(i); }, radius: 34, highlightShape: BoxShape.circle,
+        onTap: () { AppHaptics.light(); _go(i); }, radius: 34, highlightShape: BoxShape.circle,
         child: SizedBox(height: 56, child: Padding(padding: const EdgeInsets.only(top: 2), child: TweenAnimationBuilder<Color?>(
           tween: ColorTween(end: color), duration: AppAnimations.scaled(context, AppAnimations.tab), curve: AppAnimations.standard,
           builder: (_, col, __) => Column(children: [
             // Al activarse, el icono hace un «pop» corto (85 % → 100 % con rebote). Al desactivarse no se mueve.
             TweenAnimationBuilder<double>(
               key: ValueKey(on), tween: Tween(begin: on && !AppAnimations.reduceMotion(context) ? .82 : 1, end: 1),
-              duration: const Duration(milliseconds: 420), curve: AppAnimations.settle,
+              duration: Motion.emphasis, curve: AppAnimations.settle,
               builder: (_, sc, child) => Transform.scale(scale: sc, child: child),
               child: PlobbyIcon(icon, size: 24, color: col ?? color)),
             const SizedBox(height: 4),
@@ -96,7 +96,7 @@ class _PlusButton extends StatelessWidget {
             color: AppColors.brand, shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () { AppHaptics.tap(); HomeNav.newMatch(context); },
+              onTap: () { AppHaptics.light(); HomeNav.newMatch(context); },
               // Icono «+» del HTML: 28 px, trazo 2.6, extremos redondeados.
               child: Center(child: SvgPicture.string('<svg viewBox="0 0 24 24" fill="none" stroke="#171C19" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
                   width: 28, height: 28)),
@@ -118,7 +118,7 @@ class _BranchFade extends StatefulWidget {
 
 class _BranchFadeState extends State<_BranchFade> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this, duration: AppAnimations.branch, value: 1);
-  late final Animation<double> _a = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+  late final Animation<double> _a = CurvedAnimation(parent: _c, curve: Motion.enter);
   @override
   void didUpdateWidget(_BranchFade old) {
     super.didUpdateWidget(old);

@@ -56,7 +56,7 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
   StreamSubscription<bool>? _offlineSub;
   StreamSubscription<void>? _restoredSub;
   /// Ausencia mínima para recargar los datos sociales al volver a la app.
-  static const resumeRefreshAfter = Duration(seconds: 10);
+  static const resumeRefreshAfter = Duration(seconds: 10);  // timing
   LiveBanner? _banner;
   Timer? _hide;
   int _seq = 0;
@@ -76,7 +76,7 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
     _incoming = ref.read(messagingRepositoryProvider).watchIncoming().listen(_onMessage);
     _profiles = ref.read(socialRepositoryProvider).profileUpdates().listen(_onProfile);
     ref.read(presenceServiceProvider).setActive(true);   // «En línea» para mis amigos mientras uso la app
-    _healTimer = Timer(const Duration(seconds: 2), () => unawaited(_healAvatar()));
+    _healTimer = Timer(const Duration(seconds: 2), () => unawaited(_healAvatar()));  // timing
     // Al volver la red: sesión al día y datos frescos.
     _restoredSub = NetworkStatus.restored.listen((_) => unawaited(_onConnectionRestored()));
   }
@@ -136,7 +136,7 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
   /// nula y se dibuja el avatar). Varios cambios seguidos → una sola recarga.
   void _onProfile(ProfileEvent e) {
     _peopleDebounce?.cancel();
-    _peopleDebounce = Timer(const Duration(milliseconds: 300), () {
+    _peopleDebounce = Timer(const Duration(milliseconds: 300), () {  // timing
       if (!mounted) return;
       for (final p in <ProviderOrFamily>[friendsProvider, requestsProvider, conversationsProvider, conversationProvider, groupMembersProvider,
           profileProvider, feedControllerProvider, notificationsProvider, upcomingMatchesProvider, matchProvider, standingsProvider, leagueMembersProvider]) {
@@ -195,10 +195,10 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
   }
 
   void _show(LiveBanner b) {
-    AppHaptics.tap();
+    AppHaptics.light();
     _hide?.cancel();
     setState(() { _banner = b; _seq++; });
-    _hide = Timer(const Duration(seconds: 4), _dismiss);
+    _hide = Timer(const Duration(seconds: 4), _dismiss);  // timing
   }
 
   void _dismiss() { if (mounted) setState(() => _banner = null); }
@@ -221,8 +221,8 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
     return Stack(children: [
       widget.child,
       Positioned(left: 0, right: 0, top: 0, child: SafeArea(bottom: false, child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280), reverseDuration: const Duration(milliseconds: 200),
-        switchInCurve: Curves.easeOutCubic, switchOutCurve: Curves.easeInCubic,
+        duration: Motion.normal, reverseDuration: Motion.normal,
+        switchInCurve: Motion.enter, switchOutCurve: Motion.exit,
         transitionBuilder: (child, a) => SlideTransition(position: Tween(begin: const Offset(0, -1.2), end: Offset.zero).animate(a), child: FadeTransition(opacity: a, child: child)),
         child: b == null ? const SizedBox.shrink() : LiveBannerCard(key: ValueKey(_seq), banner: b, onTap: () => _open(b), onClose: _dismiss),
       ))),
@@ -234,7 +234,7 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
 /// Cápsula discreta mientras el dispositivo no tiene red (no tapa nada ni bloquea la navegación).
 extension on _LiveSyncState {
   Widget _offlinePill() => Positioned(left: 0, right: 0, top: 0, child: IgnorePointer(child: SafeArea(bottom: false, child: Center(child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 240),
+        duration: Motion.normal,
         // Material: la cápsula se dibuja por encima del Navigator (sin Material el texto saldría subrayado en amarillo).
         child: !_offline ? const SizedBox.shrink() : Semantics(liveRegion: true, label: 'Sin conexión', excludeSemantics: true, child: Material(type: MaterialType.transparency, child: Container(
           margin: const EdgeInsets.only(top: 6), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +37,7 @@ class _PairPickerState extends ConsumerState<_PairPicker> {
     _debounce?.cancel();
     if (q.trim().length < 2) { setState(() { _results = const []; _searching = false; }); return; }
     setState(() => _searching = true);
-    _debounce = Timer(const Duration(milliseconds: 300), () async {
+    _debounce = Timer(const Duration(milliseconds: 300), () async {  // timing
       try {
         final hits = await ref.read(socialRepositoryProvider).search(q.trim());
         if (mounted) setState(() { _results = [for (final h in hits) TPlayer(id: h.player.id, name: h.player.name, username: h.player.username, avatarUrl: h.player.avatarUrl)]; _searching = false; });
@@ -89,7 +90,7 @@ class _Slot extends StatelessWidget {
   final String label; final TPlayer? p; final VoidCallback onClear;
   @override
   Widget build(BuildContext context) => AnimatedContainer(
-        duration: const Duration(milliseconds: 180), height: 56, padding: const EdgeInsets.symmetric(horizontal: 10),
+        duration: Motion.fast, height: 56, padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(color: p == null ? AppColors.surfaceSunken : AppColors.brandSoft, borderRadius: AppRadius.rSm,
             border: Border.all(color: p == null ? const Color(0x1A171C19) : AppColors.brand, width: 1.5)),
         child: p == null
@@ -117,7 +118,7 @@ class _Candidate extends StatelessWidget {
             Text(isMe ? '${p.name} (tú)' : p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             Text(used ? 'Ya está en otra pareja' : (p.username.isEmpty ? '' : '@${p.username}'), style: PlobbyText.help.copyWith(fontSize: 12)),
           ])),
-          AnimatedScale(scale: selected ? 1 : .85, duration: const Duration(milliseconds: 160), child: Container(width: 24, height: 24,
+          AnimatedScale(scale: selected ? 1 : .85, duration: Motion.fast, child: Container(width: 24, height: 24,
               decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? AppColors.brand : null, border: selected ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
               child: selected ? const Center(child: PlobbyIcon(PlobbyIcons.check, size: 13, strokeWidth: 3, color: AppColors.brandInk)) : null)),
         ]),

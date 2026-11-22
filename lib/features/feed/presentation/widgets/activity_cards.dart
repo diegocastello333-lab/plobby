@@ -1,3 +1,4 @@
+import '../../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/plobby_theme.dart';
@@ -146,7 +147,7 @@ class _Achievement extends StatefulWidget {
 }
 
 class _AchievementState extends State<_Achievement> with SingleTickerProviderStateMixin {
-  late final c = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..forward();
+  late final c = AnimationController(vsync: this, duration: Motion.celebration)..forward();
   @override
   void dispose() { c.dispose(); super.dispose(); }
   @override
@@ -166,7 +167,7 @@ class _AchievementState extends State<_Achievement> with SingleTickerProviderSta
         ]))),
         child: Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Center(child: Column(children: [
           // insignia: disco lima dentro de un aro tinta con borde lima tenue (como en el HTML)
-          ScaleTransition(scale: CurvedAnimation(parent: c, curve: MediaQuery.of(context).disableAnimations ? Curves.linear : Curves.elasticOut), child: AnimatedBuilder(animation: c, builder: (_, child) => Container(
+          ScaleTransition(scale: CurvedAnimation(parent: c, curve: Motion.reduced(context) ? Motion.linear : Motion.springBounce), child: AnimatedBuilder(animation: c, builder: (_, child) => Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.ink800, border: Border.all(color: const Color(0x40D2F548), width: 1.5),
                   boxShadow: [BoxShadow(color: AppColors.brand.withValues(alpha: .35 * (1 - c.value) + .12), blurRadius: 24, spreadRadius: 4)]), child: child), child: _Disc(size: 104, id: p.achievementId))),
@@ -252,11 +253,11 @@ class _Champion extends StatefulWidget {
 }
 
 class _ChampionState extends State<_Champion> with SingleTickerProviderStateMixin {
-  late final c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
+  late final c = AnimationController(vsync: this, duration: Motion.celebrationLong);
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.of(context).disableAnimations) { c.value = 1; } else if (!c.isAnimating && c.value == 0) { c.forward(); }
+    if (Motion.reduced(context)) { c.value = 1; } else if (!c.isAnimating && c.value == 0) { c.forward(); }
   }
   @override
   void dispose() { c.dispose(); super.dispose(); }
@@ -269,7 +270,7 @@ class _ChampionState extends State<_Champion> with SingleTickerProviderStateMixi
       child: InkWell(onTap: () => context.push('/tournaments/${p.tournamentId}'), borderRadius: AppRadius.rMd, child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(children: [
-          ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: AnimatedBuilder(animation: c, builder: (_, child) => Container(
+          ScaleTransition(scale: CurvedAnimation(parent: c, curve: Motion.springBounce), child: AnimatedBuilder(animation: c, builder: (_, child) => Container(
               width: 76, height: 76,
               decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.brand,
                   boxShadow: [BoxShadow(color: AppColors.brand.withValues(alpha: .45 * (1 - c.value) + .15), blurRadius: 26, spreadRadius: 3)]),

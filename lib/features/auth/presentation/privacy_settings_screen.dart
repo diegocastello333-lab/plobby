@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/errors/failure.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/router/app_router.dart' show authGuardEnabledProvider;
 import '../../../core/share/file_export.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -13,7 +15,7 @@ import '../application/auth_providers.dart';
 import '../data/auth_repository.dart';
 import '../domain/legal.dart';
 
-/// Perfil → «Privacidad y datos» (Seguridad Fase 8, RGPD):
+/// Perfil → «Ajustes y privacidad» (Seguridad Fase 8, RGPD):
 ///  · ver los documentos legales;
 ///  · activar o retirar las comunicaciones comerciales;
 ///  · descargar mis datos (JSON con todo lo que Plobby guarda del usuario);
@@ -114,8 +116,31 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: Column(children: [
-        const PlobbyHeaderBar(title: 'Privacidad y datos'),
+        const PlobbyHeaderBar(title: 'Ajustes y privacidad'),
         Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 40), children: [
+          const _SectionTitle('Experiencia'),
+          _Group(children: [
+            Semantics(container: true, toggled: AppHaptics.enabled, label: 'Vibración', child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+              child: Row(children: [
+                const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Vibración', style: PlobbyText.value),
+                  SizedBox(height: 2),
+                  Text('Una vibración suave al confirmar acciones y celebrar logros.', style: PlobbyText.help),
+                ])),
+                ExcludeSemantics(child: Switch.adaptive(
+                  value: AppHaptics.enabled,
+                  activeTrackColor: AppColors.inverse, activeThumbColor: AppColors.brand,
+                  onChanged: (v) {
+                    setState(() => AppHaptics.enabled = v);   // efecto inmediato…
+                    unawaited(AppHaptics.setEnabled(v));      // …y se guarda en el dispositivo
+                    if (v) AppHaptics.light();                // confirma que vuelve a vibrar
+                  },
+                )),
+              ]),
+            )),
+          ]),
+          const SizedBox(height: 24),
           const _SectionTitle('Documentos'),
           _Group(children: [
             for (final d in LegalDoc.values)

@@ -46,7 +46,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _goTo(int i) {
     setState(() => _tab = i);
     final ctx = _keys[i].currentContext;
-    if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 350), curve: Curves.easeOutCubic, alignment: .0);
+    if (ctx != null) Scrollable.ensureVisible(ctx, duration: Motion.emphasis, curve: Motion.enter, alignment: .0);
   }
 
   @override
@@ -56,7 +56,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       // Perfil propio (pestaña): fondo vivo de la barra inferior. Perfil de otro jugador (ruta encima): marfil opaco.
       backgroundColor: widget.playerId == 'me' ? Colors.transparent : null,
-      body: AnimatedSwitcher(duration: const Duration(milliseconds: 260), switchInCurve: Curves.easeOut, child: KeyedSubtree(key: ValueKey(async.hasValue ? 'data' : async.hasError ? 'error' : 'loading'), child: async.when(
+      body: AnimatedSwitcher(duration: Motion.normal, switchInCurve: Motion.enter, child: KeyedSubtree(key: ValueKey(async.hasValue ? 'data' : async.hasError ? 'error' : 'loading'), child: async.when(
         // Esqueleto con la forma del perfil (cabecera tinta + pestañas + tarjetas) en lugar de una rueda en blanco.
         loading: () => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Container(height: 300 + MediaQuery.paddingOf(context).top, color: AppColors.inverse),
@@ -105,7 +105,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         else _section(null, 'Head to Head', H2HTeaser(otherId: widget.playerId, name: p.fullName)),
         _section(3, 'Actividad', ActivityFeed(view: v)),
         // Seguridad Fase 8: documentos, comunicaciones, descargar mis datos y eliminar la cuenta.
-        if (own) Padding(padding: const EdgeInsets.fromLTRB(20, 28, 20, 0), child: PlobbyButton(label: 'Privacidad y datos', kind: PlobbyButtonKind.outline,
+        if (own) Padding(padding: const EdgeInsets.fromLTRB(20, 28, 20, 0), child: PlobbyButton(label: 'Ajustes y privacidad', kind: PlobbyButtonKind.outline,
             icon: PlobbyIcons.shield, onPressed: () => context.push('/settings/privacy'))),
         if (own) const LogoutButton(),   // solo en el perfil propio, al final y separado
         // Versión instalada: así se sabe si un móvil sigue con un APK antiguo.

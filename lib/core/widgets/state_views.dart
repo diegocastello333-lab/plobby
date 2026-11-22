@@ -136,7 +136,7 @@ void showPlobbySnack(BuildContext context, String text, {bool error = false}) {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
       behavior: SnackBarBehavior.floating, elevation: 0, backgroundColor: Colors.transparent, padding: EdgeInsets.zero,
-      duration: Duration(milliseconds: error ? 4000 : 3000),
+      duration: Duration(milliseconds: error ? 4000 : 3000),  // timing
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       content: GestureDetector(onTap: m.hideCurrentSnackBar, child: Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),

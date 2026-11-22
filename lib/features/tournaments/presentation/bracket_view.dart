@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -86,7 +87,7 @@ class BracketMatchCard extends StatelessWidget {
         '${detail.team(m.team1Id)?.name ?? detail.slotLabel(m, 1)} contra ${detail.team(m.team2Id)?.name ?? (m.status == TMatchStatus.bye ? 'nadie, pasa directo' : detail.slotLabel(m, 2))}. '
         '${m.finished ? 'Resultado ${m.score}' : m.status.label}', excludeSemantics: true,
       child: Material(color: AppColors.surface, borderRadius: AppRadius.rSm, clipBehavior: Clip.antiAlias, child: InkWell(onTap: onTap, child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: Motion.normal,
         padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
         decoration: BoxDecoration(borderRadius: AppRadius.rSm, boxShadow: AppShadows.card,
             border: Border(left: BorderSide(color: live ? const Color(0xFF1FA463) : mine ? AppColors.brand : Colors.transparent, width: 4))),
@@ -106,7 +107,7 @@ class _ChampionCard extends StatelessWidget {
   final TTeam? team;
   @override
   Widget build(BuildContext context) => AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
+        duration: Motion.emphasis,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(color: team == null ? AppColors.surfaceSunken : AppColors.inverse, borderRadius: AppRadius.rMd,
             boxShadow: team == null ? null : const [BoxShadow(color: Color(0x66D2F548), blurRadius: 18, spreadRadius: -4)]),

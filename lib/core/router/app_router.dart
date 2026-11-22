@@ -1,3 +1,4 @@
+import '../motion/app_motion.dart';
 import '../../features/gamification/presentation/wrapped_screens.dart';
 import '../../features/gamification/presentation/head_to_head_screen.dart';
 import '../../features/gamification/presentation/friends_ranking_screen.dart';
@@ -226,15 +227,15 @@ class _SplashRouteState extends ConsumerState<_SplashRoute> {
     if (_leaving) return;
     setState(() => _leaving = true);
     // Salida: la marca se funde y crece ligeramente (260 ms) y se entra al Inicio sin pila (atrás no vuelve aquí).
-    Future<void>.delayed(const Duration(milliseconds: 260), () { if (mounted) GoRouter.of(context).go('/home'); });
+    Future<void>.delayed(Motion.normal, () { if (mounted) GoRouter.of(context).go('/home'); });
   }
 
   @override
   Widget build(BuildContext context) => ColoredBox(
         color: const Color(0xFFD2F548),
         child: AnimatedOpacity(
-          opacity: _leaving ? 0 : 1, duration: const Duration(milliseconds: 260), curve: Curves.easeIn,
-          child: AnimatedScale(scale: _leaving ? 1.04 : 1, duration: const Duration(milliseconds: 260), curve: Curves.easeIn,
+          opacity: _leaving ? 0 : 1, duration: Motion.normal, curve: Motion.exit,
+          child: AnimatedScale(scale: _leaving ? 1.04 : 1, duration: Motion.normal, curve: Motion.exit,
               child: SplashScreen(ready: _ready, onFinished: _finish)),
         ),
       );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
@@ -79,7 +80,7 @@ class _FriendsRankingScreenState extends ConsumerState<FriendsRankingScreen> {
         EmptyStateCard(icon: Icons.sports_tennis, title: 'Nadie ha jugado en este periodo.', text: 'Los partidos confirmados suman aquí automáticamente.')
       else ...[
         if (r.closed && list.isNotEmpty && list.first.pos(_metric) == 1) _ChampionBanner(row: list.first, metric: _metric),
-        if (list.length >= 2) AnimatedSwitcher(duration: const Duration(milliseconds: 300), child: _Podium(key: ValueKey('$_period$_offset$_metric'), rows: list.take(3).toList(), metric: _metric, meId: r.meId)),
+        if (list.length >= 2) AnimatedSwitcher(duration: Motion.normal, child: _Podium(key: ValueKey('$_period$_offset$_metric'), rows: list.take(3).toList(), metric: _metric, meId: r.meId)),
         const SizedBox(height: 14),
         for (final (i, row) in list.indexed) AppearOnce(key: ValueKey('${row.player.id}$_period$_offset$_metric'), index: i,
             child: _RankTile(row: row, metric: _metric, me: row.player.id == r.meId, move: r.movement(row.player.id, _metric))),

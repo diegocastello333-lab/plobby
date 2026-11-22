@@ -15,14 +15,14 @@ class EloBar extends StatefulWidget {
 }
 
 class _EloBarState extends State<EloBar> with TickerProviderStateMixin {
-  late final AnimationController _fill = AnimationController(vsync: this, duration: const Duration(milliseconds: 1300));
-  late final AnimationController _glow = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
+  late final AnimationController _fill = AnimationController(vsync: this, duration: Motion.celebrationLong);
+  late final AnimationController _glow = AnimationController(vsync: this, duration: Motion.loopGlow);
   bool _reduced = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final r = MediaQuery.of(context).disableAnimations;
+    final r = Motion.reduced(context);
     if (r != _reduced || !_fill.isAnimating && _fill.value == 0) {
       _reduced = r;
       if (r) { _fill.value = 1; _glow.stop(); }
@@ -39,7 +39,7 @@ class _EloBarState extends State<EloBar> with TickerProviderStateMixin {
         child: Column(children: [
           SizedBox(height: 28, width: double.infinity, child: AnimatedBuilder(
             animation: Listenable.merge([_fill, _glow]),
-            builder: (_, __) => CustomPaint(painter: _BarPainter(widget.scale, widget.elo, Curves.easeOutCubic.transform(_fill.value), _glow.value, _reduced)),
+            builder: (_, __) => CustomPaint(painter: _BarPainter(widget.scale, widget.elo, Motion.enter.transform(_fill.value), _glow.value, _reduced)),
           )),
           const SizedBox(height: 8),
           LayoutBuilder(builder: (_, c) => SizedBox(height: 32, child: Stack(children: [

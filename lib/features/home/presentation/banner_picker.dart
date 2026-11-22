@@ -41,7 +41,7 @@ class _BannerSheetState extends ConsumerState<_BannerSheet> {
     try {
       await ref.read(profileRepositoryProvider).setBanner(b.id);
       ref.invalidate(profileProvider('me'));
-      AppHaptics.selection();
+      AppHaptics.light();
       if (mounted) { Navigator.of(context).pop(); showPlobbySnack(context, '${b.name} aplicado'); }
     } catch (e) {
       if (mounted) { setState(() => _busy = null); showPlobbySnack(context, actionErrorText(e, fallback: 'No se pudo cambiar el banner. Inténtalo de nuevo.'), error: true); }
@@ -76,7 +76,7 @@ class _CollectionCard extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(button: true, selected: selected, container: true, excludeSemantics: true,
       label: '${banner.name}${selected ? ', seleccionado' : ''}',
       child: Pressable(child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200), curve: Curves.easeOut,
+        duration: Motion.normal, curve: Motion.enter,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(22), border: Border.all(color: selected ? AppColors.text : Colors.transparent, width: 2.5)),
         child: ClipRRect(borderRadius: BorderRadius.circular(18), child: AspectRatio(aspectRatio: .78, child: Stack(fit: StackFit.expand, children: [
@@ -86,7 +86,7 @@ class _CollectionCard extends StatelessWidget {
           Positioned(left: 14, right: 14, bottom: 14, child: Text(banner.name, maxLines: 1, overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, height: 1.1, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: Colors.white))),
           if (busy) const ColoredBox(color: Color(0x66171C19), child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.lime300)))),
-          Positioned(right: 10, top: 10, child: AnimatedScale(scale: selected && !busy ? 1 : 0, duration: const Duration(milliseconds: 220), curve: Curves.easeOutBack,
+          Positioned(right: 10, top: 10, child: AnimatedScale(scale: selected && !busy ? 1 : 0, duration: Motion.normal, curve: Motion.spring,
               child: Container(width: 28, height: 28, decoration: const BoxDecoration(color: AppColors.brand, shape: BoxShape.circle),
                   child: const Center(child: PlobbyIcon(PlobbyIcons.check, size: 15, strokeWidth: 3, color: AppColors.brandInk))))),
         ]))),
