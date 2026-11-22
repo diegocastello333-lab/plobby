@@ -6,7 +6,7 @@
 --
 -- ⚠️ ROMPE versiones de la app ANTERIORES a la que lee el perfil con `get_profile` (rama seguridad-legal): en esas, abrir
 --    un perfil daría error de permisos. Aplicar SOLO cuando todos los móviles/web tengan la versión nueva.
--- Requiere 20261128a. No borra datos.
+-- Requiere 20261128a y 20261130a (columna profiles.deleted_at). No borra datos.
 -- =====================================================================================================================
 
 -- Ciudad visible solo para uno mismo y amigos (la usan las vistas de amigos/solicitudes y la búsqueda)
@@ -53,7 +53,7 @@ create or replace function public.search_players(q text)
       when exists (select 1 from friend_requests r where r.receiver_id = auth.uid() and r.sender_id = p.id and r.status = 'pending') then 'requestReceived'
       else 'none' end
   from profiles p left join player_ratings pr on pr.user_id = p.id
-  where p.id <> auth.uid() and length(trim(q)) >= 2
+  where p.id <> auth.uid() and p.deleted_at is null and length(trim(q)) >= 2
     and (p.display_name ilike '%' || trim(q) || '%' or p.username ilike '%' || trim(q) || '%')
   order by p.display_name limit 30;
 $$;
@@ -69,7 +69,7 @@ create or replace function public.suggest_friends()
       (p.home_club is not distinct from (select home_club from me) and p.home_club is not null) as same_club,
       abs(coalesce(pr.elo, 1000) - (select elo from me)) <= 60 as similar_elo
     from profiles p left join player_ratings pr on pr.user_id = p.id
-    where p.id <> auth.uid()
+    where p.id <> auth.uid() and p.deleted_at is null
       and not exists (select 1 from friendships f where f.user_id = auth.uid() and f.friend_id = p.id)
       and not exists (select 1 from friend_requests r where r.status = 'pending' and ((r.sender_id = auth.uid() and r.receiver_id = p.id) or (r.receiver_id = auth.uid() and r.sender_id = p.id))))
   select id, display_name, username, avatar_url, null::text, elo, lvl, mutual,
