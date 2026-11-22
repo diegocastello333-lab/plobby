@@ -52,13 +52,57 @@ class SupabaseMessagingRepository implements MessagingRepository {
   @override
   Future<List<Conversation>> conversations() async {
     final rows = await _db.from('v_my_conversations').select().order('last_message_at', ascending: false);
-    return [for (final r in rows as List) _conv(r as Map<String, dynamic>)];
+    final list = [for (final r in rows as List) r as Map<String, dynamic>];
+    await _refreshGroupAvatars(list);
+    return [for (final r in list) _conv(r)];
+  }
+
+  // ── imágenes de grupo (bucket privado `group-avatars`) ──
+  // La BD guarda la URL firmada del momento de la subida. Antes valía 1 año (cualquiera con el enlace la veía durante
+  // un año); ahora caduca a los 7 días y la app la vuelve a firmar al leer, con validez de 1 hora (el servidor solo
+  // firma si el usuario es miembro del grupo: política `ga_read`). Caché en memoria para no firmar en cada repintado.
+  static const _signedTtl = Duration(hours: 1);
+  final Map<String, (String, DateTime)> _signed = {};
+
+  static String? groupAvatarPath(String? url) {
+    if (url == null) return null;
+    final m = RegExp(r'/storage/v1/object/sign/group-avatars/([^?]+)').firstMatch(url);
+    return m == null ? null : Uri.decodeComponent(m.group(1)!);
+  }
+
+  Future<void> _refreshGroupAvatars(List<Map<String, dynamic>> rows) async {
+    final now = DateTime.now();
+    final need = <String>{};
+    for (final r in rows) {
+      final path = groupAvatarPath(r['group_avatar_url'] as String?);
+      if (path != null && !((_signed[path]?.$2.isAfter(now)) ?? false)) need.add(path);
+    }
+    if (need.isNotEmpty) {
+      try {
+        final res = await _db.storage.from('group-avatars').createSignedUrls(need.toList(), _signedTtl.inSeconds);
+        for (final s in res) {
+          _signed[s.path] = (s.signedUrl, now.add(_signedTtl - const Duration(minutes: 5)));
+        }
+      } catch (_) {/* sin red o sin permiso: se queda la URL guardada (puede haber caducado → avatar por defecto) */}
+    }
+    for (final r in rows) {
+      final url = r['group_avatar_url'] as String?;
+      final path = groupAvatarPath(url);
+      final fresh = path == null ? null : _signed[path]?.$1;
+      if (fresh != null) {
+        // conserva el `v=` de la subida para que el caché de imagen cambie cuando cambia la foto
+        final v = Uri.tryParse(url!)?.queryParameters['v'];
+        r['group_avatar_url'] = v == null ? fresh : '$fresh${fresh.contains('?') ? '&' : '?'}v=$v';
+      }
+    }
   }
 
   @override
   Future<Conversation?> conversation(String id) async {
     final r = await _db.from('v_my_conversations').select().eq('conversation_id', id).maybeSingle();
-    return r == null ? null : _conv(r);
+    if (r == null) return null;
+    await _refreshGroupAvatars([r]);
+    return _conv(r);
   }
 
   @override
@@ -84,12 +128,12 @@ class SupabaseMessagingRepository implements MessagingRepository {
   Future<void> markRead(String c) => _db.rpc('mark_conversation_read', params: {'conv': c});
 
   // ── grupos ──
-  /// Sube la foto al bucket `group-avatars` (ruta `<conversation_id>/avatar.jpg`) y devuelve su URL firmada de larga duración.
+  /// Sube la foto al bucket `group-avatars` (ruta `<conversation_id>/avatar.jpg`) y devuelve una URL firmada de 7 días (al leer se vuelve a firmar: `_refreshGroupAvatars`).
   Future<String> _upload(String convId, Uint8List bytes) async {
     final path = '$convId/avatar.jpg';
     await _db.storage.from('group-avatars').uploadBinary(path, bytes, fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true));
     // versionada para que el caché de imagen se refresque al cambiar la foto
-    return '${await _db.storage.from('group-avatars').createSignedUrl(path, 60 * 60 * 24 * 365)}&v=${DateTime.now().millisecondsSinceEpoch}';
+    return '${await _db.storage.from('group-avatars').createSignedUrl(path, 60 * 60 * 24 * 7)}&v=${DateTime.now().millisecondsSinceEpoch}';
   }
 
   @override
