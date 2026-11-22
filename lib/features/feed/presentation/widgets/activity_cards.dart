@@ -73,7 +73,7 @@ class _Shell extends StatelessWidget {
             ])),
           ]),
         ),
-        child,
+        DoubleTapFire(post: post, child: child),
         ReactionBar(post: post, onDark: dark),
       ]),
     );

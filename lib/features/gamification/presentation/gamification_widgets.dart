@@ -77,17 +77,59 @@ class AchievementBadge extends StatelessWidget {
   final AchievementItem item;
   final double size;
   @override
-  Widget build(BuildContext context) => SizedBox(width: size, height: size, child: Stack(alignment: Alignment.center, children: [
-        if (!item.unlocked) SizedBox.expand(child: CircularProgressIndicator(value: item.fraction, strokeWidth: 3,
-            color: AppColors.text, backgroundColor: const Color(0x14171C19))),
-        Container(
-          width: size - (item.unlocked ? 0 : 10), height: size - (item.unlocked ? 0 : 10),
-          decoration: BoxDecoration(shape: BoxShape.circle, color: item.unlocked ? AppColors.brand : AppColors.surfaceSunken,
-              border: item.unlocked && item.category == 'competition' ? Border.all(color: AppColors.text, width: 2) : null),
-          child: Center(child: PlobbyIcon(achievementIcon(item.icon), size: size * .42, strokeWidth: 2,
-              color: item.unlocked ? AppColors.brandInk : AppColors.textMuted)),
-        ),
-      ]));
+  Widget build(BuildContext context) {
+    final reduce = Motion.reduced(context);
+    // el destello pasa UNA vez por logro conseguido y sesión (primera vez que se ve)
+    final shineKey = 'shine:${item.id}';
+    final shine = item.unlocked && !reduce && !AppearRegistry.hasSeen(shineKey);
+    if (shine) AppearRegistry.markSeen(shineKey);
+    return SizedBox(width: size, height: size, child: Stack(alignment: Alignment.center, clipBehavior: Clip.none, children: [
+      // anillo de progreso: se llena al aparecer (sin animación con «reducir movimiento»)
+      if (!item.unlocked) SizedBox.expand(child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: reduce ? item.fraction : 0, end: item.fraction), duration: Motion.celebration, curve: Motion.enter,
+        builder: (_, v, __) => CircularProgressIndicator(value: v, strokeWidth: 3, color: AppColors.text, backgroundColor: const Color(0x14171C19)),
+      )),
+      Container(
+        width: size - (item.unlocked ? 0 : 10), height: size - (item.unlocked ? 0 : 10),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: item.unlocked ? AppColors.brand : AppColors.surfaceSunken,
+            border: item.unlocked && item.category == 'competition' ? Border.all(color: AppColors.text, width: 2) : null),
+        child: ClipOval(child: Stack(alignment: Alignment.center, children: [
+          // bloqueado = silueta (icono apagado) + candado; conseguido = icono en tinta sobre lima
+          PlobbyIcon(achievementIcon(item.icon), size: size * .42, strokeWidth: 2,
+              color: item.unlocked ? AppColors.brandInk : AppColors.textDisabled),
+          Positioned.fill(child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: shine ? 0 : 1, end: 1), duration: Motion.celebrationLong, curve: Motion.move,
+            builder: (_, v, __) => v >= 1 ? const SizedBox.shrink() : CustomPaint(painter: _Shine(v)),
+          )),
+        ])),
+      ),
+      if (!item.unlocked) Positioned(right: -1, bottom: -1, child: Container(
+        width: size * .34, height: size * .34, alignment: Alignment.center,
+        decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, border: Border.all(color: AppColors.border)),
+        child: PlobbyIcon(PlobbyIcons.lock, size: size * .19, color: AppColors.textMuted),
+      )),
+    ]));
+  }
+}
+
+/// Banda de luz diagonal que cruza la insignia de izquierda a derecha.
+class _Shine extends CustomPainter {
+  _Shine(this.t);
+  final double t;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final x = -size.width + 3 * size.width * t;
+    final band = Rect.fromLTWH(x, 0, size.width * .5, size.height);
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(.5);
+    canvas.translate(-size.width / 2, -size.height / 2);
+    canvas.drawRect(band.inflate(size.height), Paint()..shader = LinearGradient(colors: const [Color(0x00FFFFFF), Color(0x8CFFFFFF), Color(0x00FFFFFF)])
+        .createShader(band));
+    canvas.restore();
+  }
+  @override
+  bool shouldRepaint(_Shine o) => o.t != t;
 }
 
 /// Tarjeta de nivel: número de nivel, barra de XP y lo que falta. Animada al aparecer.

@@ -35,7 +35,9 @@ class BracketView extends StatelessWidget {
     return LayoutBuilder(builder: (context, c) => InteractiveViewer(
           constrained: false, minScale: .45, maxScale: 1.6, boundaryMargin: const EdgeInsets.all(48),
           child: SizedBox(width: width, height: math.max(height, 200), child: Stack(children: [
-            Positioned.fill(child: CustomPaint(painter: _Connectors([
+            // las líneas de los ganadores se dibujan al abrir el cuadro (una vez; quietas con «reducir movimiento»)
+            Positioned.fill(child: TweenAnimationBuilder<double>(tween: Tween(begin: Motion.reduced(context) ? 1 : 0, end: 1),
+                duration: Motion.celebrationLong, curve: Motion.move, builder: (_, t, __) => CustomPaint(painter: _Connectors(t: t, [
               for (final m in ko)
                 if (m.nextMatchId != null)
                   () {
@@ -43,7 +45,7 @@ class BracketView extends StatelessWidget {
                     return (Offset(left(m.round) + cardW, centerY(m)), Offset(left(next.round), centerY(next)), m.winnerTeamId != null && m.status != TMatchStatus.bye);
                   }(),
               if (finalMatch != null) (Offset(left(rounds) + cardW, centerY(finalMatch)), Offset(left(rounds + 1), centerY(finalMatch)), champion != null),
-            ]))),
+            ])))),
             for (var r = 1; r <= rounds; r++)
               Positioned(left: left(r), top: 0, width: cardW, height: headerH - 8, child: Center(child: Text(roundName(r, rounds).toUpperCase(), style: PlobbyText.eb))),
             Positioned(left: left(rounds + 1), top: 0, width: cardW, height: headerH - 8, child: const Center(child: Text('CAMPEÓN', style: PlobbyText.eb))),
@@ -106,7 +108,18 @@ class _ChampionCard extends StatelessWidget {
   const _ChampionCard({required this.team});
   final TTeam? team;
   @override
-  Widget build(BuildContext context) => AnimatedContainer(
+  Widget build(BuildContext context) => Stack(clipBehavior: Clip.none, children: [
+    Positioned.fill(child: _championBox(context)),
+    // corona: cae y rebota cuando hay campeón
+    Positioned(left: 12, top: -20, width: 30, height: 22, child: TweenAnimationBuilder<double>(
+      tween: Tween(begin: team != null && Motion.reduced(context) ? 1 : 0, end: team == null ? 0 : 1),
+      duration: Motion.celebration, curve: Motion.springBounce,
+      builder: (_, v, __) => Opacity(opacity: v.clamp(0.0, 1.0), child: Transform.translate(offset: Offset(0, -16 * (1 - v)),
+          child: Transform.rotate(angle: -.2, child: CustomPaint(painter: _Crown())))),
+    )),
+  ]);
+
+  Widget _championBox(BuildContext context) => AnimatedContainer(
         duration: Motion.emphasis,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(color: team == null ? AppColors.surfaceSunken : AppColors.inverse, borderRadius: AppRadius.rMd,
@@ -122,8 +135,9 @@ class _ChampionCard extends StatelessWidget {
 }
 
 class _Connectors extends CustomPainter {
-  _Connectors(this.lines);
+  _Connectors(this.lines, {this.t = 1});
   final List<(Offset, Offset, bool)> lines;
+  final double t;
   @override
   void paint(Canvas c, Size s) {
     final idle = Paint()..color = const Color(0x33171C19)..strokeWidth = 1.5..style = PaintingStyle.stroke;
@@ -131,9 +145,25 @@ class _Connectors extends CustomPainter {
     for (final (a, b, d) in lines) {
       final mid = (a.dx + b.dx) / 2;
       final path = Path()..moveTo(a.dx, a.dy)..lineTo(mid, a.dy)..lineTo(mid, b.dy)..lineTo(b.dx, b.dy);
-      c.drawPath(path, d ? done : idle);
+      c.drawPath(path, idle);                       // la guía gris siempre está
+      if (!d) continue;
+      if (t >= 1) { c.drawPath(path, done); continue; }
+      for (final m in path.computeMetrics()) { c.drawPath(m.extractPath(0, m.length * t), done); }   // el trazo del ganador avanza
     }
   }
   @override
-  bool shouldRepaint(_Connectors o) => true;
+  bool shouldRepaint(_Connectors o) => o.t != t || o.lines.length != lines.length;
+}
+
+/// Corona sencilla (tres picos) en lima con borde tinta.
+class _Crown extends CustomPainter {
+  @override
+  void paint(Canvas c, Size s) {
+    final w = s.width, h = s.height;
+    final path = Path()..moveTo(0, h)..lineTo(0, h * .3)..lineTo(w * .28, h * .62)..lineTo(w * .5, 0)..lineTo(w * .72, h * .62)..lineTo(w, h * .3)..lineTo(w, h)..close();
+    c.drawPath(path, Paint()..color = AppColors.brand);
+    c.drawPath(path, Paint()..color = AppColors.text..style = PaintingStyle.stroke..strokeWidth = 1.6..strokeJoin = StrokeJoin.round);
+  }
+  @override
+  bool shouldRepaint(_Crown o) => false;
 }

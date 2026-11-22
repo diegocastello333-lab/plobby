@@ -137,7 +137,10 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: 16),
           SizedBox(height: 150, child: pts.length < 2
               ? Center(child: Text('Aún no hay suficientes partidos en este periodo', textAlign: TextAlign.center, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: soft)))
-              : Semantics(label: 'Evolución del ELO: de ${pts.first.after} a ${pts.last.after}', excludeSemantics: true, child: CustomPaint(painter: _LinePainter([for (final c in pts) c.after.toDouble()])))),
+              : Semantics(label: 'Evolución del ELO: de ${pts.first.after} a ${pts.last.after}', excludeSemantics: true, child: TweenAnimationBuilder<double>(
+                    // la línea se dibuja de izquierda a derecha al abrir y al cambiar de periodo
+                    key: ValueKey(range), tween: Tween(begin: Motion.reduced(context) ? 1 : 0, end: 1), duration: Motion.celebrationLong, curve: Motion.move,
+                    builder: (_, t, __) => CustomPaint(painter: _LinePainter([for (final c in pts) c.after.toDouble()], t: t))))),
           if (pts.length >= 2) ...[
             const SizedBox(height: 12),
             Container(height: 1, color: const Color(0x1FF6F8F1)),
@@ -250,8 +253,9 @@ class _ChangeRow extends StatelessWidget {
 
 /// Línea lima con área degradada y punto final, sobre tinta (como el gráfico del HTML).
 class _LinePainter extends CustomPainter {
-  _LinePainter(this.v);
+  _LinePainter(this.v, {this.t = 1});
   final List<double> v;
+  final double t;
   @override
   void paint(Canvas canvas, Size s) {
     final lo = v.reduce((a, b) => a < b ? a : b) - 10, hi = v.reduce((a, b) => a > b ? a : b) + 10;
@@ -259,10 +263,24 @@ class _LinePainter extends CustomPainter {
     final path = Path()..moveTo(p(0).dx, p(0).dy);
     for (var i = 1; i < v.length; i++) { path.lineTo(p(i).dx, p(i).dy); }
     final area = Path.from(path)..lineTo(s.width, s.height)..lineTo(0, s.height)..close();
+    // el área se revela con la línea (recorte hasta donde va el trazo)
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, s.width * t, s.height));
     canvas.drawPath(area, Paint()..shader = const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x40D2F548), Color(0x05D2F548)]).createShader(Offset.zero & s));
-    canvas.drawPath(path, Paint()..color = AppColors.brand..style = PaintingStyle.stroke..strokeWidth = 2.2..strokeJoin = StrokeJoin.round);
-    canvas.drawCircle(p(v.length - 1), 4.5, Paint()..color = AppColors.brand);
+    canvas.restore();
+    final line = Paint()..color = AppColors.brand..style = PaintingStyle.stroke..strokeWidth = 2.2..strokeJoin = StrokeJoin.round;
+    if (t >= 1) {
+      canvas.drawPath(path, line);
+      canvas.drawCircle(p(v.length - 1), 4.5, Paint()..color = AppColors.brand);
+    } else {
+      for (final m in path.computeMetrics()) {
+        final len = m.length * t;
+        canvas.drawPath(m.extractPath(0, len), line);
+        final tip = m.getTangentForOffset(len)?.position;
+        if (tip != null) canvas.drawCircle(tip, 4.5, Paint()..color = AppColors.brand);
+      }
+    }
   }
   @override
-  bool shouldRepaint(_LinePainter o) => o.v != v;
+  bool shouldRepaint(_LinePainter o) => o.v != v || o.t != t;
 }

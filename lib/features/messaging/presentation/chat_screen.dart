@@ -182,17 +182,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-/// Entrada de un mensaje nuevo: 12 px desde su lado + fundido, 240 ms. Sin clave propia: al pasar de «enviando» a
+/// Entrada de un mensaje nuevo: muelle desde su esquina (12 px + escala 90 %→100 % + fundido). Sin clave propia: al pasar de «enviando» a
 /// «enviado» (cambia el id) el elemento se reutiliza y no se repite la animación.
 class _NewMessage extends StatelessWidget {
   const _NewMessage({required this.child, required this.fromRight});
   final Widget child; final bool fromRight;
   @override
   Widget build(BuildContext context) {
-    if (Motion.reduced(context)) return child;
+    // muelle: la burbuja crece desde su esquina (abajo a la derecha si es mía) con un rebote mínimo
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1), duration: Motion.normal, curve: Motion.enter, child: child,
-      builder: (_, t, c) => Opacity(opacity: t, child: Transform.translate(offset: Offset((fromRight ? 12 : -12) * (1 - t), 8 * (1 - t)), child: c)),
+      tween: Tween(begin: Motion.reduced(context) ? 1 : 0, end: 1), duration: Motion.emphasis, curve: Motion.spring, child: child,
+      builder: (_, t, c) => Opacity(opacity: t.clamp(0.0, 1.0), child: Transform.translate(offset: Offset((fromRight ? 12 : -12) * (1 - t), 8 * (1 - t)),
+          child: Transform.scale(scale: .9 + .1 * t, alignment: fromRight ? Alignment.bottomRight : Alignment.bottomLeft, child: c))),
     );
   }
 }

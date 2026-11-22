@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
+import '../../../core/widgets/celebration.dart';
 import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
@@ -182,6 +183,18 @@ class _PostMatchViewState extends ConsumerState<_PostMatchView> with SingleTicke
   void _finish() {
     if (_done) return;
     setState(() => _done = true);
+    // subida de nivel y/o de categoría: UNA celebración a pantalla completa al terminar (no interrumpe la secuencia)
+    if (s.leveledUp || s.tierUp) {
+      final title = s.leveledUp ? '¡Nivel ${s.levelAfter}!' : '¡${s.tierAfter}!';
+      final text = [
+        if (s.leveledUp) 'Has subido al nivel ${s.levelAfter}.',
+        if (s.tierUp) 'Nueva categoría de ELO: ${s.tierAfter}.',
+      ].join(' ');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) showCelebration(context, Celebration(eventKey: 'pm:${s.matchId}', title: title, text: text,
+            icon: s.leveledUp ? PlobbyIcons.star : PlobbyIcons.trophy));
+      });
+    }
     if (s.achievements.isNotEmpty) {
       // los logros ya se han visto aquí: se marcan en el servidor (seen_at) para no volver a celebrarlos
       unawaited(ref.read(gamificationRepositoryProvider).markAchievementsSeen().then((_) {

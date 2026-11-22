@@ -5,6 +5,7 @@ import '../../application/profile_providers.dart';
 import '../../domain/stats_calculator.dart';
 import 'win_streak_badge.dart';
 import '../../../../core/widgets/motion_widgets.dart';
+import '../../../../core/motion/app_motion.dart';
 
 const _order = [StatsPeriod.d30, StatsPeriod.d90, StatsPeriod.all];
 
@@ -22,9 +23,9 @@ class StatsGrid extends ConsumerWidget {
       const SizedBox(height: 14),
       // IntrinsicHeight + altura mínima: con texto grande (Dynamic Type) las tres tarjetas crecen juntas en vez de desbordar.
       IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Expanded(child: _Tile(value: '${s.played}', label: 'Partidos jugados')),
+        Expanded(child: _Tile(count: s.played, label: 'Partidos jugados')),
         const SizedBox(width: 10),
-        Expanded(child: _Tile(value: '${s.winRate}%', label: '% de victorias', bg: PlobbyColors.lime, fg: PlobbyColors.forest)),
+        Expanded(child: _Tile(count: s.winRate, suffix: '%', label: '% de victorias', bg: PlobbyColors.lime, fg: PlobbyColors.forest)),
         const SizedBox(width: 10),
         Expanded(child: _Tile(child: WinStreakBadge(streak: k.current), label: 'Racha actual', bg: PlobbyColors.forest, fg: PlobbyColors.ivory)),
       ])),
@@ -44,8 +45,8 @@ class StatsGrid extends ConsumerWidget {
 Widget _pair(Widget a, Widget b) => IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: a), const SizedBox(width: 10), Expanded(child: b)]));
 
 class _Tile extends StatelessWidget {
-  const _Tile({this.value, this.child, required this.label, this.bg = Colors.white, this.fg = PlobbyColors.charcoal});
-  final String? value; final Widget? child; final String label; final Color bg, fg;
+  const _Tile({this.count, this.suffix = '', this.child, required this.label, this.bg = Colors.white, this.fg = PlobbyColors.charcoal});
+  final int? count; final String suffix; final Widget? child; final String label; final Color bg, fg;
   @override
   Widget build(BuildContext context) => Container(
       constraints: const BoxConstraints(minHeight: 100), padding: const EdgeInsets.all(12),
@@ -53,7 +54,11 @@ class _Tile extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         // La cifra se reduce para caber en su tarjeta (nunca se corta): en móviles de 320 px y con texto grande.
         FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-            child: child ?? Text(value!, maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 30, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.6, color: fg))),
+            // la cifra cuenta desde 0 al aparecer y de un valor a otro al cambiar de periodo
+            child: child ?? Semantics(label: '$count$suffix', excludeSemantics: true, child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: Motion.reduced(context) ? count!.toDouble() : 0, end: count!.toDouble()), duration: Motion.celebration, curve: Motion.enter,
+                builder: (_, v, __) => Text('${v.round()}$suffix', maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 30, height: 1.1,
+                    fontWeight: FontWeight.w800, letterSpacing: -0.6, color: fg, fontFeatures: const [FontFeature.tabularFigures()]))))),
         const SizedBox(height: 8),
         Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: 0, color: fg.withValues(alpha: .7))),
       ]));

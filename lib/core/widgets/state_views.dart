@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../motion/app_motion.dart';
 import '../errors/app_errors.dart';
 import '../errors/failure.dart';
 import '../net/network_status.dart';
@@ -23,8 +24,13 @@ class EmptyStateCard extends StatelessWidget {
         width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
         decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, boxShadow: AppShadows.card),
         child: Column(children: [
-          Container(width: 64, height: 64, decoration: const BoxDecoration(color: AppColors.brandSoft, shape: BoxShape.circle),
-              child: ExcludeSemantics(child: Icon(icon, size: 28, color: AppColors.brandText))),
+          // el icono entra con un pequeño rebote después de la tarjeta (una vez; quieto con «reducir movimiento»)
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: Motion.reduced(context) ? 1 : 0, end: 1), duration: Motion.celebration, curve: Motion.springBounce,
+            builder: (_, t, c) => Transform.scale(scale: .6 + .4 * t, child: Transform.rotate(angle: -.25 * (1 - t), child: c)),
+            child: Container(width: 64, height: 64, decoration: const BoxDecoration(color: AppColors.brandSoft, shape: BoxShape.circle),
+                child: ExcludeSemantics(child: Icon(icon, size: 28, color: AppColors.brandText))),
+          ),
           const SizedBox(height: 16),
           Semantics(header: true, child: Text(title, textAlign: TextAlign.center, style: PlobbyText.cardTitle.copyWith(fontSize: 17, height: 1.25))),
           const SizedBox(height: 6),

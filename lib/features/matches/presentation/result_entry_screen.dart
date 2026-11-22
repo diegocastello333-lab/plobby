@@ -1,3 +1,4 @@
+import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
 import '../application/lifecycle_providers.dart';
@@ -132,14 +134,15 @@ class _GameField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     OutlineInputBorder b(Color c, [double w = 1]) => OutlineInputBorder(borderRadius: AppRadius.rMd, borderSide: BorderSide(color: c, width: w));
-    return Semantics(label: label, textField: true, child: TextField(
+    // cada game anotado: la casilla da un pequeño salto y una vibración ligera (una por cambio)
+    return PopOnEvent(trigger: controller.text, child: Semantics(label: label, textField: true, child: TextField(
       controller: controller, keyboardType: TextInputType.number, textAlign: TextAlign.center, textAlignVertical: TextAlignVertical.center, maxLength: 1, expands: true, maxLines: null, minLines: null,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (_) => onChanged(),
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (v) { if (v.isNotEmpty) AppHaptics.light(); onChanged(); },
       style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text),
       decoration: InputDecoration(
         counterText: '', filled: true, fillColor: AppColors.surface, isDense: true, contentPadding: EdgeInsets.zero,
         enabledBorder: b(error ? AppColors.danger : AppColors.borderStrong, error ? 1.5 : 1), focusedBorder: b(error ? AppColors.danger : AppColors.text, 2), border: b(AppColors.borderStrong),
       ),
-    ));
+    )));
   }
 }

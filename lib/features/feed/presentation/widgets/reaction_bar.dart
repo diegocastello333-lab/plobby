@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -79,9 +80,100 @@ class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
         duration: Motion.fast, height: 32, constraints: const BoxConstraints(minWidth: 40), padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : const Color(0x0F171C19)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.text, width: 1.5) : null),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Text(widget.t.emoji, style: const TextStyle(fontSize: 15)),
-          if (widget.count > 0) ...[const SizedBox(width: 5), Text('${widget.count}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: sel ? AppColors.brandInk : (widget.onDark ? const Color(0xBFF6F8F1) : AppColors.textMuted)))],
+          // partículas: el emoji «salta» al elegirlo (decoración; no cambia el tamaño de la píldora)
+          Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+            Text(widget.t.emoji, style: const TextStyle(fontSize: 15)),
+            if (!Motion.reduced(context)) Positioned.fill(child: IgnorePointer(child: AnimatedBuilder(animation: c,
+                builder: (_, __) => c.isAnimating ? CustomPaint(painter: _Burst(c.value, widget.t.emoji)) : const SizedBox.shrink()))),
+          ]),
+          if (widget.count > 0) ...[const SizedBox(width: 5), RollingCount(value: widget.count, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: sel ? AppColors.brandInk : (widget.onDark ? const Color(0xBFF6F8F1) : AppColors.textMuted)))],
         ]))),
     ));
   }
+}
+
+/// Seis emojis pequeños que salen en abanico hacia arriba y se desvanecen (una vez por reacción).
+class _Burst extends CustomPainter {
+  _Burst(this.t, this.emoji);
+  final double t;
+  final String emoji;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero), e = Motion.enter.transform(t);
+    for (var i = 0; i < 6; i++) {
+      final a = -math.pi / 2 + (i - 2.5) * .42, d = 10 + 26 * e;
+      final tp = TextPainter(text: TextSpan(text: emoji, style: TextStyle(fontSize: 11 + 4 * (1 - t), color: Color.fromRGBO(0, 0, 0, (1 - t).clamp(0.0, 1.0)))),
+          textDirection: TextDirection.ltr)..layout();
+      tp.paint(canvas, c + Offset(math.cos(a) * d, math.sin(a) * d - 8 * e) - Offset(tp.width / 2, tp.height / 2));
+    }
+  }
+  @override
+  bool shouldRepaint(_Burst o) => o.t != t;
+}
+
+/// Contador que rueda: el número nuevo entra desde abajo (sube) o desde arriba (baja).
+class RollingCount extends StatefulWidget {
+  const RollingCount({super.key, required this.value, required this.style});
+  final int value;
+  final TextStyle style;
+  @override
+  State<RollingCount> createState() => _RollingCountState();
+}
+
+class _RollingCountState extends State<RollingCount> {
+  bool _up = true;
+  @override
+  void didUpdateWidget(covariant RollingCount o) {
+    super.didUpdateWidget(o);
+    if (o.value != widget.value) _up = widget.value > o.value;
+  }
+  @override
+  Widget build(BuildContext context) => Semantics(label: '${widget.value}', excludeSemantics: true, child: ClipRect(child: AnimatedSwitcher(
+        duration: Motion.of(context, Motion.normal), switchInCurve: Motion.enter, switchOutCurve: Motion.exit,
+        transitionBuilder: (child, a) {
+          final incoming = child.key == ValueKey(widget.value);
+          final dir = (_up ? 1.0 : -1.0) * (incoming ? 1 : -1);
+          return SlideTransition(position: Tween(begin: Offset(0, .9 * dir), end: Offset.zero).animate(a), child: FadeTransition(opacity: a, child: child));
+        },
+        child: Text('${widget.value}', key: ValueKey(widget.value), style: widget.style.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+      )));
+}
+
+/// Doble toque en el contenido de una publicación = 🔥. Solo AÑADE la reacción (nunca la quita por accidente) y
+/// enseña un 🔥 grande que crece y se desvanece en el centro. Los botones de reacción siguen siendo la vía accesible.
+class DoubleTapFire extends ConsumerStatefulWidget {
+  const DoubleTapFire({super.key, required this.post, required this.child});
+  final FeedPost post;
+  final Widget child;
+  @override
+  ConsumerState<DoubleTapFire> createState() => _DoubleTapFireState();
+}
+
+class _DoubleTapFireState extends ConsumerState<DoubleTapFire> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: Motion.celebration);
+  @override
+  void dispose() { _c.dispose(); super.dispose(); }
+
+  void _fire() {
+    if (widget.post.reactions.mine != ReactionType.fire) {
+      AppHaptics.medium();
+      ref.read(feedControllerProvider.notifier).react(widget.post.id, ReactionType.fire);
+    }
+    if (!Motion.reduced(context)) _c.forward(from: 0);
+  }
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onDoubleTap: _fire,
+        child: Stack(alignment: Alignment.center, clipBehavior: Clip.none, children: [
+          widget.child,
+          Positioned.fill(child: IgnorePointer(child: AnimatedBuilder(animation: _c, builder: (_, __) {
+            if (!_c.isAnimating) return const SizedBox.shrink();
+            final v = _c.value, pop = Motion.springBounce.transform((v * 2.2).clamp(0.0, 1.0));
+            final fade = v < .65 ? 1.0 : (1 - (v - .65) / .35).clamp(0.0, 1.0);
+            return Center(child: Opacity(opacity: fade, child: Transform.translate(offset: Offset(0, -18 * Motion.exit.transform(((v - .65) / .35).clamp(0.0, 1.0))),
+                child: Transform.scale(scale: .4 + .8 * pop, child: const Text('🔥', style: TextStyle(fontSize: 64))))));
+          }))),
+        ]),
+      );
 }

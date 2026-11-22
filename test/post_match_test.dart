@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plobby/core/motion/app_motion.dart';
 import 'package:plobby/core/share/canvas_text.dart';
+import 'package:plobby/core/widgets/celebration.dart';
 import 'package:plobby/features/gamification/application/gamification_providers.dart';
 import 'package:plobby/features/gamification/application/gamification_share.dart';
 import 'package:plobby/features/gamification/data/mock_gamification_repository.dart';
@@ -143,23 +144,40 @@ void main() {
     testWidgets('secuencia completa: victoria vibra una vez (éxito) y el logro una vez (media)', (t) async {
       final repo = _Repo();
       await t.pumpWidget(_app(repo));
-      for (var i = 0; i < 80; i++) { await t.pump(const Duration(milliseconds: 100)); }   // timing
-      expect(AppHaptics.log.where((k) => k == 'success').length, 1);
+      for (var i = 0; i < 60; i++) { await t.pump(const Duration(milliseconds: 100)); }   // timing
+      // victoria (éxito) + logro (media); al terminar, UNA celebración de nivel y categoría (éxito)
+      expect(find.text('¡Nivel 2!'), findsOneWidget);
+      expect(find.textContaining('Nueva categoría de ELO: Intermedio'), findsOneWidget);
+      expect(AppHaptics.log.where((k) => k == 'success').length, 2);
       expect(AppHaptics.log.where((k) => k == 'medium').length, 1);
+      for (var i = 0; i < 40; i++) { await t.pump(const Duration(milliseconds: 100)); }   // timing
+      expect(find.text('¡Nivel 2!'), findsNothing);                // se cierra sola (≈2,4 s)
       expect(find.text('Compartir'), findsOneWidget);
+      // volver a abrir el mismo resumen no repite la celebración
+      await t.pumpWidget(const SizedBox());
+      await t.pumpWidget(_app(repo));
+      for (var i = 0; i < 70; i++) { await t.pump(const Duration(milliseconds: 100)); }   // timing
+      expect(find.text('¡Nivel 2!'), findsNothing);
     });
 
     testWidgets('reducir movimiento: estado final directo, sin animar', (t) async {
+      Motion.forceReduced = true;            // como en el móvil: afecta a toda la app (también a la capa de celebración)
+      addTearDown(() => Motion.forceReduced = null);
       await t.pumpWidget(_app(_Repo(), reduce: true));
       await t.pump(); await t.pump(); await t.pump();
       expect(find.text('1210'), findsOneWidget);
       expect(find.text('Compartir'), findsOneWidget);
-      expect(t.binding.hasScheduledFrame, isFalse);
+      await t.pump();
+      expect(find.text('¡Nivel 2!'), findsOneWidget);              // la celebración sí aparece…
+      expect(find.byWidgetPredicate((w) => w is CustomPaint && w.painter is ConfettiPainter), findsNothing);   // …sin confeti
+      await t.pump(const Duration(seconds: 3));                     // timing
+      await t.pump(const Duration(milliseconds: 300));              // timing
     });
 
     testWidgets('derrota: no vibra y no usa el color como única señal', (t) async {
       final m = _match(sets: const [SetScore(3, 6), SetScore(4, 6)]);
-      await t.pumpWidget(_app(_Repo(), reduce: true, m: m, r: _rating(delta: -14), a: _achData()));
+      final lowXp = AchievementsData(xp: 350, level: 1, levelFloor: 0, levelCeiling: 400, items: const [], history: [XpEvent('match', 'm1', 100, _at)]);
+      await t.pumpWidget(_app(_Repo(), reduce: true, m: m, r: _rating(delta: -14), a: lowXp));
       await t.pump(); await t.pump(); await t.pump();
       expect(find.text('Buen partido'), findsOneWidget);
       expect(find.text('−14'), findsOneWidget);                   // signo + número (y flecha), no solo color
