@@ -305,3 +305,10 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - `20261129a_storage_hardening` APLICADA (con autorización): `avatars` sigue público (decisión del usuario), solo
   `<uid>/<fichero>.jpg|jpeg|png|webp`; `group-avatars` privado 2 MB, solo admins escriben/borran, la app re-firma la URL
   (1 h) al leer (`_refreshGroupAvatars`). Informe `docs/seguridad/fase2_storage.md` (15/15).
+- Fase 3 (panel, hecha por el usuario): proveedor Email DESACTIVADO (verificado: signup/login/otp/recover → email_provider_disabled).
+  Solo Google. Guía `docs/seguridad/fase3_autenticacion.md`.
+- `20261130a_account_lifecycle` APLICADA + Edge Function `delete-account` DESPLEGADA (verify_jwt, CORS `ALLOWED_ORIGINS`,
+  por defecto https://plobby.vercel.app; cambiar el secreto cuando la web tenga dominio). Borrar de auth.users dispara
+  `private.anonymize_user` (perfil «Jugador eliminado», `profiles.deleted_at`; `profiles.id` YA NO tiene FK a auth.users).
+  RPC `export_my_data()` (1 cada 10 min). Códigos de liga de 8 caracteres. Informe `docs/seguridad/fase4_servidor.md` (22/22).
+

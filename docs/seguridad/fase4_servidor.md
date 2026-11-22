@@ -1,5 +1,11 @@
 # Plobby · Fase 4: lógica sensible en servidor
 
+**Aplicada en producción el 22 nov 2026** (con autorización): migración `20261130a` + Edge Function `delete-account`
+(versión 1, `verify_jwt` activado). Comprobado desde fuera: sin sesión → 401; con la clave pública como token → 401
+`invalid_session`; desde un origen ajeno → 403; preflight desde `https://plobby.vercel.app` → permitido.
+Pendiente: probar un borrado real desde la app (Fase 8) y poner `ALLOWED_ORIGINS` con el dominio definitivo de la web
+(Edge Functions → Secrets).
+
 ## Revisión de las 64 funciones que la app puede llamar
 - Todas son `SECURITY DEFINER` con `search_path` fijo (Fase 1) y comprueban quién llama: 48 con `auth.uid()` directamente,
   16 a través de auxiliares que también lo usan (`is_group_admin`, `_t_is_admin`, `is_league_manager`, `can_view_league`,
