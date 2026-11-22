@@ -302,3 +302,6 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - `20261128b_profile_visibility` PENDIENTE: rompe la pantalla de perfil de APK/web anteriores a esta rama. Aplicar cuando
   todos tengan la app nueva (que ya lee con `get_profile`).
 - Pruebas: `supabase/tests/rls_isolation_test.sql` (51/51 en producción, siempre termina en ROLLBACK).
+- `20261129a_storage_hardening` APLICADA (con autorización): `avatars` sigue público (decisión del usuario), solo
+  `<uid>/<fichero>.jpg|jpeg|png|webp`; `group-avatars` privado 2 MB, solo admins escriben/borran, la app re-firma la URL
+  (1 h) al leer (`_refreshGroupAvatars`). Informe `docs/seguridad/fase2_storage.md` (15/15).

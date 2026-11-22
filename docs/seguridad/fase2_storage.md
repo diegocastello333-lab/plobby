@@ -1,6 +1,6 @@
 # Plobby · Fase 2: Storage
 
-Migración `supabase/migrations/20261129a_storage_hardening.sql`. Validada en la BD real con ROLLBACK: **15 de 15** pruebas OK.
+Migración `supabase/migrations/20261129a_storage_hardening.sql`, **aplicada en producción el 22 nov 2026** (con autorización; `avatars` se mantiene público por decisión del usuario). Validada en la BD real con ROLLBACK: **15 de 15** pruebas OK.
 
 | Bucket | Antes | Después |
 |---|---|---|
