@@ -76,9 +76,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       backgroundColor: AppColors.bg,
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.fromLTRB(20, 28, 20, 24), children: [
-          Container(width: 48, height: 48, alignment: Alignment.center,
+          Align(alignment: AlignmentDirectional.centerStart, child: Container(width: 48, height: 48, alignment: Alignment.center,
               decoration: BoxDecoration(color: AppColors.brandSoft, borderRadius: BorderRadius.circular(14)),
-              child: const PlobbyIcon(PlobbyIcons.shield, size: 24, color: AppColors.text)),
+              child: const PlobbyIcon(PlobbyIcons.shield, size: 24, color: AppColors.text))),
           const SizedBox(height: 18),
           Semantics(header: true, child: Text(update ? 'Hemos actualizado nuestras condiciones' : 'Antes de empezar', style: PlobbyText.t1)),
           const SizedBox(height: 8),

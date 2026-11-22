@@ -10,7 +10,7 @@ Versión 1 · [PENDIENTE: fecha de publicación]
 
 ## Cómo eliminar tu cuenta
 
-- **Desde la app:** Perfil → Privacidad y datos → Eliminar mi cuenta. Se borra en el momento.
+- **Desde la app:** Perfil › Privacidad y datos › Eliminar mi cuenta. Se borra en el momento.
 - **Sin la app:** escribe a [PENDIENTE: email de privacidad] desde el email de tu cuenta de Google con el asunto «Eliminar mi cuenta de Plobby». Responderemos en un plazo máximo de un mes.
 
 ## Qué se borra
