@@ -9,6 +9,7 @@ import '../../../core/widgets/state_views.dart';
 import '../../share_stats/application/share_service.dart';
 import '../application/gamification_share.dart';
 import '../domain/gamification_models.dart';
+import '../../matches/domain/post_match_summary.dart';
 
 /// Qué se comparte. La vista previa y el PNG usan el MISMO pintor a tamaño real (lo que ves es lo que se guarda).
 sealed class ShareTarget {
@@ -16,6 +17,7 @@ sealed class ShareTarget {
   const factory ShareTarget.h2h(H2HData d) = _H2H;
   const factory ShareTarget.wrapped(WrappedData w) = _Wrapped;
   const factory ShareTarget.ranking(RankingData r, RankMetric m) = _Ranking;
+  const factory ShareTarget.postMatch(PostMatchSummary p) = _PostMatch;
   CustomPainter painter(ShareImages images);
   Future<Uint8List> png(ShareSize f, ShareImages images);
   Iterable<GPlayer> get players;
@@ -48,6 +50,15 @@ class _Ranking extends ShareTarget {
   @override Future<Uint8List> png(ShareSize f, ShareImages i) => RankingSharePainter.toPng(r, m, f, images: i);
   @override Iterable<GPlayer> get players => r.ranked(m).take(3).map((x) => x.player);
   @override String get fileName => 'plobby_ranking_${r.period.name}';
+}
+
+class _PostMatch extends ShareTarget {
+  const _PostMatch(this.p);
+  final PostMatchSummary p;
+  @override CustomPainter painter(ShareImages i) => PostMatchSharePainter(p);
+  @override Future<Uint8List> png(ShareSize f, ShareImages i) => PostMatchSharePainter.toPng(p, f);
+  @override Iterable<GPlayer> get players => const [];
+  @override String get fileName => 'plobby_partido_${p.matchId.length > 8 ? p.matchId.substring(0, 8) : p.matchId}';
 }
 
 Future<void> showShareImageSheet(BuildContext context, ShareTarget target) => showPlobbySheet<void>(context, (_) => _ShareSheet(target: target));

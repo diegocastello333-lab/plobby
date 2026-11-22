@@ -29,6 +29,7 @@ import '../../features/auth/presentation/privacy_settings_screen.dart';
 import '../../features/auth/presentation/welcome_screen.dart';
 import '../../features/matches/domain/match_models.dart';
 import '../../features/matches/presentation/final_result_screen.dart';
+import '../../features/matches/presentation/post_match_screen.dart';
 import '../../features/match_recap/presentation/share_match_screen.dart';
 import '../../features/matches/presentation/match_detail_screen.dart';
 import '../../features/matches/presentation/result_entry_screen.dart';
@@ -128,6 +129,7 @@ final appRoutes = <RouteBase>[
     GoRoute(path: 'result', builder: (_, s) => ResultEntryScreen(matchId: s.pathParameters['id']!)),
     GoRoute(path: 'final', builder: (_, s) => FinalResultScreen(matchId: s.pathParameters['id']!)),
     GoRoute(path: 'share', builder: (_, s) => ShareMatchScreen(matchId: s.pathParameters['id']!)),
+    GoRoute(path: 'summary', builder: (_, s) => PostMatchScreen(matchId: s.pathParameters['id']!)),
   ]),
   GoRoute(path: '/welcome', builder: (_, __) => const WelcomeScreen()),
   // Seguridad Fase 8: aceptación de documentos, lectura de documentos y privacidad.

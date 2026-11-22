@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../core/share/canvas_text.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../domain/gamification_models.dart';
+import '../../matches/domain/post_match_summary.dart';
 
 /// Imágenes compartibles de Head to Head, Wrapped y Ranking. Usan el mismo motor de texto medido que Match Recap y
 /// «Compartir mis stats» (`core/share/canvas_text.dart`): nada se solapa ni se sale, y los tests lo comprueban.
@@ -277,4 +278,61 @@ Future<ShareImages> loadShareImages(Iterable<GPlayer> players) async {
     if (img != null) out[p.id] = img;
   }()]);
   return out;
+}
+
+// ───────────────────────────── Post-partido ─────────────────────────────
+
+/// Resumen de un partido confirmado (pantalla post-partido) en Story o publicación: resultado, ELO, XP y logros.
+/// Solo datos del servidor; los bloques sin datos no se pintan.
+class PostMatchSharePainter extends CustomPainter {
+  PostMatchSharePainter(this.p, {this.log});
+  final PostMatchSummary p;
+  final ShareLayoutLog? log;
+
+  @override
+  void paint(Canvas c, Size s) {
+    final t = ShareText(c, log: log), story = s.height > 1500, W = s.width;
+    _background(c, s);
+    final headerBottom = _header(c, t, W, 'PARTIDO CONFIRMADO');
+    _centered(c, t, s, headerBottom, (c, t, hb) {
+      final head = t.draw(p.won ? 'VICTORIA' : 'BUEN PARTIDO', W / 2, hb + (story ? 90 : 56), story ? 104 : 84, p.won ? _lime : _white, ax: .5,
+          family: ShareFonts.unbounded, maxWidth: W - _m * 2, minFontSize: 56, label: 'titular');
+      final people = [if (p.partner != null) 'Con ${p.partner}', if (p.rivals.isNotEmpty) 'vs ${p.rivals.join(' y ')}'].join('  ·  ');
+      var y = head.bottom + 30;
+      if (people.isNotEmpty) y = t.draw(people, W / 2, y, 30, _mute, ax: .5, maxWidth: W - _m * 2, minFontSize: 22, weight: FontWeight.w700, label: 'jugadores').bottom;
+      // sets
+      y += story ? 70 : 44;
+      final n = p.sets.length, gap = 24.0, bw = math.min(260.0, (W - _m * 2 - gap * (n - 1)) / math.max(n, 1)), bh = story ? 210.0 : 170.0;
+      var x = (W - (bw * n + gap * (n - 1))) / 2;
+      for (var i = 0; i < n; i++) {
+        final (a, b) = p.mine(p.sets[i]);
+        final box = Rect.fromLTWH(x, y, bw, bh);
+        c.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(32)), Paint()..color = a > b ? _lime : _ink2);
+        final fg = a > b ? _ink : _white;
+        final lab = t.draw('SET ${i + 1}', box.center.dx, box.top + 30, 20, a > b ? _ink.withValues(alpha: .7) : _mute, ax: .5, tracking: .1,
+            weight: FontWeight.w800, maxWidth: box.width - 32, label: 'etiqueta', container: box);
+        t.draw('$a-$b', box.center.dx, lab.bottom + (box.bottom - lab.bottom) / 2, story ? 84 : 68, fg, v: VAnchor.capCenter, ax: .5,
+            family: ShareFonts.unbounded, maxWidth: box.width - 32, minFontSize: 40, label: 'cifra', container: box);
+        x += bw + gap;
+      }
+      y += bh + (story ? 70 : 44);
+      final lines = <(String, String)>[
+        if (p.hasElo) ('ELO', '${p.eloAfter}  (${p.eloDelta! >= 0 ? '+' : '−'}${p.eloDelta!.abs()})'),
+        if (p.tierUp) ('NUEVA CATEGORÍA', p.tierAfter!),
+        if (p.hasXp) ('EXPERIENCIA', '+${p.xpGained} XP${p.leveledUp ? '  ·  Nivel ${p.levelAfter}' : ''}'),
+        if (p.achievements.isNotEmpty) (p.achievements.length == 1 ? 'LOGRO DESBLOQUEADO' : 'LOGROS DESBLOQUEADOS', p.achievements.map((a) => a.title).join(' · ')),
+      ];
+      for (final (k, v) in lines.take(story ? 4 : 3)) {
+        if (y > s.height - (story ? 200 : 150)) break;
+        final a = t.draw(k, W / 2, y, 20, _lime, ax: .5, tracking: .12, weight: FontWeight.w800, label: 'momento');
+        final b = t.draw(v, W / 2, a.bottom + 20, 36, _white, ax: .5, maxWidth: W - _m * 2, minFontSize: 22, weight: FontWeight.w700, label: 'momento valor');
+        y = b.bottom + (story ? 50 : 36);
+      }
+    });
+    _footer(t, s);
+  }
+
+  @override
+  bool shouldRepaint(PostMatchSharePainter o) => o.p != p;
+  static Future<Uint8List> toPng(PostMatchSummary p, ShareSize f) => _png((c, s) => PostMatchSharePainter(p).paint(c, s), f.size);
 }

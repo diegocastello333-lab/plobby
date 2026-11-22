@@ -142,6 +142,8 @@ class _Body extends ConsumerWidget {
           'Hasta que los dos capitanes lo confirmen, no cuenta para ELO, estadísticas, racha ni clasificación.'),
       if (m.status == MatchStatus.confirmed) Padding(padding: const EdgeInsets.symmetric(vertical: 18), child: Column(children: [
         PlobbyButton(label: 'Ver resultado final', onPressed: () => context.push('/match/${m.id}/final')),
+        if (m.player(uid) != null) Padding(padding: const EdgeInsets.only(top: 10),
+            child: PlobbyButton(label: 'Ver resumen del partido', icon: PlobbyIcons.play, kind: PlobbyButtonKind.outline, onPressed: () => context.push('/match/${m.id}/summary'))),
         if (m.bothCaptainsAccepted && m.player(uid) != null) Padding(padding: const EdgeInsets.only(top: 10),
             child: PlobbyButton(label: 'Compartir resultado', icon: PlobbyIcons.share, kind: PlobbyButtonKind.outline, onPressed: () => context.push('/match/${m.id}/share'))),
       ])),
@@ -264,7 +266,7 @@ class _ConfirmationCard extends StatelessWidget {
           else ...[row(1), row(2)],
           if (perms.canConfirm || perms.canSubmitResult) const SizedBox(height: 10),
           if (perms.canConfirm) ...[
-            PlobbyButton(label: 'Aceptar resultado', onPressed: () => run(() async { final s = await act.respond(m.id, m.resultVersion, accept: true); if (context.mounted) showPlobbySnack(context, s == MatchStatus.confirmed ? 'Resultado confirmado. ELO y estadísticas actualizados.' : 'Has aceptado. Falta el otro capitán.'); })),
+            PlobbyButton(label: 'Aceptar resultado', onPressed: () => run(() async { final s = await act.respond(m.id, m.resultVersion, accept: true); if (!context.mounted) return; if (s == MatchStatus.confirmed) { context.push('/match/${m.id}/summary'); } else { showPlobbySnack(context, 'Has aceptado. Falta el otro capitán.'); } })),
             const SizedBox(height: 8),
             PlobbyButton(label: 'Rechazar', kind: PlobbyButtonKind.danger, onPressed: () => _reject(context)),
           ],

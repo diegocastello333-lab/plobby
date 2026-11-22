@@ -9,6 +9,7 @@ import '../../../core/widgets/plobby_icon.dart';
 import '../application/lifecycle_providers.dart';
 import 'match_detail_screen.dart' show MatchEventLog, durationText;
 import 'match_widgets.dart';
+import 'post_match_screen.dart';
 
 /// Resultado final (solo partidos CONFIRMADOS) — `scMFinal` del prototipo HTML. Accesible desde el historial de cada
 /// jugador: `/match/:id/final`.
@@ -71,8 +72,13 @@ class FinalResultScreen extends ConsumerWidget {
             info(m.leagueName != null ? 'Liga' : 'Tipo', m.leagueName ?? 'Amistoso'), info('Confirmado', 'Los dos capitanes'),
           ]);
         }),
-        if (m.bothCaptainsAccepted && m.player(uid) != null) Padding(padding: const EdgeInsets.only(top: 14),
-            child: PlobbyButton(label: 'Compartir resultado', icon: PlobbyIcons.share, onPressed: () => context.push('/match/${m.id}/share'))),
+        if (m.bothCaptainsAccepted && m.player(uid) != null) ...[
+          PostMatchAutoOpen(matchId: m.id, enabled: DateTime.now().difference(m.endedAt ?? m.scheduledAt).inDays <= 7),
+          Padding(padding: const EdgeInsets.only(top: 14),
+              child: PlobbyButton(label: 'Compartir resultado', icon: PlobbyIcons.share, onPressed: () => context.push('/match/${m.id}/share'))),
+          Padding(padding: const EdgeInsets.only(top: 10),
+              child: PlobbyButton(label: 'Ver resumen del partido', icon: PlobbyIcons.play, kind: PlobbyButtonKind.outline, onPressed: () => context.push('/match/${m.id}/summary'))),
+        ],
         if (m.events.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4), child: MatchEventLog(m: m)),
       ])),
     ]));
