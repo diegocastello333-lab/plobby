@@ -291,3 +291,14 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   volver la red (solo lecturas, una vez), renueva sesión si es `auth`. LiveSync: cápsula «Sin conexión» (también sin
   sesión) y al volver la red renueva token caducado + refreshSocial. Las acciones nunca se reintentan solas.
 - Tests: `test/connectivity_errors_test.dart`. Total 384/384.
+
+## Seguridad y legal (22 nov 2026, rama `seguridad-legal`)
+- Informes: `docs/seguridad/fase0_auditoria.md`, `docs/seguridad/fase1_base_de_datos.md`. Decisiones del usuario: solo
+  Google (desactivar email/contraseña), sin rol admin por ahora, borrado de cuenta = anonimizar partidos/torneos ajenos,
+  perfiles limitados para no amigos (nombre, usuario, foto, nivel).
+- `20261128a_security_hardening` APLICADA (con autorización). Esquema `private` (auxiliares de RLS, no expuesto);
+  auxiliares de `public` ya no invocables; permisos mínimos y **privilegios por defecto revocados: toda migración nueva
+  debe hacer sus `grant` explícitos**; `audit_log` (triggers en auth.users); RPC `get_profile`.
+- `20261128b_profile_visibility` PENDIENTE: rompe la pantalla de perfil de APK/web anteriores a esta rama. Aplicar cuando
+  todos tengan la app nueva (que ya lee con `get_profile`).
+- Pruebas: `supabase/tests/rls_isolation_test.sql` (51/51 en producción, siempre termina en ROLLBACK).
