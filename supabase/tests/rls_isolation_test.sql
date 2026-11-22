@@ -4,7 +4,7 @@
 --
 -- Uso: ejecutar el fichero entero en el SQL Editor / execute_sql. Crea 3 usuarios temporales y SIEMPRE termina con
 -- `raise exception` para deshacerlo todo: el mensaje de error ES el informe («RESULTADO: n/n OK» + una línea por prueba).
--- Requiere la migración 20261128a (y, si está aplicada, comprueba también la 20261128b).
+-- Requiere las migraciones 20261128a, 20261130a y 20261201a (y, si está aplicada, comprueba también la 20261128b).
 -- =====================================================================================================================
 do $$
 declare
@@ -43,6 +43,7 @@ begin
   select count(*) into n from public.player_ratings where user_id = b;                 res := res || format('C no ve el ELO de B: %s', n = 0);
   select count(*) into n from public.xp_events where user_id = b;                      res := res || format('C no ve la XP de B: %s', n = 0);
   select count(*) into n from public.rating_history where user_id = b;                 res := res || format('C no ve historial de B: %s', n = 0);
+  select count(*) into n from public.user_consents where user_id = b;                  res := res || format('C no ve consentimientos de B: %s', n = 0);
 
   update public.profiles set bio = 'hackeado' where id = b; get diagnostics n = row_count;
   res := res || format('C no edita el perfil de B: %s', n = 0);
@@ -138,6 +139,10 @@ begin
   exception when others then res := res || format('anon no llama get_profile: true (%s)', sqlstate); end;
   begin perform * from public.search_players('Beto'); res := res || text 'anon no llama search_players: false';
   exception when others then res := res || format('anon no llama search_players: true (%s)', sqlstate); end;
+  begin perform public.export_my_data(); res := res || text 'anon no exporta datos: false';
+  exception when others then res := res || format('anon no exporta datos: true (%s)', sqlstate); end;
+  begin perform count(*) from public.user_consents; res := res || text 'anon no lee consentimientos: false';
+  exception when others then res := res || format('anon no lee consentimientos: true (%s)', sqlstate); end;
   begin insert into public.comments (post_id, user_id, content) values (post, b, 'anon'); res := res || text 'anon no escribe: false';
   exception when others then res := res || format('anon no escribe: true (%s)', sqlstate); end;
   execute 'reset role';
@@ -154,6 +159,8 @@ begin
   select count(*) into n from pg_class t join pg_namespace s on s.oid = t.relnamespace where s.nspname = 'public' and t.relkind in ('r', 'v')
      and (has_table_privilege('anon', t.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE') or has_table_privilege('authenticated', t.oid, 'TRUNCATE,REFERENCES,TRIGGER'));
   res := res || format('anon sin permisos y nadie con TRUNCATE/REFERENCES/TRIGGER: %s', n = 0);
+  select count(*) into n from pg_proc fp join pg_namespace s on s.oid = fp.pronamespace where s.nspname = 'public' and has_function_privilege('anon', fp.oid, 'EXECUTE');
+  res := res || format('anon no puede ejecutar ninguna función: %s', n = 0);
   select count(*) into failed from unnest(res) r where r ~ ': (f|false)( |$)';
   raise exception E'RESULTADO: %/% OK\n%', array_length(res, 1) - failed, array_length(res, 1), array_to_string(res, E'\n');
 end $$;

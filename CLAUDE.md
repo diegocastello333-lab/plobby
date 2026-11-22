@@ -319,7 +319,9 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Fase 6 (web, en la rama): CSP estricta (sin scripts en línea: `web/app_boot.js`), HSTS, Permissions-Policy, COOP/CORP en
   vercel.json; 0 violaciones en Chromium; sin cookies ni terceros → sin banner (AEPD). `test/web_security_headers_test.dart`.
 - Fase 7 (documentos legales) APLAZADA por el usuario: textos provisionales con [PENDIENTE] en `assets/legal/` y `web/legal/`.
-- Fase 8 (en la rama; migración `20261201a_legal_consents` PENDIENTE de autorización): `/consent` (guardia: sin sesión →
+- Fase 8 (migración `20261201a_legal_consents` APLICADA con autorización; crear perfil exige consentimiento, editarlo no): `/consent` (guardia: sin sesión →
   /welcome; sin consentimiento → /consent; sin onboarding → /onboarding), `/legal/:slug`, `/settings/privacy` (Perfil →
   Privacidad y datos). AuthRepository: legalStatus/acceptLegal/setMarketing/exportMyData/deleteAccount/signOutEverywhere.
+- Fase 9: informe final `docs/seguridad/fase9_verificacion_final.md` (antes/después, 55+21+21 pruebas, ataques con curl,
+  lista de tareas manuales). APK con todo: `dist/plobby-seguridad-f8.apk` (firma debug).
 
