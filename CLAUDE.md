@@ -311,4 +311,9 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   por defecto https://plobby.vercel.app; cambiar el secreto cuando la web tenga dominio). Borrar de auth.users dispara
   `private.anonymize_user` (perfil «Jugador eliminado», `profiles.deleted_at`; `profiles.id` YA NO tiene FK a auth.users).
   RPC `export_my_data()` (1 cada 10 min). Códigos de liga de 8 caracteres. Informe `docs/seguridad/fase4_servidor.md` (22/22).
+- Fase 5 (Android, en la rama; APK de prueba `dist/plobby-seguridad-f5.apk`, firmado con debug): sesión en
+  `flutter_secure_storage` (`core/supabase/secure_session_storage.dart`, migra sola desde SharedPreferences), sin
+  backups, solo HTTPS (`res/xml/network_security_config.xml`), R8 + `--obfuscate --split-debug-info`, firma desde
+  `android/key.properties` si existe, logs de release solo con el tipo de error. Informe `docs/seguridad/fase5_android.md`.
+  Si Maven Central da 429 al compilar, reintentar tras 1 min. SDK Android en scratchpad/android-sdk; Flutter en scratchpad/sdk/flutter.
 

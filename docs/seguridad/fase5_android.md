@@ -31,8 +31,16 @@ storeFile=/ruta/a/plobby-upload.jks
 ```
 En Google Play activa «Firma de apps de Google Play»: esta clave pasa a ser solo la de subida.
 
-## Permisos
-Ver el resultado de la compilación más abajo (manifiesto fusionado).
+## Resultado de la compilación (22 nov 2026)
+`flutter build apk --release --obfuscate --split-debug-info=…` → **OK, 67,4 MB** (APK universal; el App Bundle de
+Google Play pesa bastante menos por dispositivo). Manifiesto fusionado del APK (aapt2):
+- **Permisos:** solo `INTERNET` (más `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, interno de AndroidX y no visible para el
+  usuario). Ni cámara, ni ubicación, ni contactos, ni almacenamiento: la galería se abre con el selector del sistema.
+- `allowBackup=false`, `fullBackupContent=false`, `dataExtractionRules`, `usesCleartextTraffic=false`,
+  `networkSecurityConfig` ✔ · no `debuggable` ✔.
+- Dart ofuscado: 0 nombres de clases de Plobby legibles en `libapp.so` ✔. R8 activo ✔.
+- Firma: **clave de debug** (no hay `android/key.properties`). Para Google Play hay que crear la clave propia (abajo).
+- No probado en un móvil real: falta instalarlo y comprobar que se conserva la sesión al actualizar.
 
 ## Play Integrity
 **No se activa ahora.** Necesita la app publicada en Google Play Console y una verificación en el servidor (Edge
