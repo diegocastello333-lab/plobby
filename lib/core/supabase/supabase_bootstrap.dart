@@ -29,6 +29,7 @@ import '../../features/social/application/social_providers.dart';
 import '../../features/social/data/supabase_social_repository.dart';
 import '../../features/tournaments/application/tournament_providers.dart';
 import '../../features/tournaments/data/supabase_tournament_repository.dart';
+import 'secure_session_storage.dart';
 
 /// Punto único de conexión con Supabase.
 ///
@@ -42,7 +43,10 @@ class SupabaseBootstrap {
   static Future<SupabaseClient?> init() async {
     if (!Env.hasSupabase) return null;
     // Cliente HTTP con límite de tiempo: ninguna consulta deja una pantalla cargando indefinidamente.
-    await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabasePublishableKey, httpClient: TimeoutHttpClient());
+    // Sesión cifrada en Android/iOS (Keystore/Keychain) en vez de SharedPreferences en texto plano: ver
+    // `secure_session_storage.dart` (migra sola la sesión de versiones anteriores).
+    await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabasePublishableKey, httpClient: TimeoutHttpClient(),
+        authOptions: plobbyAuthOptions(Env.supabaseUrl));
     return Supabase.instance.client;
   }
 

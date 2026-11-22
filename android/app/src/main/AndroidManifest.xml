@@ -1,11 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Seguridad (Fase 5): sin copias de seguridad de los datos de la app, solo HTTPS (res/xml/network_security_config.xml). -->
     <!-- Supabase (API, Auth, Realtime) y fotos de red -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Plobby"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher">
+        android:roundIcon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"

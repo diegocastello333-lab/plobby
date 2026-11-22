@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plobby · solo HTTPS (Seguridad Fase 5). Sin excepciones para ningún dominio y solo con las CA del sistema
+     (no se confía en certificados instalados por el usuario). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

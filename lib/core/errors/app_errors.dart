@@ -18,8 +18,14 @@ class AppErrors {
     final line = '[$origin] ${DateTime.now().toIso8601String()} $error';
     recent.add(line);
     if (recent.length > 30) recent.removeAt(0);
-    debugPrint(line);
-    if (stack != null) debugPrint(stack.toString().split('\n').take(8).join('\n'));
+    // En release (APK/web publicada) el registro del sistema solo recibe el TIPO de error: los mensajes del servidor
+    // pueden incluir nombres, ids o textos de usuarios y logcat lo pueden leer otras herramientas (Seguridad Fase 5).
+    if (kReleaseMode) {
+      debugPrint('[$origin] ${error.runtimeType}');
+    } else {
+      debugPrint(line);
+      if (stack != null) debugPrint(stack.toString().split('\n').take(8).join('\n'));
+    }
   }
 
   static void install() {
