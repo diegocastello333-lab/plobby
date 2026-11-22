@@ -11,7 +11,6 @@ class SupabaseProfileRepository implements ProfileRepository {
   String get _uid => _db.auth.currentUser!.id;
   String _resolve(String id) => id == 'me' ? _uid : id;
 
-  static const _cols = 'id, display_name, username, avatar_url, avatar_id, banner_id, city, bio, self_declared_level, court_side, dominant_hand, habitual_club, habitual_partner_id';
   static const _levels = {
     'beginner': ('Iniciación', 2.0), 'intermediate': ('Intermedio', 3.0),
     'upper_intermediate': ('Intermedio alto', 4.0), 'advanced': ('Avanzado', 5.0),
@@ -20,32 +19,31 @@ class SupabaseProfileRepository implements ProfileRepository {
   @override
   Future<ProfileData> load(String playerId) async {
     final uid = _resolve(playerId);
+    // `get_profile` (migración 20261128a): el servidor decide qué columnas ve cada uno. Propio perfil y amigos: todo;
+    // desconocidos: nombre, usuario, foto y nivel. Incluye la pareja habitual, así que ya no hace falta otra consulta
+    // (y se evita la relación ambigua de `profiles` consigo misma del 16 nov 2026).
     final results = await Future.wait<dynamic>([
-      _db.from('profiles').select(_cols).eq('id', uid).single(),
+      _db.rpc('get_profile', params: {'p_user': uid}),
       _db.from('player_ratings').select('elo').eq('user_id', uid).maybeSingle(),
       _db.from('league_members').select('league_id').eq('user_id', uid),
       _db.rpc('get_player_history', params: {'p_user': uid}),
     ]);
-    final p = results[0] as Map<String, dynamic>;
+    final raw = results[0];
+    if (raw is! Map) throw const PostgrestException(message: 'Perfil no encontrado', code: 'PGRST116');
+    final p = raw.cast<String, dynamic>();
+    final full = p['full'] != false;
     final elo = ((results[1] as Map<String, dynamic>?)?['elo'] as num?)?.toInt() ?? 1200;
     final leagues = (results[2] as List).length;
     final history = (results[3] as List? ?? const []).cast<Map<String, dynamic>>();
 
     PartnerLink? partner;
-    final partnerId = p['habitual_partner_id'] as String?;
-    if (partnerId != null) {
-      // Consulta aparte y por id (16 nov 2026): el 15 nov se pidió la pareja dentro de la misma consulta con la pista
-      // `profiles!habitual_partner_id`, pero en una relación de `profiles` consigo misma esa pista es ambigua (pareja que
-      // yo elegí / perfiles que me eligieron a mí) y la respuesta podía llegar como LISTA: el `as Map` lanzaba, el perfil
-      // entero fallaba y la tarjeta de error decía «no hay conexión». Ver test/profile_repository_test.dart.
-      final q = await _db.from('profiles').select('id, display_name, username, avatar_url, habitual_partner_id').eq('id', partnerId).maybeSingle();
-      if (q != null) {
-        partner = PartnerLink(
-          userId: partnerId, name: (q['display_name'] ?? '') as String, username: (q['username'] ?? '') as String, avatarUrl: q['avatar_url'] as String?,
-          // Pareja confirmada cuando los dos se han elegido mutuamente.
-          status: q['habitual_partner_id'] == uid ? PartnerStatus.accepted : PartnerStatus.pending,
-        );
-      }
+    final q = p['partner'];
+    if (q is Map) {
+      partner = PartnerLink(
+        userId: q['id'] as String, name: (q['display_name'] ?? '') as String, username: (q['username'] ?? '') as String, avatarUrl: q['avatar_url'] as String?,
+        // Pareja confirmada cuando los dos se han elegido mutuamente.
+        status: q['mutual'] == true ? PartnerStatus.accepted : PartnerStatus.pending,
+      );
     }
     final level = _levels[p['self_declared_level']];
     final club = (p['habitual_club'] as String?)?.trim();
@@ -56,7 +54,7 @@ class SupabaseProfileRepository implements ProfileRepository {
       side: p['court_side'] == 'left' ? PlaySide.left : PlaySide.right,
       dominantHand: p['dominant_hand'] == 'left' ? 'Izquierda' : 'Derecha',
       club: club == null || club.isEmpty ? null : ClubRef(id: club, name: club, city: ''),
-      partner: partner, leaguesPlayed: leagues,
+      partner: partner, leaguesPlayed: leagues, limited: !full,
     );
     return ProfileData(profile: profile, matches: history.map((h) => matchFromHistory(h, uid, profile.side)).whereType<MatchResult>().toList(), currentElo: elo);
   }

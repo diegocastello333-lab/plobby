@@ -87,7 +87,7 @@ class ProfileHeader extends ConsumerWidget {
             style: const TextStyle(fontFamily: AppTypography.sansFamily, color: Color(0xEBF6F8F1), fontSize: 14, height: 1.5, letterSpacing: 0))),
         const SizedBox(height: 12),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          _Chip('Nivel declarado', p.declaredLevel), _Chip('Posición', p.side == PlaySide.right ? 'Derecha' : 'Izquierda'), _Chip('Mano', p.dominantHand),
+          _Chip('Nivel declarado', p.declaredLevel), _Chip('Posición', p.limited ? '—' : (p.side == PlaySide.right ? 'Derecha' : 'Izquierda')), _Chip('Mano', p.limited ? '—' : p.dominantHand),
         ]),
         const SizedBox(height: 18),
         // Con texto grande (≥130 %) los dos botones se apilan a lo ancho en vez de recortar su etiqueta

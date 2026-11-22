@@ -40,7 +40,7 @@ class IdentityCard extends ConsumerWidget {
       // Antes llamaba a requestPartner('lucia') (id fijo de prueba): con Supabase siempre fallaba (no es un UUID ni un amigo).
       rows.add(_Add('Añadir pareja habitual', () => _pickPartner(context, n, null)));
     }
-    rows.add(_Row(icon: PlobbyIcons.swords, label: 'LADO DE JUEGO', title: profile.side == PlaySide.right ? 'Derecha' : 'Izquierda',
+    rows.add(_Row(icon: PlobbyIcons.swords, label: 'LADO DE JUEGO', title: profile.limited ? '—' : (profile.side == PlaySide.right ? 'Derecha' : 'Izquierda'),
         onEdit: isOwner ? () => n.setSide(profile.side == PlaySide.right ? PlaySide.left : PlaySide.right) : null));
     // Material (no DecoratedBox) como fondo blanco: los ListTile pintan su efecto de pulsación en el Material más
     // cercano y un DecoratedBox con color lo ocultaba. Mismo aspecto: blanco, radio 14.

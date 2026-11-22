@@ -24,7 +24,7 @@ class PlayerProfile {
     required this.id, required this.fullName, required this.username, required this.location,
     this.avatarUrl, this.avatarId, this.bannerId, this.verified = false, this.bio = '', required this.declaredLevel,
     required this.declaredLevelValue, required this.side, required this.dominantHand,
-    this.club, this.partner, this.leaguesPlayed = 0,
+    this.club, this.partner, this.leaguesPlayed = 0, this.limited = false,
   });
   final String id, fullName, username, location, bio, declaredLevel;
   final String? avatarUrl;
@@ -39,6 +39,9 @@ class PlayerProfile {
   final ClubRef? club; // opcional: si es null no se pinta ningún campo
   final PartnerLink? partner;
   final int leaguesPlayed;
+  /// Perfil de alguien que no es tu amigo: el servidor (`get_profile`) solo da nombre, usuario, foto y nivel.
+  /// Lado, mano, ciudad, bio, club y pareja no se conocen y se muestran como «—» en vez de un valor inventado.
+  final bool limited;
 
   PlayerProfile copyWith({PlaySide? side, ClubRef? club, bool clearClub = false, PartnerLink? partner, bool clearPartner = false, String? bio, String? bannerId}) =>
       PlayerProfile(
@@ -46,7 +49,7 @@ class PlayerProfile {
         verified: verified, bio: bio ?? this.bio, declaredLevel: declaredLevel, declaredLevelValue: declaredLevelValue,
         side: side ?? this.side, dominantHand: dominantHand,
         club: clearClub ? null : (club ?? this.club),
-        partner: clearPartner ? null : (partner ?? this.partner), leaguesPlayed: leaguesPlayed,
+        partner: clearPartner ? null : (partner ?? this.partner), leaguesPlayed: leaguesPlayed, limited: limited,
       );
 }
 
