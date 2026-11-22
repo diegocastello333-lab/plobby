@@ -13,7 +13,7 @@ const BUILD_ID = '__PLOBBY_BUILD_ID__';
 const CACHE = `plobby-app-${BUILD_ID}`;
 
 // La página (index.html) y los ficheros que la arrancan: primero red, para recoger despliegues nuevos.
-const NETWORK_FIRST = ['/', '/index.html', '/flutter_bootstrap.js', '/manifest.json'];
+const NETWORK_FIRST = ['/', '/index.html', '/flutter_bootstrap.js', '/app_boot.js', '/manifest.json'];
 // Nunca a caché.
 const NEVER = ['/sw.js', '/version.json', '/flutter_service_worker.js'];
 

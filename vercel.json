@@ -7,30 +7,79 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), payment=()" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://niwognkvoifrvlizcdvb.supabase.co; font-src 'self' data:; connect-src 'self' https://niwognkvoifrvlizcdvb.supabase.co wss://niwognkvoifrvlizcdvb.supabase.co; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=(), clipboard-write=(self)"
+        }
       ]
     },
     {
-      "source": "/(|index.html|sw.js|flutter_bootstrap.js|main.dart.js|manifest.json|version.json)",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      "source": "/(|index.html|sw.js|flutter_bootstrap.js|app_boot.js|main.dart.js|manifest.json|version.json)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     },
     {
       "source": "/(canvaskit|assets|icons)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, must-revalidate"
+        }
+      ]
     },
     {
       "source": "/sw.js",
-      "headers": [{ "key": "Service-Worker-Allowed", "value": "/" }]
+      "headers": [
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
     }
   ]
 }
