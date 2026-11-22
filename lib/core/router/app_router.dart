@@ -20,6 +20,11 @@ import '../../features/leagues/presentation/manage_league_screen.dart';
 import 'app_shell.dart';
 import '../../features/feed/presentation/notifications_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
+import '../../features/auth/domain/auth_models.dart' show OnboardingData;
+import '../../features/auth/domain/legal.dart' show LegalStatus;
+import '../../features/auth/presentation/consent_screen.dart';
+import '../../features/auth/presentation/legal_doc_screen.dart';
+import '../../features/auth/presentation/privacy_settings_screen.dart';
 import '../../features/auth/presentation/welcome_screen.dart';
 import '../../features/matches/domain/match_models.dart';
 import '../../features/matches/presentation/final_result_screen.dart';
@@ -46,11 +51,13 @@ import '../../features/splash/presentation/splash_screen.dart';
 final authGuardEnabledProvider = Provider<bool>((ref) => false);
 
 /// Estado de acceso para la guardia: sesión + onboarding completado (RPC get_my_profile vía AuthRepository.loadOnboarding).
-final sessionGateProvider = FutureProvider<({bool signedIn, bool onboarded})>((ref) async {
+/// Seguridad Fase 8: también si tiene aceptada la versión vigente de los documentos obligatorios (`legal_status`).
+final sessionGateProvider = FutureProvider<({bool signedIn, bool onboarded, bool consentsOk})>((ref) async {
   final user = ref.watch(authStateProvider).valueOrNull;
-  if (user == null) return (signedIn: false, onboarded: false);
-  final d = await ref.read(authRepositoryProvider).loadOnboarding();
-  return (signedIn: true, onboarded: d.completed);
+  if (user == null) return (signedIn: false, onboarded: false, consentsOk: false);
+  final repo = ref.read(authRepositoryProvider);
+  final r = await Future.wait<Object>([repo.loadOnboarding(), repo.legalStatus()]);
+  return (signedIn: true, onboarded: (r[0] as OnboardingData).completed, consentsOk: (r[1] as LegalStatus).requiredOk);
 });
 
 /// Router único. Las 4 pestañas (Inicio, Feed, Competiciones, Perfil) viven en un `StatefulShellRoute` con la barra inferior;
@@ -72,7 +79,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         final signedIn = ref.read(authRepositoryProvider).currentUser != null;
         return signedIn ? null : authRedirect(signedIn: false, onboardingDone: false, location: state.matchedLocation);
       }
-      return authRedirect(signedIn: gate.value!.signedIn, onboardingDone: gate.value!.onboarded, location: state.matchedLocation);
+      return authRedirect(signedIn: gate.value!.signedIn, onboardingDone: gate.value!.onboarded, consentsOk: gate.value!.consentsOk,
+          location: state.matchedLocation);
     },
     routes: appRoutes,
   );
@@ -121,6 +129,13 @@ final appRoutes = <RouteBase>[
     GoRoute(path: 'share', builder: (_, s) => ShareMatchScreen(matchId: s.pathParameters['id']!)),
   ]),
   GoRoute(path: '/welcome', builder: (_, __) => const WelcomeScreen()),
+  // Seguridad Fase 8: aceptación de documentos, lectura de documentos y privacidad.
+  GoRoute(path: '/consent', builder: (c, __) => ConsentScreen(onDone: () {
+    ProviderScope.containerOf(c, listen: false).invalidate(sessionGateProvider);
+    GoRouter.of(c).go('/home');
+  })),
+  GoRoute(path: '/legal/:doc', builder: (_, s) => LegalDocScreen(slug: s.pathParameters['doc']!)),
+  GoRoute(path: '/settings/privacy', builder: (_, __) => const PrivacySettingsScreen()),
   GoRoute(path: '/onboarding', builder: (c, __) => OnboardingScreen(onDone: () {
     ProviderScope.containerOf(c, listen: false).invalidate(sessionGateProvider);   // la guardia vuelve a leer el perfil ya completo
     GoRouter.of(c).go('/home');
@@ -182,12 +197,16 @@ class _OpenChat extends ConsumerWidget {
 
 /// Guardia de acceso para `GoRouter(redirect: …, refreshListenable: …)`. Pura y testeable:
 /// sin sesión → /welcome; con sesión pero perfil sin completar → /onboarding; con todo listo no se vuelve a ver ninguna de las dos.
-String? authRedirect({required bool signedIn, required bool onboardingDone, required String location}) {
+/// Seguridad Fase 8: con sesión pero sin aceptar la versión vigente de Términos + Privacidad + edad → /consent (antes del
+/// onboarding y también si cambia la versión de un documento). Los documentos (/legal/…) se pueden leer siempre.
+String? authRedirect({required bool signedIn, required bool onboardingDone, bool consentsOk = true, required String location}) {
   if (location == '/splash') return null; // la pantalla de carga se muestra siempre; navega ella al terminar
-  final onAuth = location == '/welcome', onOnb = location == '/onboarding';
+  if (location.startsWith('/legal/')) return null;
+  final onAuth = location == '/welcome', onOnb = location == '/onboarding', onConsent = location == '/consent';
   if (!signedIn) return onAuth ? null : '/welcome';
+  if (!consentsOk) return onConsent ? null : '/consent';
   if (!onboardingDone) return onOnb ? null : '/onboarding';
-  if (onAuth || onOnb) return '/home';
+  if (onAuth || onOnb || onConsent) return '/home';
   return null;
 }
 

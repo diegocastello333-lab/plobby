@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/plobby_components.dart';
+import '../../../core/widgets/plobby_icon.dart';
 import '../../matches/presentation/upcoming_matches_section.dart';
 import '../../../core/motion/app_motion.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -102,6 +104,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (own) _section(null, 'Progreso', const ProgressSection())
         else _section(null, 'Head to Head', H2HTeaser(otherId: widget.playerId, name: p.fullName)),
         _section(3, 'Actividad', ActivityFeed(view: v)),
+        // Seguridad Fase 8: documentos, comunicaciones, descargar mis datos y eliminar la cuenta.
+        if (own) Padding(padding: const EdgeInsets.fromLTRB(20, 28, 20, 0), child: PlobbyButton(label: 'Privacidad y datos', kind: PlobbyButtonKind.outline,
+            icon: PlobbyIcons.shield, onPressed: () => context.push('/settings/privacy'))),
         if (own) const LogoutButton(),   // solo en el perfil propio, al final y separado
         // Versión instalada: así se sabe si un móvil sigue con un APK antiguo.
         if (own) const Padding(padding: EdgeInsets.only(top: 14), child: Center(child: Text('Plobby · versión $plobbyBuild',

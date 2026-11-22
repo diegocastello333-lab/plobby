@@ -15,7 +15,7 @@ class SplashBoot {
   /// Lo secundario (amigos, partidos, feed…) lo carga cada sección después, con sus propios estados de carga.
   static Future<void> criticalWork(WidgetRef ref) async {
     final gate = await ref.read(sessionGateProvider.future).timeout(const Duration(seconds: 6));
-    if (gate.signedIn && gate.onboarded) {
+    if (gate.signedIn && gate.onboarded && gate.consentsOk) {
       await ref.read(profileProvider('me').future).timeout(const Duration(seconds: 3));
     }
   }

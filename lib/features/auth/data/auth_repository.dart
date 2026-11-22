@@ -1,4 +1,5 @@
 import '../domain/auth_models.dart';
+import '../domain/legal.dart';
 import '../../../core/errors/failure.dart';
 
 /// Acceso con Google (Supabase Auth). Una cuenta Google ↔ un único usuario: la implementación real usa
@@ -17,6 +18,20 @@ abstract class AuthRepository {
   /// quitar la foto para no dejar ficheros huérfanos. Nunca lanza: si falla, el perfil ya está guardado.
   Future<void> deleteAvatarFiles({String? keepUrl});
   Future<void> completeOnboarding();
+
+  // ── Legal y privacidad (Seguridad Fase 8) ──
+  /// Qué documentos obligatorios faltan por aceptar (o cambiaron de versión) y si tiene activas las comunicaciones comerciales.
+  Future<LegalStatus> legalStatus();
+  /// Acepta Términos + Privacidad + edad mínima (versión vigente, la fija el servidor) y guarda la casilla opcional de marketing.
+  Future<LegalStatus> acceptLegal({required bool marketing});
+  /// Activa o retira el consentimiento para comunicaciones comerciales.
+  Future<void> setMarketing(bool accept);
+  /// Todos los datos del usuario en JSON (RPC export_my_data; máximo 1 cada 10 minutos).
+  Future<String> exportMyData();
+  /// Borra la cuenta (Edge Function `delete-account`): fotos, datos personales y usuario; lo compartido queda anónimo.
+  Future<void> deleteAccount();
+  /// Cierra la sesión en todos los dispositivos (revoca todos los tokens de refresco).
+  Future<void> signOutEverywhere();
 }
 
 class AuthException implements Exception, CodedFailure {

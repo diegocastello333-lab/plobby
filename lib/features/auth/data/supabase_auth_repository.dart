@@ -12,10 +12,12 @@
 //  6. Supabase → Authentication → Settings: «Enable automatic linking» por email verificado (una cuenta Google = un usuario).
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import '../domain/auth_models.dart';
+import '../domain/legal.dart';
 import 'auth_repository.dart';
 
 const kAuthRedirect = 'io.plobby.app://login-callback/';
@@ -104,6 +106,59 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> completeOnboarding() async {
-    try { await _c.rpc('complete_onboarding'); } on sb.PostgrestException { throw AuthException('onboarding_incomplete'); }
+    try { await _c.rpc('complete_onboarding'); }
+    on sb.PostgrestException catch (e) { throw AuthException(e.message.contains('consent_required') ? 'consent_required' : 'onboarding_incomplete'); }
   }
+
+  // ── Legal y privacidad (Seguridad Fase 8) ──
+  static String get _platform => kIsWeb ? 'web' : switch (defaultTargetPlatform) {
+        TargetPlatform.android => 'android', TargetPlatform.iOS => 'ios', _ => 'other' };
+
+  /// Traduce los códigos del servidor (`raise exception 'too_young'`, `rate_limited`…) a [AuthException].
+  static Never _legalError(Object e) {
+    if (e is sb.PostgrestException) {
+      for (final k in ['too_young', 'age_confirmation_required', 'consent_required', 'rate_limited']) {
+        if (e.message.contains(k)) throw AuthException(k, e.message);
+      }
+      throw AuthException('server', e.message);
+    }
+    if (e is sb.FunctionException) throw AuthException(e.status == 401 ? 'session_expired' : 'server', '${e.details}');
+    throw AuthException('network');
+  }
+
+  @override
+  Future<LegalStatus> legalStatus() async {
+    try { return LegalStatus.fromJson(((await _c.rpc('legal_status')) as Map).cast<String, dynamic>()); }
+    catch (e) { _legalError(e); }
+  }
+
+  @override
+  Future<LegalStatus> acceptLegal({required bool marketing}) async {
+    try {
+      final r = await _c.rpc('accept_legal', params: {'p_terms': true, 'p_privacy': true, 'p_age_confirmed': true, 'p_marketing': marketing, 'p_platform': _platform});
+      return LegalStatus.fromJson((r as Map).cast<String, dynamic>());
+    } catch (e) { _legalError(e); }
+  }
+
+  @override
+  Future<void> setMarketing(bool accept) async {
+    try { await _c.rpc('set_marketing_consent', params: {'p_accept': accept, 'p_platform': _platform}); } catch (e) { _legalError(e); }
+  }
+
+  @override
+  Future<String> exportMyData() async {
+    try { return const JsonEncoder.withIndent('  ').convert(await _c.rpc('export_my_data')); } catch (e) { _legalError(e); }
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    try {
+      await _c.functions.invoke('delete-account', body: {'confirm': 'ELIMINAR'});
+    } catch (e) { _legalError(e); }
+    // El usuario ya no existe: se limpia la sesión local (el servidor ya revocó los tokens).
+    try { await _c.auth.signOut(scope: sb.SignOutScope.local); } catch (_) {}
+  }
+
+  @override
+  Future<void> signOutEverywhere() => _c.auth.signOut(scope: sb.SignOutScope.global);
 }

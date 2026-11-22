@@ -28,6 +28,8 @@ flutter:
     # Banners dinámicos de Inicio: 2 colecciones × 4 momentos del día (amanecer, dia, atardecer, noche).
     - assets/images/banners/banner1/
     - assets/images/banners/banner2/
+    # Documentos legales (Seguridad Fase 8). Mismo texto que web/legal/*.html. PROVISIONALES hasta la Fase 7.
+    - assets/legal/
   # Fuentes del prototipo HTML, empaquetadas (OFL, ver assets/fonts/OFL-*.txt). Sin descarga en tiempo de ejecución.
   fonts:
     - family: Inter

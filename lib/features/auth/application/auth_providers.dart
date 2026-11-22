@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/auth_repository.dart';
 import '../data/mock_auth_repository.dart';
 import '../domain/auth_models.dart';
+import '../domain/legal.dart';
 import '../../../core/errors/failure.dart';
 
 /// En main.dart sustituye por SupabaseAuthRepository (ver supabase/integration/supabase_auth_repository.dart.txt).
@@ -94,3 +95,6 @@ class OnboardingController extends Notifier<OnboardingState> {
   void pickAvatar(String id) => state = state.copyWith(data: state.data.copyWith(avatarId: id, clearAvatarUrl: true), errors: const {});
 }
 final onboardingProvider = NotifierProvider<OnboardingController, OnboardingState>(OnboardingController.new);
+
+/// Estado legal del usuario (Seguridad Fase 8): documentos pendientes y consentimiento de marketing.
+final legalStatusProvider = FutureProvider.autoDispose<LegalStatus>((ref) => ref.watch(authRepositoryProvider).legalStatus());

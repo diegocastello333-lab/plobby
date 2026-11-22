@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../domain/auth_models.dart';
+import '../domain/legal.dart';
 import 'auth_repository.dart';
 
 /// MOCK para desarrollo/tests: NO autentica con Google. La app real usa SupabaseAuthRepository (supabase/integration).
@@ -40,4 +41,21 @@ class MockAuthRepository implements AuthRepository {
     if (pendingSteps(_data).where((s) => s != 4).isNotEmpty) throw AuthException('onboarding_incomplete');
     _data = _data.copyWith(completed: true);
   }
+
+  // ── Legal (modo demo y tests): por defecto ya aceptado; `legal` permite simular pendientes ──
+  LegalStatus legal = const LegalStatus(requiredOk: true);
+  int exports = 0;
+  bool deleted = false;
+  @override
+  Future<LegalStatus> legalStatus() async => legal;
+  @override
+  Future<LegalStatus> acceptLegal({required bool marketing}) async => legal = LegalStatus(requiredOk: true, marketing: marketing);
+  @override
+  Future<void> setMarketing(bool accept) async => legal = LegalStatus(requiredOk: legal.requiredOk, pending: legal.pending, marketing: accept);
+  @override
+  Future<String> exportMyData() async { exports++; return '{"format":"plobby-export","version":1,"user_id":"${_user?.id ?? 'demo'}"}'; }
+  @override
+  Future<void> deleteAccount() async { deleted = true; await signOut(); }
+  @override
+  Future<void> signOutEverywhere() => signOut();
 }

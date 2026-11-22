@@ -316,4 +316,10 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   backups, solo HTTPS (`res/xml/network_security_config.xml`), R8 + `--obfuscate --split-debug-info`, firma desde
   `android/key.properties` si existe, logs de release solo con el tipo de error. Informe `docs/seguridad/fase5_android.md`.
   Si Maven Central da 429 al compilar, reintentar tras 1 min. SDK Android en scratchpad/android-sdk; Flutter en scratchpad/sdk/flutter.
+- Fase 6 (web, en la rama): CSP estricta (sin scripts en línea: `web/app_boot.js`), HSTS, Permissions-Policy, COOP/CORP en
+  vercel.json; 0 violaciones en Chromium; sin cookies ni terceros → sin banner (AEPD). `test/web_security_headers_test.dart`.
+- Fase 7 (documentos legales) APLAZADA por el usuario: textos provisionales con [PENDIENTE] en `assets/legal/` y `web/legal/`.
+- Fase 8 (en la rama; migración `20261201a_legal_consents` PENDIENTE de autorización): `/consent` (guardia: sin sesión →
+  /welcome; sin consentimiento → /consent; sin onboarding → /onboarding), `/legal/:slug`, `/settings/privacy` (Perfil →
+  Privacidad y datos). AuthRepository: legalStatus/acceptLegal/setMarketing/exportMyData/deleteAccount/signOutEverywhere.
 
