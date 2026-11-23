@@ -47,13 +47,14 @@ class SupabaseProfileRepository implements ProfileRepository {
     }
     final level = _levels[p['self_declared_level']];
     final club = (p['habitual_club'] as String?)?.trim();
+    final clubId = p['habitual_club_id'] as String?;   // id del catálogo (get_profile lo devuelve desde 20261202f)
     final profile = PlayerProfile(
       id: playerId, fullName: (p['display_name'] ?? '') as String, username: (p['username'] ?? '') as String, location: (p['city'] ?? '') as String,
       avatarUrl: p['avatar_url'] as String?, avatarId: p['avatar_id'] as String?, bannerId: p['banner_id'] as String?, bio: (p['bio'] ?? '') as String,
       declaredLevel: level?.$1 ?? 'Sin declarar', declaredLevelValue: level?.$2 ?? 0,
       side: p['court_side'] == 'left' ? PlaySide.left : PlaySide.right,
       dominantHand: p['dominant_hand'] == 'left' ? 'Izquierda' : 'Derecha',
-      club: club == null || club.isEmpty ? null : ClubRef(id: club, name: club, city: ''),
+      club: club == null || club.isEmpty ? null : ClubRef(id: clubId ?? club, name: club, city: (p['habitual_club_municipality'] ?? '') as String),
       partner: partner, leaguesPlayed: leagues, limited: !full,
     );
     return ProfileData(profile: profile, matches: history.map((h) => matchFromHistory(h, uid, profile.side)).whereType<MatchResult>().toList(), currentElo: elo);
@@ -64,8 +65,15 @@ class SupabaseProfileRepository implements ProfileRepository {
       _db.from('profiles').update({'court_side': side == PlaySide.left ? 'left' : 'right', 'updated_at': DateTime.now().toUtc().toIso8601String()}).eq('id', _uid);
 
   @override
-  Future<void> setClub(ClubRef? club) =>
-      _db.from('profiles').update({'habitual_club': club?.name, 'updated_at': DateTime.now().toUtc().toIso8601String()}).eq('id', _uid);
+  Future<void> setClub(ClubRef? club) {
+    // club del catálogo → id (el servidor rellena el nombre y lo copia como club base); si no, solo texto (compatibilidad)
+    final catalog = club != null && RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-').hasMatch(club.id);
+    return _db.from('profiles').update({
+      'habitual_club_id': catalog ? club.id : null,
+      'habitual_club': catalog ? null : club?.name,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', _uid);
+  }
 
   @override
   Future<PartnerLink?> requestPartner(String userId) async {

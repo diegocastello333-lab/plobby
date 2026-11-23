@@ -1,4 +1,6 @@
 import '../../features/gamification/application/gamification_providers.dart';
+import '../../features/clubs/application/club_providers.dart';
+import '../../features/clubs/data/supabase_club_repository.dart';
 import '../../features/gamification/data/supabase_gamification_repository.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
@@ -64,6 +66,7 @@ class SupabaseBootstrap {
         socialRepositoryProvider.overrideWithValue(SupabaseSocialRepository(c, channel: channel)),
         tournamentRepositoryProvider.overrideWithValue(SupabaseTournamentRepository(c, channel: channel)),
         gamificationRepositoryProvider.overrideWithValue(SupabaseGamificationRepository(c)),
+        clubRepositoryProvider.overrideWithValue(SupabaseClubRepository(c)),
         presenceServiceProvider.overrideWithValue(uid == null ? const NoPresenceService() : SupabasePresenceService(c, uid)),
         ratingRepositoryProvider.overrideWithValue(SupabaseRatingRepository(c)),
         matchRepositoryProvider.overrideWithValue(SupabaseMatchRepository(c)),

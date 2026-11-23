@@ -1,5 +1,6 @@
 import '../motion/app_motion.dart';
 import '../../features/gamification/presentation/wrapped_screens.dart';
+import '../../features/clubs/presentation/club_screen.dart';
 import '../../features/gamification/presentation/head_to_head_screen.dart';
 import '../../features/gamification/presentation/friends_ranking_screen.dart';
 import '../../features/gamification/presentation/achievements_screen.dart';
@@ -108,6 +109,8 @@ final appRoutes = <RouteBase>[
   // Gamificación: Head to Head, ranking entre amigos, Wrapped y logros (fuera de la barra inferior).
   GoRoute(path: '/h2h/:id', builder: (_, s) => HeadToHeadScreen(otherId: s.pathParameters['id']!)),
   GoRoute(path: '/ranking', builder: (_, __) => const FriendsRankingScreen()),
+  GoRoute(path: '/club/:id', builder: (_, s) => ClubScreen(clubId: s.pathParameters['id']!)),
+  GoRoute(path: '/admin/clubs', builder: (_, __) => const ClubModerationScreen()),
   GoRoute(path: '/achievements', builder: (_, __) => const AchievementsScreen()),
   GoRoute(path: '/wrapped', builder: (_, __) => const WrappedListScreen(), routes: [
     GoRoute(path: ':kind/:start', pageBuilder: (_, s) => MaterialPage(fullscreenDialog: true, key: s.pageKey, child: WrappedStoryScreen(

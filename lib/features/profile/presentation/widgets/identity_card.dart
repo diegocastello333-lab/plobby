@@ -8,6 +8,9 @@ import '../../application/profile_providers.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/models.dart';
 import '../../../../core/widgets/state_views.dart';
+import '../../../../core/errors/failure.dart';
+import '../../../clubs/application/club_providers.dart' show isCatalogClubId;
+import '../../../clubs/presentation/club_search_sheet.dart' show pickClub, clubRemoved;
 import '../../../matches/domain/match_models.dart' show PlayerOption;
 import '../../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
 
@@ -22,10 +25,13 @@ class IdentityCard extends ConsumerWidget {
     final n = ref.read(profileProvider(isOwner ? 'me' : profile.id).notifier);
     final rows = <Widget>[];
     if (profile.club != null) {
-      rows.add(_Row(icon: PlobbyIcons.building, label: 'CLUB BASE', title: profile.club!.name, sub: profile.club!.city,
+      final cid = profile.club!.id;
+      rows.add(_Row(icon: PlobbyIcons.building, label: 'CLUB HABITUAL', title: profile.club!.name,
+          sub: isCatalogClubId(cid) ? [if (profile.club!.city.isNotEmpty) profile.club!.city, 'Ver club'].join(' · ') : profile.club!.city,
+          onTap: isCatalogClubId(cid) ? () => context.push('/club/$cid') : null,   // página del club: jugadores, ranking y ligas
           onEdit: isOwner ? () => _pickClub(context, ref, n) : null));
     } else if (isOwner) {
-      rows.add(_Add('Añadir club base (opcional)', () => _pickClub(context, ref, n)));
+      rows.add(_Add('Añadir club habitual (opcional)', () => _pickClub(context, ref, n)));
     }
     final pa = profile.partner;
     // Cada jugador elige su pareja de forma independiente: se muestra siempre (antes, en perfiles ajenos solo si era mutua,
@@ -54,10 +60,13 @@ class IdentityCard extends ConsumerWidget {
   }
 
   Future<void> _pickClub(BuildContext context, WidgetRef ref, ProfileNotifier n) async {
-    final repo = ref.read(profileRepositoryProvider);
-    final res = await showModalBottomSheet<ClubRef?>(context: context, isScrollControlled: true, showDragHandle: true,
-        builder: (_) => _ClubSearch(repo: repo, hasClub: profile.club != null));
-    if (res != null) await n.setClub(res.id == '_remove' ? null : res);
+    final res = await pickClub(context, allowRemove: profile.club != null);
+    if (res == null) return;
+    try {
+      await n.setClub(res == clubRemoved ? null : ClubRef(id: res.id, name: res.name, city: res.municipality ?? ''));
+    } catch (e) {
+      if (context.mounted) showPlobbySnack(context, actionErrorText(e, fallback: 'No se pudo guardar el club. Inténtalo de nuevo.'), error: true);
+    }
   }
 }
 
@@ -86,30 +95,6 @@ class _Add extends StatelessWidget {
   final String t; final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => ListTile(onTap: onTap, leading: const PlobbyIcon(PlobbyIcons.plus, color: AppColors.textMuted), title: Text(t, style: const TextStyle(color: PlobbyColors.mute, fontWeight: FontWeight.w600, fontSize: 13.5)));
-}
-
-class _ClubSearch extends StatefulWidget {
-  const _ClubSearch({required this.repo, required this.hasClub});
-  final ProfileRepository repo; final bool hasClub;
-  @override
-  State<_ClubSearch> createState() => _ClubSearchState();
-}
-
-class _ClubSearchState extends State<_ClubSearch> {
-  List<ClubRef> items = [];
-  @override
-  void initState() { super.initState(); _q(''); }
-  Future<void> _q(String s) async { final r = await widget.repo.searchClubs(s); if (mounted) setState(() => items = r); }
-  @override
-  Widget build(BuildContext context) => Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(onChanged: _q, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Buscar club')),
-        for (final c in items) ListTile(title: Text(c.name), subtitle: Text(c.city), onTap: () => Navigator.pop(context, c)),
-        if (items.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('No encontramos ningún club con ese nombre.')),
-        if (widget.hasClub) ListTile(leading: const Icon(Icons.delete_outline, color: PlobbyColors.loss), title: const Text('Quitar club'),
-            onTap: () => Navigator.pop(context, const ClubRef(id: '_remove', name: '', city: ''))),
-      ]));
 }
 
 /// Elige la pareja habitual SOLO entre los amigos (pantalla de Amigos en modo elección única) y la guarda en Supabase
