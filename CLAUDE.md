@@ -339,3 +339,21 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   Playwright en `tool/motion_lab/perf/`. El entorno no tiene GPU: el 74 % del tiempo es presentación del navegador; NO
   equivale a un móvil. Pendiente: medir en Android real con `flutter run --profile`.
 - Tests: 433/433.
+
+## Catálogo de clubes (23 nov 2026, rama `clubes`)
+- Plan e informes: `docs/clubes/plan_y_informes.md`. APLICADAS (con autorización): `20261202a_clubs_catalog` (esquema, RLS,
+  `normalize_club_name`, `club_aliases`, `search_clubs` INVOKER + `private.club_candidates` DEFINER con índices, `propose_club`,
+  `club_page`, `nearby_clubs`, admin `admin_pending_clubs/admin_review_club/admin_add_club_alias` → audit `admin_action`),
+  `20261202b_clubs_seed` (245 clubes + 79 alias, generado por `supabase/seed/build_clubs_seed.py` desde el CSV),
+  `20261202c_clubs_text_migration` (informe en `private.club_text_migration`), `20261202d_clubs_single_field`
+  («Club habitual» = club base: habitual_club_id ↔ home_club_id sincronizados), `20261202e_geocode_token`.
+- Admin = `raw_app_meta_data.plobby_admin = true` (puesto a la cuenta del dueño). Alias extra: RCGLM → Real Club La Moraleja.
+- Pruebas: `supabase/tests/clubs_test.sql` (62/62 en réplica local; 41/41 funcionales en producción). Búsqueda 6–10 ms con
+  245 clubes; con 10.000 simulados 38–106 ms en el servidor de Supabase.
+- Réplica local: PostgreSQL 16 en /var/lib/postgresql/plobby_pg (puerto 5499, socket /tmp, log /tmp/pg5499.log);
+  `supabase/tests/run_local.sh` (stub con auth.jwt, pgcrypto, columnas de auth.users y USAGE de extensions).
+- Geocodificación: Edge Function `geocode-clubs` (desplegada, verify_jwt=false con autorización propia: token de un solo uso
+  cuyo hash está en `private.service_tokens` o admin). **Nominatim devuelve 403 desde Supabase** (bloquea IPs de nube):
+  pendiente de que el usuario elija otro proveedor. 0 clubes geocodificados.
+- Pendiente: decisión del usuario sobre 7 posibles duplicados del CSV; pantallas de la app (autocompletado, proponer,
+  página del club, moderación, «Clubes cerca de ti»).
