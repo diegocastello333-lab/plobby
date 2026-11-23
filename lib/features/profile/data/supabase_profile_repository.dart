@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/models.dart';
+import '../domain/verified_users.dart';
 import 'profile_repository.dart';
 
 /// Perfil real (Supabase). Lecturas con RLS + RPC `get_player_history` (migración 20261120_leagues_profile.sql);
@@ -55,7 +56,7 @@ class SupabaseProfileRepository implements ProfileRepository {
       side: p['court_side'] == 'left' ? PlaySide.left : PlaySide.right,
       dominantHand: p['dominant_hand'] == 'left' ? 'Izquierda' : 'Derecha',
       club: club == null || club.isEmpty ? null : ClubRef(id: clubId ?? club, name: club, city: (p['habitual_club_municipality'] ?? '') as String),
-      partner: partner, leaguesPlayed: leagues, limited: !full,
+      partner: partner, leaguesPlayed: leagues, limited: !full, verified: isVerifiedUser(uid),
     );
     return ProfileData(profile: profile, matches: history.map((h) => matchFromHistory(h, uid, profile.side)).whereType<MatchResult>().toList(), currentElo: elo);
   }

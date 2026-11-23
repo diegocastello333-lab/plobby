@@ -9,6 +9,7 @@ import '../../../../core/widgets/motion_widgets.dart';
 import '../../../../core/widgets/plobby_components.dart';
 import '../../../../core/widgets/plobby_icon.dart';
 import '../../../../core/widgets/silhouette_avatar.dart';
+import '../../../../core/widgets/verified_badge.dart';
 import '../../../../core/widgets/state_views.dart' show showPlobbySnack;
 import '../../domain/models.dart';
 import '../../../social/application/social_providers.dart';
@@ -59,9 +60,7 @@ class ProfileHeader extends ConsumerWidget {
             Row(children: [
               Flexible(child: Text(p.fullName, maxLines: 2, overflow: TextOverflow.ellipsis,   // 2 líneas: con texto grande no se corta
                   style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink50, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
-              if (p.verified) Padding(padding: const EdgeInsets.only(left: 7), child: Semantics(label: 'Perfil verificado', child: Container(width: 20, height: 20,
-                  decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.lime300),
-                  child: const Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3.2, color: AppColors.ink900))))),
+              if (p.verified) const Padding(padding: EdgeInsets.only(left: 7), child: VerifiedBadge(size: 22)),
             ]),
             const SizedBox(height: 3),
             Row(children: [

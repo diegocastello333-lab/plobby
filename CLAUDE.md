@@ -361,3 +361,9 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   (buscador con el club habitual por defecto + «escribir el nombre»; `create_match` sigue recibiendo texto).
   Ligas: sin campo de club (las ligas de club se crean desde el panel). Tests `test/clubs_test.dart`. Total 451/451.
 - Pendiente: decisión del usuario sobre 7 posibles duplicados del CSV; geocodificación (proveedor) y «Clubes cerca de ti».
+
+## Sello de verificado (23 nov 2026, rama `verificado`)
+- `core/widgets/verified_badge.dart`: `VerifiedBadge` (roseta lima de 9 lóbulos, reflejo holográfico que gira + franja de
+  luz, check en tinta; quieto con «reducir movimiento», `IdleMotion.loop` en web). Solo en la cabecera del perfil.
+- Quién: `profile/domain/verified_users.dart` (`verifiedUserIds`, por UUID; hoy solo la cuenta del dueño). Sin cambios en BD;
+  si hay más verificados, pasar a columna del servidor. Tests `test/verified_badge_test.dart`. Total 454/454.
