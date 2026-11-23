@@ -34,4 +34,12 @@ void main() {
     }
     expect(RegExp(r'''(src|href)="https?://''').hasMatch(html), isFalse, reason: 'recurso externo en index.html');
   });
+
+  test('CSP: se pueden leer las fotos elegidas de la galería (blob:/data: en connect-src)', () {
+    // image_picker entrega la foto como URL blob: y la app la lee con una petición; sin blob: no se puede subir
+    // (onboarding, Editar perfil, portada de torneo, imagen de grupo). Son datos locales: no abre terceros.
+    final connect = global['Content-Security-Policy']!.split(';').map((d) => d.trim()).firstWhere((d) => d.startsWith('connect-src'));
+    expect(connect.split(' '), containsAll(['blob:', 'data:']));
+    expect(connect.split(' ').where((x) => x.startsWith('http') || x.startsWith('wss')).every((x) => x.contains('niwognkvoifrvlizcdvb.supabase.co')), isTrue);
+  });
 }

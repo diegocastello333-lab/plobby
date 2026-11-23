@@ -3,7 +3,7 @@
 ## Cabeceras (vercel.json, para todas las rutas)
 | Cabecera | Valor |
 |---|---|
-| Content-Security-Policy | `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://niwognkvoifrvlizcdvb.supabase.co; font-src 'self' data:; connect-src 'self' https://niwognkvoifrvlizcdvb.supabase.co wss://niwognkvoifrvlizcdvb.supabase.co; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests` |
+| Content-Security-Policy | `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://niwognkvoifrvlizcdvb.supabase.co; font-src 'self' data:; connect-src 'self' blob: data: https://niwognkvoifrvlizcdvb.supabase.co wss://niwognkvoifrvlizcdvb.supabase.co; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests` |
 | Strict-Transport-Security | `max-age=63072000; includeSubDomains` (2 años). Sin `preload`: es un compromiso difícil de deshacer; se puede añadir con el dominio definitivo |
 | X-Frame-Options | `DENY` (y `frame-ancestors 'none'` en la CSP) |
 | X-Content-Type-Options | `nosniff` |
@@ -39,3 +39,8 @@ solicitado por el usuario está **exento de consentimiento**. Al no haber cookie
 Cookies** informativa (Fase 7), enlazada desde la bienvenida y los ajustes.
 **Si en el futuro se añade analítica o publicidad**, habrá que poner un banner con «Aceptar» y «Rechazar» al mismo nivel y no
 cargar esos scripts antes del consentimiento (y ampliar la CSP).
+
+**Corrección (23 nov 2026):** `connect-src` incluye `blob:` y `data:`. Al elegir una foto de la galería en la web, el
+selector de imágenes la entrega como URL `blob:` y la app la lee con una petición a esa URL; sin `blob:` la CSP la
+bloqueaba y no se podía subir la foto (onboarding, Editar perfil, portada de torneo, imagen de grupo). `blob:`/`data:` son
+datos locales del propio navegador: no abre conexiones a terceros.

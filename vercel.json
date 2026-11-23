@@ -30,7 +30,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://niwognkvoifrvlizcdvb.supabase.co; font-src 'self' data:; connect-src 'self' https://niwognkvoifrvlizcdvb.supabase.co wss://niwognkvoifrvlizcdvb.supabase.co; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://niwognkvoifrvlizcdvb.supabase.co; font-src 'self' data:; connect-src 'self' blob: data: https://niwognkvoifrvlizcdvb.supabase.co wss://niwognkvoifrvlizcdvb.supabase.co; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests"
         },
         {
           "key": "Strict-Transport-Security",
