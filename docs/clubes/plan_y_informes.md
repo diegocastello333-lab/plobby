@@ -83,3 +83,13 @@ Datos del CSV: 245 clubes, 79 alias, sin slugs repetidos; 156 sin dirección y 1
 ## Informe 3 · Geocodificación
 Pendiente: necesito que apruebes el proveedor (ver decisiones). Hasta entonces `lat/lng` vacíos, `geocode_status =
 'pending'`, la búsqueda funciona sin el bonus de cercanía y «Clubes cerca de ti» no muestra nada.
+
+## Decisiones del 23 nov 2026 (aplicadas)
+- **Un solo campo**: «Club habitual» = club base. `20261202d_clubs_single_field` (APLICADA): guardar `habitual_club_id`
+  copia el valor en `home_club_id` y viceversa; el contador de jugadores salta en ambos casos (corregido: un trigger
+  «UPDATE OF columna» no veía el valor puesto por otro trigger). Datos existentes igualados.
+- **Administrador**: tu cuenta tiene `app_metadata.plobby_admin = true` (se aplica al renovar la sesión, como mucho 1 h,
+  o al volver a entrar).
+- **Geocodificación**: Nominatim (OpenStreetMap), desde una Edge Function. Pendiente de implementar.
+- **Página del club**: todos los jugadores con ese club (nombre, usuario, foto, nivel y ELO).
+- Pendiente de tu respuesta: los 7 posibles duplicados del CSV y si «RCGLM» es el Real Club de Golf La Moraleja.
