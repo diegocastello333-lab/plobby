@@ -353,7 +353,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Réplica local: PostgreSQL 16 en /var/lib/postgresql/plobby_pg (puerto 5499, socket /tmp, log /tmp/pg5499.log);
   `supabase/tests/run_local.sh` (stub con auth.jwt, pgcrypto, columnas de auth.users y USAGE de extensions).
 - Geocodificación: Edge Function `geocode-clubs` (desplegada, verify_jwt=false con autorización propia: token de un solo uso
-  cuyo hash está en `private.service_tokens` o admin). **Nominatim devuelve 403 desde Supabase** (bloquea IPs de nube):
+  cuyo hash está en `private.service_tokens` o admin). **Nominatim y Photon devuelven 403 desde Supabase** (bloquean IPs de nube):
   pendiente de que el usuario elija otro proveedor. 0 clubes geocodificados.
 - Pendiente: decisión del usuario sobre 7 posibles duplicados del CSV; pantallas de la app (autocompletado, proponer,
   página del club, moderación, «Clubes cerca de ti»).

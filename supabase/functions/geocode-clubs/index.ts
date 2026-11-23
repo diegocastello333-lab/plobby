@@ -1,8 +1,8 @@
-// Plobby · Geocodificación de clubes con Nominatim (OpenStreetMap). Nunca desde el cliente.
+// Plobby · Geocodificación de clubes con Photon (Komoot, datos de OpenStreetMap). Nunca desde el cliente.
 // - Solo la puede lanzar un administrador (app_metadata.plobby_admin) o quien tenga un token de un solo uso cuyo hash
 //   está en la base de datos (public.geocode_token_ok, ejecutable solo por service_role).
 // - Procesa clubes con geocode_status = 'pending' (máx. `limit` por llamada, por defecto 60) a 1 consulta/segundo
-//   (política de uso de Nominatim) con un User-Agent identificable.
+//   (uso responsable del servicio público) con un User-Agent identificable.
 // - Solo acepta resultados dentro de la Comunidad de Madrid. Nunca usa el centro del municipio como ubicación del club:
 //   si no hay un resultado preciso, el club queda como 'failed' para revisarlo a mano.
 // Datos © colaboradores de OpenStreetMap (ODbL): la app lo cita donde muestra ubicaciones.
@@ -16,20 +16,23 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type Club = { id: string; name: string; address: string | null; postal_code: string | null; municipality: string | null; area: string | null };
 
-async function nominatim(q: string): Promise<{ lat: number; lng: number; label: string } | null> {
-  const u = new URL('https://nominatim.openstreetmap.org/search');
-  u.searchParams.set('format', 'jsonv2'); u.searchParams.set('limit', '1'); u.searchParams.set('countrycodes', 'es');
-  u.searchParams.set('viewbox', `${MADRID.minLng},${MADRID.maxLat},${MADRID.maxLng},${MADRID.minLat}`); u.searchParams.set('bounded', '1');
-  u.searchParams.set('q', q);
-  const r = await fetch(u, { headers: { 'User-Agent': UA, 'Accept-Language': 'es' } });
-  if (!r.ok) throw new Error(`nominatim ${r.status}: ${(await r.text()).slice(0, 160)}`);
+// Photon (Komoot): datos de OpenStreetMap, sin clave. (Nominatim devuelve 403 a las IPs de Supabase.)
+const REJECT = ['city', 'town', 'village', 'district', 'locality', 'county', 'state', 'country', 'region', 'suburb', 'postcode'];
+async function geocode(q: string): Promise<{ lat: number; lng: number; label: string } | null> {
+  const u = new URL('https://photon.komoot.io/api/');
+  u.searchParams.set('q', q); u.searchParams.set('limit', '1');
+  u.searchParams.set('bbox', `${MADRID.minLng},${MADRID.minLat},${MADRID.maxLng},${MADRID.maxLat}`);
+  const r = await fetch(u, { headers: { 'User-Agent': UA } });
+  if (!r.ok) throw new Error(`photon ${r.status}: ${(await r.text()).slice(0, 160)}`);
   const j = await r.json();
-  if (!Array.isArray(j) || j.length === 0) return null;
-  const lat = Number(j[0].lat), lng = Number(j[0].lon);
+  const f = j?.features?.[0];
+  if (!f) return null;
+  const [lng, lat] = f.geometry?.coordinates ?? [];
   if (!(lat >= MADRID.minLat && lat <= MADRID.maxLat && lng >= MADRID.minLng && lng <= MADRID.maxLng)) return null;
-  // resultados de tipo municipio/ciudad/provincia no son el club: se descartan
-  if (['city', 'town', 'village', 'administrative', 'state', 'county', 'municipality'].includes(String(j[0].type)) && j[0].category !== 'leisure') return null;
-  return { lat, lng, label: String(j[0].display_name ?? '') };
+  const p = f.properties ?? {};
+  // un municipio, barrio o código postal no es la ubicación del club: se descarta
+  if (REJECT.includes(String(p.type)) || ['place', 'boundary'].includes(String(p.osm_key))) return null;
+  return { lat, lng, label: [p.name, p.street, p.housenumber, p.city].filter(Boolean).join(', ') };
 }
 
 Deno.serve(async (req) => {
@@ -54,7 +57,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   // modo prueba: una sola consulta, sin escribir nada
   if (typeof body.probe === 'string') {
-    try { return Response.json({ probe: body.probe, result: await nominatim(body.probe) }); }
+    try { return Response.json({ probe: body.probe, result: await geocode(body.probe) }); }
     catch (e) { return Response.json({ probe: body.probe, error: String(e) }, { status: 502 }); }
   }
   const limit = Math.min(Math.max(Number(body.limit ?? 60), 1), 100);
@@ -72,7 +75,7 @@ Deno.serve(async (req) => {
     let hit: { lat: number; lng: number } | null = null;
     for (const q of tries) {
       await sleep(1100);
-      try { hit = await nominatim(q); } catch (e) {
+      try { hit = await geocode(q); } catch (e) {
         // error del servicio (bloqueo, límite…): se para SIN marcar el club como fallido
         return Response.json({ error: String(e), stopped_at: c.name, ok: out.ok.length, failed: out.failed }, { status: 502 });
       }
