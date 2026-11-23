@@ -340,7 +340,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   equivale a un móvil. Pendiente: medir en Android real con `flutter run --profile`.
 - Tests: 433/433.
 
-## Catálogo de clubes (23 nov 2026, rama `clubes`)
+## Catálogo de clubes (23 nov 2026, rama `clubes`; publicada en `gamificacion-premium`, anterior en `backup/web-v3-antes-de-clubes`)
 - Plan e informes: `docs/clubes/plan_y_informes.md`. APLICADAS (con autorización): `20261202a_clubs_catalog` (esquema, RLS,
   `normalize_club_name`, `club_aliases`, `search_clubs` INVOKER + `private.club_candidates` DEFINER con índices, `propose_club`,
   `club_page`, `nearby_clubs`, admin `admin_pending_clubs/admin_review_club/admin_add_club_alias` → audit `admin_action`),
