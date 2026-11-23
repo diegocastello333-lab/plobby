@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -118,6 +119,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
       body: Column(children: [
         const PlobbyHeaderBar(title: 'Ajustes y privacidad'),
         Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 40), children: [
+          // en la web no hay vibración (los navegadores no la ofrecen a Flutter): el interruptor solo sale en el móvil
+          if (!kIsWeb) ...[
           const _SectionTitle('Experiencia'),
           _Group(children: [
             Semantics(container: true, toggled: AppHaptics.enabled, label: 'Vibración', child: Padding(
@@ -140,7 +143,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
               ]),
             )),
           ]),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+          ],
           const _SectionTitle('Documentos'),
           _Group(children: [
             for (final d in LegalDoc.values)
