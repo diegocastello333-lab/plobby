@@ -202,5 +202,34 @@ void main() {
       }
     }
   });
-}
 
+  group('accesibilidad', () {
+    for (final (scale, width) in [(1.0, 320.0), (2.0, 320.0), (2.0, 390.0)]) {
+      testWidgets('sin desbordes con texto al ${(scale * 100).round()} % y ${width.toInt()} pt', (t) async {
+        SharedPreferences.setMockInitialValues({});
+        Motion.forceReduced = true;            // estado final directo (lo que se mide es la maquetación)
+        addTearDown(() => Motion.forceReduced = null);
+        t.view.physicalSize = Size(width, 844); t.view.devicePixelRatio = 1; addTearDown(t.view.reset);
+        final problems = <String>[];
+        final old = FlutterError.onError;
+        FlutterError.onError = (d) => problems.add('${d.exceptionAsString().split('\n').first} ${RegExp(r'lib/[^:]+:\d+').firstMatch(d.toString())?.group(0) ?? ''}');
+        await t.pumpWidget(ProviderScope(
+          overrides: [
+            currentUserIdProvider.overrideWithValue('me'),
+            matchProvider('m1').overrideWith((ref) => Stream.value(_match(sets: const [SetScore(7, 6), SetScore(6, 7), SetScore(10, 8)]))),
+            myRatingProvider.overrideWith((ref) async => _rating()),
+            achievementsProvider.overrideWith((ref) async => _achData()),
+            gamificationRepositoryProvider.overrideWithValue(_Repo()),
+          ],
+          child: MaterialApp(builder: (c, child) => MediaQuery(data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(scale)), child: child!),
+              home: const PostMatchScreen(matchId: 'm1')),
+        ));
+        for (var i = 0; i < 6; i++) { await t.pump(const Duration(milliseconds: 100)); }   // timing
+        await t.pump(const Duration(seconds: 3));   // timing: se cierra la celebración
+        await t.pump(const Duration(milliseconds: 300));   // timing
+        FlutterError.onError = old;
+        expect(problems, isEmpty, reason: problems.toSet().join('\n'));
+      });
+    }
+  });
+}

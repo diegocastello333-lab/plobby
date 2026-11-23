@@ -1,0 +1,90 @@
+[
+ {
+  "scene": "ranking",
+  "rate": 1,
+  "reduce": false,
+  "fps": 50.7,
+  "p50": 16.7,
+  "p95": 16.8,
+  "max": 533.3,
+  "jank": 2.3,
+  "longtaskMs": 1008
+ },
+ {
+  "scene": "achievements",
+  "rate": 1,
+  "reduce": false,
+  "fps": 54.9,
+  "p50": 16.7,
+  "p95": 16.8,
+  "max": 316.7,
+  "jank": 3,
+  "longtaskMs": 444
+ },
+ {
+  "scene": "rating",
+  "rate": 1,
+  "reduce": false,
+  "fps": 25.3,
+  "p50": 33.3,
+  "p95": 50.1,
+  "max": 600.1,
+  "jank": 94.7,
+  "longtaskMs": 930
+ },
+ {
+  "scene": "feed",
+  "rate": 1,
+  "reduce": false,
+  "fps": 22.3,
+  "p50": 50,
+  "p95": 66.7,
+  "max": 466.7,
+  "jank": 65.9,
+  "longtaskMs": 3178
+ },
+ {
+  "scene": "ranking",
+  "rate": 4,
+  "reduce": false,
+  "fps": 42.6,
+  "p50": 16.7,
+  "p95": 16.8,
+  "max": 800.1,
+  "jank": 1.6,
+  "longtaskMs": 1741
+ },
+ {
+  "scene": "achievements",
+  "rate": 4,
+  "reduce": false,
+  "fps": 46.2,
+  "p50": 16.7,
+  "p95": 16.7,
+  "max": 833.3,
+  "jank": 1.4,
+  "longtaskMs": 1419
+ },
+ {
+  "scene": "rating",
+  "rate": 4,
+  "reduce": false,
+  "fps": 7.8,
+  "p50": 100,
+  "p95": 183.4,
+  "max": 1049.9,
+  "jank": 100,
+  "longtaskMs": 7011
+ },
+ {
+  "scene": "feed",
+  "rate": 4,
+  "reduce": false,
+  "fps": 4.4,
+  "p50": 150,
+  "p95": 783.4,
+  "max": 900,
+  "jank": 96.3,
+  "longtaskMs": 7304
+ }
+]

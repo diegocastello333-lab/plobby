@@ -210,11 +210,9 @@ class _PostMatchViewState extends ConsumerState<_PostMatchView> with SingleTicke
       backgroundColor: AppColors.bg,
       body: GestureDetector(
         behavior: HitTestBehavior.translucent, onTap: _done ? null : _skip,
-        child: AnimatedBuilder(
-          animation: _c,
-          builder: (context, _) {
-            final v = _c.value;
-            return Column(children: [
+        // rendimiento: NO se reconstruye la pantalla entera en cada fotograma; cada bloque escucha la línea de tiempo y
+        // solo se redibuja durante su propio tramo (con su propia capa de pintado)
+        child: Column(children: [
               SizedBox(height: pad.top),
               SizedBox(height: 52, child: Row(children: [
                 SizedBox(width: 84, child: Align(alignment: AlignmentDirectional.centerStart, child: IconButton(tooltip: 'Cerrar', onPressed: () => context.pop(),
@@ -227,10 +225,10 @@ class _PostMatchViewState extends ConsumerState<_PostMatchView> with SingleTicke
                 )),
               ])),
               Expanded(child: ListView(padding: EdgeInsets.fromLTRB(20, 8, 20, 24), children: [
-                _Hero(s: s, sets: _tl.of('sets', v), head: _tl.of('head', v)),
-                if (s.hasElo) ...[const SizedBox(height: 12), _Reveal(t: _tl.of('elo', v), child: _EloBlock(s: s, t: _tl.of('elo', v)))],
-                if (s.hasXp) ...[const SizedBox(height: 12), _Reveal(t: _tl.of('xp', v), child: _XpBlock(s: s, t: _tl.of('xp', v)))],
-                if (s.achievements.isNotEmpty) ...[const SizedBox(height: 12), _Reveal(t: _tl.of('ach', v), child: _AchBlock(s: s, t: _tl.of('ach', v)))],
+                _Hero(s: s, anim: _c, tl: _tl),
+                if (s.hasElo) ...[const SizedBox(height: 12), _Stage(anim: _c, map: (v) => (_tl.of('elo', v), 0), builder: (p) => _Reveal(t: p.$1, child: _EloBlock(s: s, t: p.$1)))],
+                if (s.hasXp) ...[const SizedBox(height: 12), _Stage(anim: _c, map: (v) => (_tl.of('xp', v), 0), builder: (p) => _Reveal(t: p.$1, child: _XpBlock(s: s, t: p.$1)))],
+                if (s.achievements.isNotEmpty) ...[const SizedBox(height: 12), _Stage(anim: _c, map: (v) => (_tl.of('ach', v), 0), builder: (p) => _Reveal(t: p.$1, child: _AchBlock(s: s, t: p.$1)))],
               ])),
               AnimatedOpacity(
                 opacity: _done ? 1 : 0, duration: Motion.of(context, Motion.normal), curve: Motion.enter,
@@ -245,12 +243,41 @@ class _PostMatchViewState extends ConsumerState<_PostMatchView> with SingleTicke
                   ]),
                 )),
               ),
-            ]);
-          },
-        ),
+            ]),
       ),
     );
   }
+}
+
+/// Un bloque de la secuencia: escucha la línea de tiempo pero SOLO se reconstruye cuando cambia su propio progreso
+/// (fuera de su tramo vale 0 o 1 y no hace nada). RepaintBoundary: su pintado no arrastra al resto de la pantalla.
+class _Stage extends StatefulWidget {
+  const _Stage({required this.anim, required this.map, required this.builder});
+  final Animation<double> anim;
+  final (double, double) Function(double v) map;
+  final Widget Function((double, double) p) builder;
+  @override
+  State<_Stage> createState() => _StageState();
+}
+
+class _StageState extends State<_Stage> {
+  late (double, double) _p = widget.map(widget.anim.value);
+  @override
+  void initState() {
+    super.initState();
+    widget.anim.addListener(_tick);
+  }
+  @override
+  void dispose() {
+    widget.anim.removeListener(_tick);
+    super.dispose();
+  }
+  void _tick() {
+    final p = widget.map(widget.anim.value);
+    if (p != _p) setState(() => _p = p);
+  }
+  @override
+  Widget build(BuildContext context) => RepaintBoundary(child: widget.builder(_p));
 }
 
 /// Aparece subiendo 12 px y con fundido al empezar su tramo (con un poco de margen para leer).
@@ -268,13 +295,23 @@ class _Reveal extends StatelessWidget {
 // ─────────────── Resultado ───────────────
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.s, required this.sets, required this.head});
+  const _Hero({required this.s, required this.anim, required this.tl});
   final PostMatchSummary s;
-  final double sets, head;
+  final Animation<double> anim;
+  final _Timeline tl;
   @override
   Widget build(BuildContext context) {
     final n = s.sets.length;
-    final h = Motion.springBounce.transform(head);
+    // la tarjeta se construye UNA vez; solo se reconstruye el set que está entrando y, después, el titular
+    final headline = Column(children: [
+      Semantics(header: true, liveRegion: true, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        PlobbyIcon(s.won ? PlobbyIcons.trophy : PlobbyIcons.thumb, size: 22, color: s.won ? AppColors.brand : const Color(0xFFF2F5EF)),
+        const SizedBox(width: 10),
+        Flexible(child: Text(s.headline, style: PlobbyText.t1.copyWith(color: s.won ? AppColors.brand : const Color(0xFFF2F5EF)))),
+      ])),
+      const SizedBox(height: 6),
+      Text(s.subline, textAlign: TextAlign.center, style: PlobbyText.sub.copyWith(color: const Color(0xD9FFFFFF))),
+    ]);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
       decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
@@ -284,20 +321,16 @@ class _Hero extends StatelessWidget {
         Semantics(
           label: 'Sets: ${s.score}', excludeSemantics: true,
           child: Wrap(alignment: WrapAlignment.center, spacing: 10, runSpacing: 10, children: [
-            for (var i = 0; i < n; i++) _SetChip(s: s, i: i, t: ((sets * n) - i).clamp(0.0, 1.0)),
+            for (var i = 0; i < n; i++) _Stage(anim: anim, map: (v) => (((tl.of('sets', v) * n) - i).clamp(0.0, 1.0), 0),
+                builder: (p) => _SetChip(s: s, i: i, t: p.$1)),
           ]),
         ),
         const SizedBox(height: 16),
-        // titular: el resultado se dice con palabras e icono (no solo con color)
-        Opacity(opacity: head.clamp(0.0, 1.0), child: Transform.scale(scale: .85 + .15 * h, child: Column(children: [
-          Semantics(header: true, liveRegion: true, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            PlobbyIcon(s.won ? PlobbyIcons.trophy : PlobbyIcons.thumb, size: 22, color: s.won ? AppColors.brand : const Color(0xFFF2F5EF)),
-            const SizedBox(width: 10),
-            Flexible(child: Text(s.headline, style: PlobbyText.t1.copyWith(color: s.won ? AppColors.brand : const Color(0xFFF2F5EF)))),
-          ])),
-          const SizedBox(height: 6),
-          Text(s.subline, textAlign: TextAlign.center, style: PlobbyText.sub.copyWith(color: const Color(0xD9FFFFFF))),
-        ]))),
+        // titular: el resultado se dice con palabras e icono (no solo con color); solo se transforma, no se reconstruye
+        _Stage(anim: anim, map: (v) => (tl.of('head', v), 0), builder: (p) {
+          final h = Motion.springBounce.transform(p.$1);
+          return Opacity(opacity: p.$1.clamp(0.0, 1.0), child: Transform.scale(scale: .85 + .15 * h, child: headline));
+        }),
       ]),
     );
   }
@@ -394,9 +427,8 @@ class _TierBar extends StatelessWidget {
             child: Container(width: 2, color: AppColors.bg)),
       ]))),
       const SizedBox(height: 6),
-      Row(children: [
+      Wrap(alignment: WrapAlignment.spaceBetween, spacing: 12, runSpacing: 2, children: [
         Text(tier.name, style: PlobbyText.label),
-        const Spacer(),
         if (next != null) Text('${next.name} en ${next.from}', style: PlobbyText.help),
       ]),
     ]);
@@ -425,15 +457,13 @@ class _XpBlock extends StatelessWidget {
           Text('+${(s.xpGained * e).round()} XP', style: PlobbyText.value.copyWith(fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
         ]),
         const SizedBox(height: 10),
-        Row(children: [
+        // nivel + aviso de subida + lo que falta: pasan a otra línea si no caben (pantallas estrechas, texto grande)
+        Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
           Text('Nivel $lvl', style: PlobbyText.cardTitle),
-          if (s.leveledUp && lvl > s.levelBefore) ...[
-            const SizedBox(width: 8),
+          if (s.leveledUp && lvl > s.levelBefore)
             Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(999)),
                 child: Text('¡SUBES DE NIVEL!', style: PlobbyText.key.copyWith(color: AppColors.brandInk))),
-          ],
-          const Spacer(),
           Text('${ceil - xp} XP para el ${lvl + 1}', style: PlobbyText.help),
         ]),
         const SizedBox(height: 8),

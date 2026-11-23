@@ -325,3 +325,17 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Fase 9: informe final `docs/seguridad/fase9_verificacion_final.md` (antes/después, 55+21+21 pruebas, ataques con curl,
   lista de tareas manuales). APK con todo: `dist/plobby-seguridad-f8.apk` (firma debug).
 
+
+## Animaciones y acabado premium (22–23 nov 2026, rama `gamificacion-premium`)
+- Informe: `docs/animaciones_informe.md`. Fases 0, 1, 2 y 4 aprobadas; Fase 3 (mecánicas nuevas) RECHAZADA. Sin cambios en BD.
+- `core/motion/app_motion.dart`: `Motion` (fast/normal/emphasis/celebration…, curvas enter/exit/move/spring/springBounce,
+  `Motion.reduced/of/fadeOr`, `forceReduced` para tests) y `AppHaptics` (light/medium/success/error; nunca fuerte; una por
+  evento; interruptor «Vibración» en Perfil → Ajustes y privacidad, guardado en SharedPreferences y cargado en main).
+- REGLA (test/motion_tokens_test.dart): en la interfaz nada de `Duration(` sin `// timing`, ni `Curves.`, ni `HapticFeedback.`.
+- Post-partido `/match/:id/summary` (`post_match_screen.dart`, `PostMatchSummary` con datos de rating_history/xp_events/logros):
+  secuencia saltable, `_Stage` = cada bloque se reconstruye solo en su tramo. Se abre al confirmar y 1 vez por partido.
+- `core/widgets/celebration.dart`: confeti en código, `showCelebration` 1 vez por evento (`CelebrationLog`).
+- Banco de rendimiento `tool/motion_lab/` (no se incluye en la app): `flutter build web -t tool/motion_lab/main.dart` + scripts
+  Playwright en `tool/motion_lab/perf/`. El entorno no tiene GPU: el 74 % del tiempo es presentación del navegador; NO
+  equivale a un móvil. Pendiente: medir en Android real con `flutter run --profile`.
+- Tests: 433/433.
