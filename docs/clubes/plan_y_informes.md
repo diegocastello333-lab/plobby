@@ -1,7 +1,10 @@
 # Plobby · Catálogo de clubes y «club base» — plan, migraciones e informes (23 nov 2026)
 
-Estado: **migraciones escritas y validadas en una réplica local con el mismo esquema que producción (62/62)**.
-**NO aplicadas en producción**: esperan tu autorización y tus decisiones (al final).
+Estado: **APLICADAS EN PRODUCCIÓN el 23 nov 2026** (con autorización): 245 clubes verificados, 79 alias, migración de
+textos hecha (1 asignado, 3 para revisar). Pruebas en producción (siempre con ROLLBACK): **41/41 funcionales**.
+Rendimiento en producción con el catálogo real: **6–10 ms** por búsqueda. Con 10.000 clubes simulados el servidor de
+Supabase (más lento que la réplica local) da 38–106 ms: por encima de 50 ms en 4 de 7 búsquedas; habrá que revisarlo si
+el catálogo crece mucho (p. ej. limitar candidatos por zona o subir de plan). Advisors: sin errores nuevos.
 
 ## Situación encontrada
 - `clubs`: 0 filas, lectura abierta a cualquier usuario con sesión. `courts`: 0. Extensiones `unaccent` y `pg_trgm`
