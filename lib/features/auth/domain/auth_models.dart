@@ -18,21 +18,22 @@ extension SelfLevelX on SelfLevel {
 /// Datos del onboarding. `selfLevel` es el nivel DECLARADO: no se mezcla con el ELO (que solo calcula el servidor).
 class OnboardingData {
   const OnboardingData({this.firstName = '', this.lastName = '', this.username = '', this.city = '', this.birthDate,
-      this.selfLevel, this.side, this.hand, this.habitualClub, this.habitualPartnerId, this.avatarId, this.avatarUrl, this.completed = false});
+      this.selfLevel, this.side, this.hand, this.habitualClub, this.habitualClubId, this.habitualPartnerId, this.avatarId, this.avatarUrl, this.completed = false});
   final String firstName, lastName, username, city;
   final DateTime? birthDate;
   final SelfLevel? selfLevel;
   final CourtSide? side;
   final Hand? hand;
-  final String? habitualClub, habitualPartnerId, avatarId, avatarUrl;
+  /// Club habitual: nombre visible y, si se eligió del catálogo, su id (el servidor guarda el id).
+  final String? habitualClub, habitualClubId, habitualPartnerId, avatarId, avatarUrl;
   final bool completed;
 
   OnboardingData copyWith({String? firstName, String? lastName, String? username, String? city, DateTime? birthDate, SelfLevel? selfLevel,
-          CourtSide? side, Hand? hand, String? habitualClub, String? habitualPartnerId, String? avatarId, String? avatarUrl, bool clearAvatarId = false, bool clearAvatarUrl = false, bool? completed}) =>
+          CourtSide? side, Hand? hand, String? habitualClub, String? habitualClubId, bool clearClub = false, String? habitualPartnerId, String? avatarId, String? avatarUrl, bool clearAvatarId = false, bool clearAvatarUrl = false, bool? completed}) =>
       OnboardingData(
           firstName: firstName ?? this.firstName, lastName: lastName ?? this.lastName, username: username ?? this.username, city: city ?? this.city,
           birthDate: birthDate ?? this.birthDate, selfLevel: selfLevel ?? this.selfLevel, side: side ?? this.side, hand: hand ?? this.hand,
-          habitualClub: habitualClub ?? this.habitualClub, habitualPartnerId: habitualPartnerId ?? this.habitualPartnerId,
+          habitualClub: clearClub ? null : (habitualClub ?? this.habitualClub), habitualClubId: clearClub ? null : (habitualClubId ?? this.habitualClubId), habitualPartnerId: habitualPartnerId ?? this.habitualPartnerId,
           avatarId: clearAvatarId ? null : (avatarId ?? this.avatarId), avatarUrl: clearAvatarUrl ? null : (avatarUrl ?? this.avatarUrl), completed: completed ?? this.completed);
 }
 

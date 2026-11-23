@@ -2,6 +2,7 @@ import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../clubs/presentation/club_search_sheet.dart' show pickClub, clubRemoved;
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
@@ -123,7 +124,25 @@ class _Step2 extends ConsumerWidget {
       sec('Posición en pista', chips(CourtSide.values, d.side, (v) => v == CourtSide.right ? 'Derecha' : 'Revés', (v) => c.update(d.copyWith(side: v)))),
       sec('Mano dominante', chips(Hand.values, d.hand, (v) => v == Hand.right ? 'Derecha' : 'Izquierda', (v) => c.update(d.copyWith(hand: v)))),
       if (st.errors['level'] != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(st.errors['level']!, style: PlobbyText.help.copyWith(color: AppColors.danger, fontWeight: FontWeight.w600, fontSize: 12))),
-      LabeledField(label: 'Club habitual (opcional)', initialValue: d.habitualClub, onChanged: (v) => c.update(d.copyWith(habitualClub: v))),
+      // Club habitual (opcional): del catálogo (reconoce nombres mal escritos, alias…) o propuesta nueva. Se guarda el id.
+      Text('Club habitual (opcional)', style: PlobbyText.label),
+      const SizedBox(height: 8),
+      SurfaceCard(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        onTap: () async {
+          final hit = await pickClub(context, allowRemove: d.habitualClub != null);
+          if (hit == null) return;
+          c.update(hit == clubRemoved ? d.copyWith(clearClub: true)
+              : d.copyWith(habitualClub: hit.name, habitualClubId: hit.id));
+        },
+        child: Row(children: [
+          const PlobbyIcon(PlobbyIcons.building, size: 18, color: AppColors.text), const SizedBox(width: 10),
+          Expanded(child: Text(d.habitualClub ?? 'Busca tu club', style: PlobbyText.value.copyWith(
+              color: d.habitualClub == null ? AppColors.textMuted : AppColors.text, fontWeight: d.habitualClub == null ? FontWeight.w400 : FontWeight.w700))),
+          const PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted),
+        ]),
+      ),
+      const SizedBox(height: 20),
       // Pareja habitual (opcional): selector de amigos reales (friendOptionsProvider); se guarda como habitual_partner_id.
     ]);
   }

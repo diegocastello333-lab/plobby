@@ -12,6 +12,7 @@ import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../clubs/application/club_providers.dart' show isClubAdminProvider;
 import '../application/auth_providers.dart';
 import '../data/auth_repository.dart';
 import '../domain/legal.dart';
@@ -143,6 +144,15 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
               ]),
             )),
           ]),
+            const SizedBox(height: 24),
+          ],
+          // Solo administradores de la plataforma (raw_app_meta_data.plobby_admin; el servidor vuelve a comprobarlo en cada RPC).
+          if (ref.watch(isClubAdminProvider)) ...[
+            const _SectionTitle('Administración'),
+            _Group(children: [
+              _Row(icon: PlobbyIcons.building, title: 'Moderación de clubes', subtitle: 'Aprobar, fusionar o rechazar clubes propuestos',
+                  onTap: () => context.push('/admin/clubs')),
+            ]),
             const SizedBox(height: 24),
           ],
           const _SectionTitle('Documentos'),

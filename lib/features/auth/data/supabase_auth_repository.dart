@@ -62,7 +62,7 @@ class SupabaseAuthRepository implements AuthRepository {
       selfLevel: pick(SelfLevel.values, r['self_declared_level'] as String?, (x) => x.db),
       side: r['court_side'] == null ? null : (r['court_side'] == 'left' ? CourtSide.left : CourtSide.right),
       hand: r['dominant_hand'] == null ? null : (r['dominant_hand'] == 'left' ? Hand.left : Hand.right),
-      habitualClub: r['habitual_club'] as String?, habitualPartnerId: r['habitual_partner_id'] as String?,
+      habitualClub: r['habitual_club'] as String?, habitualClubId: r['habitual_club_id'] as String?, habitualPartnerId: r['habitual_partner_id'] as String?,
       avatarId: r['avatar_id'] as String?, avatarUrl: r['avatar_url'] as String?, completed: r['onboarding_completed_at'] != null);
   }
 
@@ -73,7 +73,7 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<void> saveStep(int step, OnboardingData d) async {
     final data = switch (step) {
       1 => {'first_name': d.firstName, 'last_name': d.lastName, 'username': d.username, 'city': d.city, 'birth_date': d.birthDate!.toIso8601String().substring(0, 10)},
-      2 => {'level': d.selfLevel!.db, 'side': d.side == CourtSide.left ? 'left' : 'right', 'hand': d.hand == Hand.left ? 'left' : 'right', 'club': d.habitualClub ?? '', 'partner_id': d.habitualPartnerId ?? ''},
+      2 => {'level': d.selfLevel!.db, 'side': d.side == CourtSide.left ? 'left' : 'right', 'hand': d.hand == Hand.left ? 'left' : 'right', 'club': d.habitualClub ?? '', 'club_id': d.habitualClubId ?? '', 'partner_id': d.habitualPartnerId ?? ''},
       3 => {'avatar_url': d.avatarUrl ?? '', 'avatar_id': d.avatarId ?? ''},
       _ => throw AuthException('invalid_step'),
     };

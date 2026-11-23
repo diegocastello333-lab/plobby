@@ -190,10 +190,15 @@ void main() {
       await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)]);
       await _openFriendlyForm(t);
       await _pickPlayers(t);
+      await t.ensureVisible(find.text('No está en la lista: escribir el nombre'));
+      await t.tap(find.text('No está en la lista: escribir el nombre'));
+      await t.pump();
+      await t.enterText(find.widgetWithText(TextFormField, 'Club La Moraleja'), '');   // se precarga con el club habitual
       await _tapCreate(t);
       expect(find.text('Indica el club donde se juega el partido.'), findsOneWidget);   // club obligatorio
       expect(repo.created, isEmpty);
       await t.enterText(find.widgetWithText(TextFormField, 'p. ej. Club La Moraleja'), 'Pádel Chamberí');
+      await t.pump();
       await _tapCreate(t);
       expect(repo.created, hasLength(1));
       final d = repo.created.single;
@@ -203,13 +208,32 @@ void main() {
       expect(t.takeException(), isNull);
     });
 
-    testWidgets('con clubes en la base se guarda el club que se ve seleccionado (no uno fijo)', (t) async {
-      final repo = _Repo(clubList: const ['Club Alameda', 'Pádel Vértice']);
+    testWidgets('sin tocar el club se envía el club habitual que se ve en el campo', (t) async {
+      final repo = _Repo();
+      await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)]);
+      await _openFriendlyForm(t);
+      expect(find.descendant(of: find.byType(CreateMatchScreen), matching: find.text('Club La Moraleja')), findsOneWidget);
+      await _pickPlayers(t);
+      await _tapCreate(t);
+      expect(repo.created.single.club, 'Club La Moraleja');
+    });
+
+    testWidgets('el club se busca en el catálogo con un nombre aproximado y se envía el nombre oficial', (t) async {
+      final repo = _Repo();
       await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)]);
       await _openFriendlyForm(t);
       await _pickPlayers(t);
+      await t.ensureVisible(find.text('Club La Moraleja'));
+      await t.tap(find.text('Club La Moraleja'));
+      await _settle(t);
+      await t.enterText(find.byType(TextField).last, 'ciudad raqueta');
+      await t.pump(const Duration(milliseconds: 300));   // timing
+      await _settle(t);
+      await t.tap(find.textContaining('BamVolea Ciudad de la Raqueta').first);
+      await _settle(t);
+      expect(find.descendant(of: find.byType(CreateMatchScreen), matching: find.text('BamVolea Ciudad de la Raqueta')), findsOneWidget);
       await _tapCreate(t);
-      expect(repo.created.single.club, 'Club Alameda');   // antes se enviaba «Club La Moraleja»
+      expect(repo.created.single.club, 'BamVolea Ciudad de la Raqueta');
     });
 
     testWidgets('error de Supabase (create_match): mensaje comprensible y el formulario sigue abierto', (t) async {
@@ -233,11 +257,11 @@ void main() {
       expect(find.byType(CreateMatchScreen), findsOneWidget);
     });
 
-    testWidgets('si falla la lectura de clubes se puede escribir el club; sin amigos se explica qué falta', (t) async {
+    testWidgets('el club se puede escribir a mano; sin amigos se explica qué falta', (t) async {
       final repo = _Repo(clubsError: true, friendList: const [PlayerOption('a', 'Ana R.')]);
       await _app(t, overrides: [matchRepositoryProvider.overrideWithValue(repo)], social: _Social(count: 1));
       await _openFriendlyForm(t);
-      expect(find.widgetWithText(TextFormField, 'p. ej. Club La Moraleja'), findsOneWidget);
+      expect(find.text('No está en la lista: escribir el nombre'), findsOneWidget);   // el club no depende de leer la tabla
       expect(find.textContaining('necesitas tres amigos'), findsOneWidget);
       expect(t.takeException(), isNull);
     });

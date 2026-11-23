@@ -12,6 +12,8 @@ import '../../social/application/social_providers.dart' show friendsProvider;
 import '../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
 import '../domain/match_models.dart';
 import '../../../core/errors/failure.dart';
+import '../../clubs/presentation/club_search_sheet.dart' show pickClub, clubRemoved;
+import '../../profile/application/profile_providers.dart' show profileProvider;
 
 /// Formulario ÚNICO de creación de partido — hoja «Crear partido» del prototipo HTML (aquí como pantalla, misma ruta). `type` decide si pide liga (liga) o no (amistoso).
 /// `leagueId` + `resultRequired` se usan al registrar el resultado desde una liga concreta (flujo previo).
@@ -25,11 +27,15 @@ class CreateMatchScreen extends ConsumerStatefulWidget {
 }
 
 class _S extends ConsumerState<CreateMatchScreen> {
-  String? _league, _partner, _r1, _r2, _club;
+  String? _league, _partner, _r1, _r2;
+  /// Club elegido en el catálogo (buscador con nombres aproximados y alias). Por defecto, el club habitual del jugador.
+  String? _club;
+  bool _clubTouched = false;
+  /// «Escribir el nombre»: el club donde se juega no tiene por qué estar en el catálogo (la RPC guarda texto).
+  bool _manualClub = false;
   /// Nombres de los jugadores elegidos (vienen del selector de Amigos) para pintarlos en los huecos.
   final _names = <String, String>{};
-  /// Club escrito a mano cuando la tabla `clubs` está vacía o no se pudo leer (antes: `clubs.first` sobre una lista
-  /// vacía lanzaba «Bad state: No element» al construir la pantalla → pantalla gris/negra en la APK).
+  /// Club escrito a mano (opción «Escribir el nombre»).
   final _clubText = TextEditingController();
   late DateTime _when = DateTime.now().add(const Duration(hours: 2));  // timing
   final _sets = List.generate(3, (_) => [TextEditingController(), TextEditingController()]);
@@ -47,13 +53,19 @@ class _S extends ConsumerState<CreateMatchScreen> {
         for (final s in _sets) if (s[0].text.isNotEmpty || s[1].text.isNotEmpty) SetScore(int.tryParse(s[0].text) ?? -1, int.tryParse(s[1].text) ?? -1),
       ];
 
-  /// Club que se envía: el elegido en la lista (o el primero, que es el que se ve seleccionado) o el escrito a mano.
-  String _selectedClub(List<String> clubs) => clubs.isNotEmpty ? (_club ?? clubs.first) : _clubText.text.trim();
+  /// Club que se envía: el que se ve (el elegido en el buscador o, sin tocarlo, el club habitual) o el escrito a mano.
+  String _selectedClub(String? habitual) => _manualClub ? _clubText.text.trim() : ((_clubTouched ? _club : habitual) ?? '');
 
-  Future<void> _submit(List<String> clubs) async {
+  Future<void> _pickClub(String? current) async {
+    final hit = await pickClub(context, title: 'Club del partido', initialQuery: current);
+    if (hit == null || !mounted) return;
+    setState(() { _club = hit == clubRemoved ? null : hit.name; _clubTouched = true; _error = null; });
+  }
+
+  Future<void> _submit(String? habitual) async {
     // Dos toques seguidos llegan antes de que el botón se redibuje como «ocupado»: sin esta guarda se creaban dos partidos.
     if (_busy) return;
-    final club = _selectedClub(clubs);
+    final club = _selectedClub(habitual);
     final d = MatchDraft(type: widget.type, leagueId: _friendly ? null : _league, partnerId: _partner, rival1Id: _r1, rival2Id: _r2, when: _when, club: club, sets: _scores);
     final err = validateDraft(d, resultRequired: widget.resultRequired) ?? (club.isEmpty ? 'Indica el club donde se juega el partido.' : null);
     if (err != null) { setState(() => _error = err); return; }
@@ -77,8 +89,8 @@ class _S extends ConsumerState<CreateMatchScreen> {
     // Misma fuente que el selector: amigos (amistoso) o miembros de la liga.
     final pool = _friendly ? ref.watch(friendsProvider).whenData((l) => [for (final f in l) PlayerOption(f.player.id, f.player.name)])
         : (_league == null ? const AsyncData<List<PlayerOption>>([]) : ref.watch(leagueMembersProvider(_league!)));
-    final clubsAsync = ref.watch(clubsProvider);
-    final clubs = clubsAsync.valueOrNull ?? const <String>[];
+    final habitual = ref.watch(profileProvider('me')).valueOrNull?.profile.club?.name;
+    final shownClub = _clubTouched ? _club : habitual;
     final hasSets = _scores.isNotEmpty;
     String p2(int n) => n.toString().padLeft(2, '0');
     return Scaffold(
@@ -148,10 +160,15 @@ class _S extends ConsumerState<CreateMatchScreen> {
             if (t != null) setState(() => _when = DateTime(_when.year, _when.month, _when.day, t.hour, t.minute));
           }))),
         ]),
-        // Club: lista de `clubs` si hay; si la tabla está vacía o falla la lectura, campo de texto (la RPC guarda texto).
-        if (clubsAsync.isLoading && !clubsAsync.hasValue) const _Field(label: 'Club', child: LoadingBlock(height: 48, radius: AppRadius.md))
-        else if (clubs.isNotEmpty) _Field(label: 'Club', child: _Select<String>(value: clubs.contains(_club) ? _club : clubs.first, items: [for (final c in clubs) DropdownMenuItem(value: c, child: Text(c, overflow: TextOverflow.ellipsis))], onChanged: (v) => setState(() => _club = v)))
-        else LabeledField(label: 'Club', controller: _clubText, maxLength: 80, hint: 'p. ej. Club La Moraleja', textCapitalization: TextCapitalization.words, onChanged: (_) { if (_error != null) setState(() => _error = null); }),
+        // Club: buscador del catálogo (reconoce nombres aproximados y alias); por defecto el club habitual. Si el club no
+        // está en el catálogo se puede escribir a mano (la RPC guarda texto).
+        if (_manualClub) ...[
+          LabeledField(label: 'Club', controller: _clubText, maxLength: 80, hint: 'p. ej. Club La Moraleja', textCapitalization: TextCapitalization.words, onChanged: (_) { if (_error != null) setState(() => _error = null); }),
+          _ClubModeLink(label: 'Buscar en el catálogo', onTap: () => setState(() { _manualClub = false; _error = null; })),
+        ] else ...[
+          _Field(label: 'Club', child: _PickerBox(value: shownClub ?? 'Busca el club', icon: PlobbyIcons.search, label: 'Club', onTap: () => _pickClub(shownClub))),
+          _ClubModeLink(label: 'No está en la lista: escribir el nombre', onTap: () => setState(() { _manualClub = true; _clubText.text = shownClub ?? ''; _error = null; })),
+        ],
         Text.rich(TextSpan(style: PlobbyText.label, children: [
           const TextSpan(text: 'Resultado (sets)'),
           if (!widget.resultRequired) TextSpan(text: ' · opcional si aún no se ha jugado', style: PlobbyText.label.copyWith(fontWeight: FontWeight.w400, letterSpacing: 0, color: AppColors.textMuted)),
@@ -186,7 +203,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
         const SizedBox(height: 6),
         Text(_friendly ? 'Un amistoso no pertenece a ninguna liga.' : 'El partido quedará vinculado a la liga elegida.', style: PlobbyText.help.copyWith(fontSize: 12)),
         const SizedBox(height: 14),
-        PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(clubs)),
+        PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(habitual)),
       ])),
     );
   }
@@ -295,7 +312,7 @@ class _PickerBox extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(button: true, label: '$label: $value', excludeSemantics: true, child: Material(
         color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
         child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: SizedBox(height: 48, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
-          Expanded(child: Text(value, style: PlobbyText.input)), PlobbyIcon(icon, size: 18, color: AppColors.textMuted),
+          Expanded(child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.input)), PlobbyIcon(icon, size: 18, color: AppColors.textMuted),
         ])))),
       ));
 }
@@ -311,5 +328,21 @@ class _Team extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title.toUpperCase(), style: PlobbyText.eb), const SizedBox(height: 8), ...children,
         ]),
+      );
+}
+
+/// Enlace pequeño bajo el campo Club para alternar entre el buscador del catálogo y el texto libre.
+class _ClubModeLink extends StatelessWidget {
+  const _ClubModeLink({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Align(alignment: Alignment.centerLeft, child: TextButton(
+          onPressed: onTap,
+          style: TextButton.styleFrom(foregroundColor: AppColors.text, padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(44, 44)),
+          child: Text(label, style: PlobbyText.help.copyWith(fontWeight: FontWeight.w700, decoration: TextDecoration.underline)),
+        )),
       );
 }

@@ -355,5 +355,9 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Geocodificación: Edge Function `geocode-clubs` (desplegada, verify_jwt=false con autorización propia: token de un solo uso
   cuyo hash está en `private.service_tokens` o admin). **Nominatim y Photon devuelven 403 desde Supabase** (bloquean IPs de nube):
   pendiente de que el usuario elija otro proveedor. 0 clubes geocodificados.
-- Pendiente: decisión del usuario sobre 7 posibles duplicados del CSV; pantallas de la app (autocompletado, proponer,
-  página del club, moderación, «Clubes cerca de ti»).
+- App (`lib/features/clubs/`): buscador `pickClub` (hoja con debounce, «¿Te refieres a…?», alias, «Proponer nuevo club»
+  con aviso de duplicados), página `/club/:id`, moderación `/admin/clubs` (entrada en Ajustes y privacidad solo para admin).
+  Conectado en Perfil (club habitual), Onboarding (paso 2 envía `club_id`, migración `20261202f`) y Crear partido
+  (buscador con el club habitual por defecto + «escribir el nombre»; `create_match` sigue recibiendo texto).
+  Ligas: sin campo de club (las ligas de club se crean desde el panel). Tests `test/clubs_test.dart`. Total 451/451.
+- Pendiente: decisión del usuario sobre 7 posibles duplicados del CSV; geocodificación (proveedor) y «Clubes cerca de ti».
