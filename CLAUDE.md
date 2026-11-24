@@ -408,7 +408,7 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   `Semantics(header: true, container: true, …)` (sin container se fusionan con sus vecinos).
 - APK 1.9.0+17: `dist/plobby-1.9.0-arm64.apk` (25,3 MB) y `-armv7` (23,4 MB), ofuscados, firma debug.
 
-## Fluidez (24 nov 2026, rama `fluidez`, informe `docs/rendimiento/fluidez.md`)
+## Fluidez (24 nov 2026, rama `fluidez`, PUBLICADA en `gamificacion-premium`; anterior en `backup/web-v8-antes-de-fluidez`; APK 1.9.1)
 - Medir con build `--profile` + perfil de CPU (scratchpad/perf/cpu_profile.js) y trazas (trace_cost.js), comparando con
   `backup/web-v4-antes-de-rendimiento`. Los fps de este entorno no sirven (GPU por software).
 - REGLAS: nada de `ensureSemantics()` global (accesibilidad web bajo demanda, `core/a11y/web_a11y*.dart`); nada de
