@@ -37,6 +37,8 @@ class MockAuthRepository implements AuthRepository {
   @override
   Future<void> deleteAvatarFiles({String? keepUrl}) async => deletedKeeping.add(keepUrl);
   @override
+  Future<void> ensureAvatarThumbs(String avatarUrl) async {}
+  @override
   Future<void> completeOnboarding() async {
     if (pendingSteps(_data).where((s) => s != 4).isNotEmpty) throw AuthException('onboarding_incomplete');
     _data = _data.copyWith(completed: true);

@@ -7,10 +7,12 @@ import '../../profile/application/profile_providers.dart';
 import '../../rating/application/rating_providers.dart';
 import '../../social/application/social_providers.dart';
 import '../../matches/presentation/new_match_menu.dart';
+import '../../matches/application/lifecycle_providers.dart' show currentUserIdProvider;
 import 'streak_sheet.dart';
+import '../application/home_snapshot.dart';
 
 /// Valores REALES que alimentan el Home (ninguno está fijado en el widget):
-///  amigos → friendsProvider, ELO/delta → myRatingProvider (backend), racha → profileViewProvider('me'),
+///  amigos → friendsProvider, ELO/delta → myRatingSummaryProvider (backend, últimos cambios), racha → profileViewProvider('me'),
 ///  avisos → notificationsProvider, mensajes → conversationsProvider.
 class HomeCounters {
   const HomeCounters({this.friends = 0, this.elo, this.delta30, this.streak = 0, this.bestStreak = 0, this.unreadNotifications = 0, this.unreadMessages = 0});
@@ -19,12 +21,15 @@ class HomeCounters {
 }
 
 final homeCountersProvider = Provider<HomeCounters>((ref) {
-  final r = ref.watch(myRatingProvider).valueOrNull;
+  final r = ref.watch(myRatingSummaryProvider).valueOrNull;
   final s = ref.watch(profileViewProvider('me')).valueOrNull?.streak;
+  // Mientras llegan los datos: lo último que se vio (instantánea local), nunca ceros que luego «saltan».
+  final snap = ref.watch(homeSnapshotProvider);
+  final friendsLoaded = ref.watch(friendsProvider).hasValue;
   return HomeCounters(
-    friends: ref.watch(friendCountProvider),
-    elo: r?.elo, delta30: r?.delta30,
-    streak: s?.current ?? 0, bestStreak: s?.best ?? 0,
+    friends: friendsLoaded ? ref.watch(friendCountProvider) : (snap?.friends ?? 0),
+    elo: r?.elo ?? snap?.elo, delta30: r == null ? snap?.delta30 : r.delta30,
+    streak: s?.current ?? snap?.streak ?? 0, bestStreak: s?.best ?? snap?.bestStreak ?? 0,
     unreadNotifications: ref.watch(unreadCountProvider),
     unreadMessages: ref.watch(unreadMessagesProvider),
   );
@@ -71,3 +76,16 @@ class HomeNav {
   static void seeAllAchievements(BuildContext c) => c.push('/achievements');
   static void streak(BuildContext c, HomeCounters h) => showStreakSheet(c, current: h.streak, best: h.bestStreak);
 }
+
+/// Guarda la instantánea del Inicio cuando ya hay datos reales (perfil + rating). Se escucha desde el Inicio.
+final homeSnapshotWriterProvider = Provider<void>((ref) {
+  final view = ref.watch(profileViewProvider('me')).valueOrNull;
+  final r = ref.watch(myRatingSummaryProvider).valueOrNull;
+  if (view == null || r == null || !ref.watch(friendsProvider).hasValue) return;
+  final p = view.data.profile;
+  final snap = HomeSnapshot(name: p.fullName, avatarUrl: p.avatarUrl, bannerId: p.bannerId, friends: ref.watch(friendCountProvider),
+      elo: r.elo, delta30: r.delta30, streak: view.streak.current, bestStreak: view.streak.best);
+  final uid = ref.watch(currentUserIdProvider);
+  if (uid.isEmpty || uid == 'me' || ref.read(homeSnapshotProvider) == snap) return;
+  HomeSnapshotStore.write(uid, snap);
+});

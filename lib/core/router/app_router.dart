@@ -1,8 +1,8 @@
 import '../motion/app_motion.dart';
-import '../../features/gamification/presentation/wrapped_screens.dart';
-import '../../features/clubs/presentation/club_screen.dart';
+import '../../features/gamification/presentation/wrapped_screens.dart' deferred as wrapped;
+import '../../features/clubs/presentation/club_screen.dart' deferred as clubs;
 import '../../features/gamification/presentation/head_to_head_screen.dart';
-import '../../features/gamification/presentation/friends_ranking_screen.dart';
+import '../../features/gamification/presentation/friends_ranking_screen.dart' deferred as ranking;
 import '../../features/gamification/presentation/achievements_screen.dart';
 import '../../features/gamification/domain/gamification_models.dart';
 import 'package:flutter/material.dart';
@@ -11,27 +11,28 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/feed/presentation/feed_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
-import '../../features/leagues/presentation/create_league_screen.dart';
-import '../../features/leagues/presentation/discover_leagues_screen.dart';
+import '../../features/leagues/presentation/create_league_screen.dart' deferred as createLeague;
+import '../../features/leagues/presentation/discover_leagues_screen.dart' deferred as discover;
 import '../../features/leagues/presentation/league_detail_screen.dart';
 import '../../features/leagues/presentation/leagues_screen.dart';
 import '../../features/tournaments/presentation/competitions_screen.dart';
-import '../../features/tournaments/presentation/create_tournament_screen.dart';
-import '../../features/tournaments/presentation/tournament_detail_screen.dart';
-import '../../features/leagues/presentation/manage_league_screen.dart';
+import '../../features/tournaments/presentation/create_tournament_screen.dart' deferred as createTournament;
+import '../../features/tournaments/presentation/tournament_detail_screen.dart' deferred as tournament;
+import '../../features/leagues/presentation/manage_league_screen.dart' deferred as manageLeague;
 import 'app_shell.dart';
+import 'deferred_screen.dart';
 import '../../features/feed/presentation/notifications_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/auth/domain/auth_models.dart' show OnboardingData;
 import '../../features/auth/domain/legal.dart' show LegalStatus;
 import '../../features/auth/presentation/consent_screen.dart';
-import '../../features/auth/presentation/legal_doc_screen.dart';
-import '../../features/auth/presentation/privacy_settings_screen.dart';
+import '../../features/auth/presentation/legal_doc_screen.dart' deferred as legalDoc;
+import '../../features/auth/presentation/privacy_settings_screen.dart' deferred as privacy;
 import '../../features/auth/presentation/welcome_screen.dart';
 import '../../features/matches/domain/match_models.dart';
 import '../../features/matches/presentation/final_result_screen.dart';
 import '../../features/matches/presentation/post_match_screen.dart';
-import '../../features/match_recap/presentation/share_match_screen.dart';
+import '../../features/match_recap/presentation/share_match_screen.dart' deferred as shareMatch;
 import '../../features/matches/presentation/match_detail_screen.dart';
 import '../../features/matches/presentation/result_entry_screen.dart';
 import '../../features/matches/presentation/create_match_screen.dart';
@@ -40,10 +41,10 @@ import '../../features/messaging/presentation/chat_screen.dart';
 import '../../features/messaging/presentation/conversations_screen.dart';
 import '../../features/messaging/presentation/group_info_screen.dart';
 import '../../features/messaging/presentation/new_group_screen.dart';
-import '../../features/profile/presentation/edit_profile_screen.dart';
+import '../../features/profile/presentation/edit_profile_screen.dart' deferred as editProfile;
 import '../../features/profile/presentation/profile_screen.dart';
-import '../../features/rating/presentation/elo_detail_screen.dart';
-import '../../features/share_stats/presentation/share_stats_screen.dart';
+import '../../features/rating/presentation/elo_detail_screen.dart' deferred as eloDetail;
+import '../../features/share_stats/presentation/share_stats_screen.dart' deferred as shareStats;
 import '../../features/social/presentation/add_friends_screen.dart';
 import '../../features/social/presentation/friends_screen.dart';
 import '../../features/splash/application/splash_boot.dart';
@@ -60,7 +61,9 @@ final sessionGateProvider = FutureProvider<({bool signedIn, bool onboarded, bool
   if (user == null) return (signedIn: false, onboarded: false, consentsOk: false);
   final repo = ref.read(authRepositoryProvider);
   final r = await Future.wait<Object>([repo.loadOnboarding(), repo.legalStatus()]);
-  return (signedIn: true, onboarded: (r[0] as OnboardingData).completed, consentsOk: (r[1] as LegalStatus).requiredOk);
+  final gate = (signedIn: true, onboarded: (r[0] as OnboardingData).completed, consentsOk: (r[1] as LegalStatus).requiredOk);
+  GateCache.remember(user.id, gate.onboarded && gate.consentsOk);   // próximo arranque: directo al Inicio
+  return gate;
 });
 
 /// Router único. Las 4 pestañas (Inicio, Feed, Competiciones, Perfil) viven en un `StatefulShellRoute` con la barra inferior;
@@ -100,21 +103,21 @@ final appRoutes = <RouteBase>[
       // Pestaña «Competiciones» (Ligas | Torneos). Misma ruta /leagues que antes: los enlaces de ligas siguen valiendo.
       StatefulShellBranch(routes: [GoRoute(path: '/leagues', builder: (_, __) => const CompetitionsScreen())]),
       StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen(),
-          routes: [GoRoute(path: 'share', builder: (_, __) => const ShareStatsScreen())])]),
+          routes: [GoRoute(path: 'share', builder: (_, __) => DeferredScreen(load: shareStats.loadLibrary, builder: (_) => shareStats.ShareStatsScreen()))])]),
     ],
   ),
   // Editar perfil a pantalla completa (fuera de la barra inferior). '/profile' (pestaña) no tiene hijo 'edit', así que
   // GoRouter sigue buscando y encuentra esta ruta.
-  GoRoute(path: '/profile/edit', builder: (_, __) => const EditProfileScreen()),
+  GoRoute(path: '/profile/edit', builder: (_, __) => DeferredScreen(load: editProfile.loadLibrary, builder: (_) => editProfile.EditProfileScreen())),
   // Gamificación: Head to Head, ranking entre amigos, Wrapped y logros (fuera de la barra inferior).
   GoRoute(path: '/h2h/:id', builder: (_, s) => HeadToHeadScreen(otherId: s.pathParameters['id']!)),
-  GoRoute(path: '/ranking', builder: (_, __) => const FriendsRankingScreen()),
-  GoRoute(path: '/club/:id', builder: (_, s) => ClubScreen(clubId: s.pathParameters['id']!)),
-  GoRoute(path: '/admin/clubs', builder: (_, __) => const ClubModerationScreen()),
+  GoRoute(path: '/ranking', builder: (_, __) => DeferredScreen(load: ranking.loadLibrary, builder: (_) => ranking.FriendsRankingScreen())),
+  GoRoute(path: '/club/:id', builder: (_, s) => DeferredScreen(load: clubs.loadLibrary, builder: (_) => clubs.ClubScreen(clubId: s.pathParameters['id']!))),
+  GoRoute(path: '/admin/clubs', builder: (_, __) => DeferredScreen(load: clubs.loadLibrary, builder: (_) => clubs.ClubModerationScreen())),
   GoRoute(path: '/achievements', builder: (_, __) => const AchievementsScreen()),
-  GoRoute(path: '/wrapped', builder: (_, __) => const WrappedListScreen(), routes: [
-    GoRoute(path: ':kind/:start', pageBuilder: (_, s) => MaterialPage(fullscreenDialog: true, key: s.pageKey, child: WrappedStoryScreen(
-        kind: WrappedKind.values.byName(s.pathParameters['kind']!), start: DateTime.parse('${s.pathParameters['start']}-01')))),
+  GoRoute(path: '/wrapped', builder: (_, __) => DeferredScreen(load: wrapped.loadLibrary, builder: (_) => wrapped.WrappedListScreen()), routes: [
+    GoRoute(path: ':kind/:start', pageBuilder: (_, s) => MaterialPage(fullscreenDialog: true, key: s.pageKey, child: DeferredScreen(load: wrapped.loadLibrary, builder: (_) => wrapped.WrappedStoryScreen(
+        kind: WrappedKind.values.byName(s.pathParameters['kind']!), start: DateTime.parse('${s.pathParameters['start']}-01'))))),
   ]),
   GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
   GoRoute(path: '/player/:id', builder: (_, s) => ProfileScreen(playerId: s.pathParameters['id']!)),
@@ -131,7 +134,7 @@ final appRoutes = <RouteBase>[
   GoRoute(path: '/match/:id', builder: (_, s) => MatchDetailScreen(matchId: s.pathParameters['id']!), routes: [
     GoRoute(path: 'result', builder: (_, s) => ResultEntryScreen(matchId: s.pathParameters['id']!)),
     GoRoute(path: 'final', builder: (_, s) => FinalResultScreen(matchId: s.pathParameters['id']!)),
-    GoRoute(path: 'share', builder: (_, s) => ShareMatchScreen(matchId: s.pathParameters['id']!)),
+    GoRoute(path: 'share', builder: (_, s) => DeferredScreen(load: shareMatch.loadLibrary, builder: (_) => shareMatch.ShareMatchScreen(matchId: s.pathParameters['id']!))),
     GoRoute(path: 'summary', builder: (_, s) => PostMatchScreen(matchId: s.pathParameters['id']!)),
   ]),
   GoRoute(path: '/welcome', builder: (_, __) => const WelcomeScreen()),
@@ -140,13 +143,13 @@ final appRoutes = <RouteBase>[
     ProviderScope.containerOf(c, listen: false).invalidate(sessionGateProvider);
     GoRouter.of(c).go('/home');
   })),
-  GoRoute(path: '/legal/:doc', builder: (_, s) => LegalDocScreen(slug: s.pathParameters['doc']!)),
-  GoRoute(path: '/settings/privacy', builder: (_, __) => const PrivacySettingsScreen()),
+  GoRoute(path: '/legal/:doc', builder: (_, s) => DeferredScreen(load: legalDoc.loadLibrary, builder: (_) => legalDoc.LegalDocScreen(slug: s.pathParameters['doc']!))),
+  GoRoute(path: '/settings/privacy', builder: (_, __) => DeferredScreen(load: privacy.loadLibrary, builder: (_) => privacy.PrivacySettingsScreen())),
   GoRoute(path: '/onboarding', builder: (c, __) => OnboardingScreen(onDone: () {
     ProviderScope.containerOf(c, listen: false).invalidate(sessionGateProvider);   // la guardia vuelve a leer el perfil ya completo
     GoRouter.of(c).go('/home');
   })),
-  GoRoute(path: '/rating', builder: (_, __) => const EloDetailScreen()),
+  GoRoute(path: '/rating', builder: (_, __) => DeferredScreen(load: eloDetail.loadLibrary, builder: (_) => eloDetail.EloDetailScreen())),
   GoRoute(path: '/messages', builder: (_, __) => const ConversationsScreen(), routes: [
     // abre (o crea) la conversación con un amigo; el backend rechaza si no sois amigos aceptados
     GoRoute(path: 'with/:friendId', builder: (_, s) => _OpenChat(friendId: s.pathParameters['friendId']!, invite: s.uri.queryParameters['invite'] == '1')),
@@ -157,16 +160,16 @@ final appRoutes = <RouteBase>[
     ]),
   ]),
   // Torneos (sistema independiente de Ligas). '/tournaments/new' ANTES que ':id'.
-  GoRoute(path: '/tournaments/new', builder: (_, __) => const CreateTournamentScreen()),
-  GoRoute(path: '/tournaments/:id', builder: (_, s) => TournamentDetailScreen(tournamentId: s.pathParameters['id']!)),
+  GoRoute(path: '/tournaments/new', builder: (_, __) => DeferredScreen(load: createTournament.loadLibrary, builder: (_) => createTournament.CreateTournamentScreen())),
+  GoRoute(path: '/tournaments/:id', builder: (_, s) => DeferredScreen(load: tournament.loadLibrary, builder: (_) => tournament.TournamentDetailScreen(tournamentId: s.pathParameters['id']!))),
   // Ligas (literales ANTES que ':id')
-  GoRoute(path: '/leagues/new', builder: (_, __) => const CreateLeagueScreen()),
-  GoRoute(path: '/leagues/discover', builder: (_, __) => const DiscoverLeaguesScreen()),
+  GoRoute(path: '/leagues/new', builder: (_, __) => DeferredScreen(load: createLeague.loadLibrary, builder: (_) => createLeague.CreateLeagueScreen())),
+  GoRoute(path: '/leagues/discover', builder: (_, __) => DeferredScreen(load: discover.loadLibrary, builder: (_) => discover.DiscoverLeaguesScreen())),
   GoRoute(path: '/leagues/join', builder: (c, s) => _JoinByCodeRoute(code: s.uri.queryParameters['code'])),
   GoRoute(path: '/leagues/:id', builder: (_, s) => LeagueDetailScreen(leagueId: s.pathParameters['id']!,
       initialTab: LeagueTab.values.asNameMap()[s.uri.queryParameters['tab']] ?? LeagueTab.rank), routes: [
-    GoRoute(path: 'created', builder: (_, s) => LeagueCreatedScreen(leagueId: s.pathParameters['id']!, code: s.uri.queryParameters['code'])),
-    GoRoute(path: 'manage', builder: (_, s) => ManageLeagueScreen(leagueId: s.pathParameters['id']!)),
+    GoRoute(path: 'created', builder: (_, s) => DeferredScreen(load: createLeague.loadLibrary, builder: (_) => createLeague.LeagueCreatedScreen(leagueId: s.pathParameters['id']!, code: s.uri.queryParameters['code']))),
+    GoRoute(path: 'manage', builder: (_, s) => DeferredScreen(load: manageLeague.loadLibrary, builder: (_) => manageLeague.ManageLeagueScreen(leagueId: s.pathParameters['id']!))),
   ]),
 ];
 
@@ -246,3 +249,10 @@ class _SplashRouteState extends ConsumerState<_SplashRoute> {
       );
 }
 
+
+/// Todas las pantallas en carga diferida (ver [DeferredScreen.preload]).
+final deferredScreenLoaders = <Future<void> Function()>[
+  shareStats.loadLibrary, editProfile.loadLibrary, ranking.loadLibrary, clubs.loadLibrary, wrapped.loadLibrary,
+  shareMatch.loadLibrary, legalDoc.loadLibrary, privacy.loadLibrary, eloDetail.loadLibrary, createTournament.loadLibrary,
+  tournament.loadLibrary, createLeague.loadLibrary, discover.loadLibrary, manageLeague.loadLibrary,
+];

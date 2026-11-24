@@ -8,6 +8,7 @@ import '../../../core/widgets/plobby_icon.dart';
 import '../../social/domain/social_models.dart' show PlayerSummary;
 import '../../social/presentation/player_tile.dart' show PlayerAvatar;
 import '../domain/tournament_models.dart';
+import '../../../core/widgets/net_image.dart';
 
 const _months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -78,7 +79,7 @@ class TournamentCover extends StatelessWidget {
     if (bytes != null) {
       child = Image.memory(bytes!, fit: BoxFit.cover, gaplessPlayback: true);
     } else if (url != null && url!.isNotEmpty) {
-      child = Image.network(url!, fit: BoxFit.cover, cacheWidth: w, errorBuilder: (_, __, ___) => _CourtArt(seed: seed));
+      child = NetImage(url!, fit: BoxFit.cover, cacheWidth: w, errorBuilder: (_, __, ___) => _CourtArt(seed: seed));
     } else {
       child = _CourtArt(seed: seed);
     }

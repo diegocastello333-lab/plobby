@@ -67,7 +67,7 @@ Widget _app(_Repo repo, {bool reduce = false, LifecycleMatch? m, RatingDetail? r
       overrides: [
         currentUserIdProvider.overrideWithValue('me'),
         matchProvider('m1').overrideWith((ref) => Stream.value(m ?? _match())),
-        myRatingProvider.overrideWith((ref) async => r ?? _rating()),
+        myRatingSummaryProvider.overrideWith((ref) async => r ?? _rating()),
         achievementsProvider.overrideWith((ref) async => a ?? _achData()),
         gamificationRepositoryProvider.overrideWithValue(repo),
       ],
@@ -114,7 +114,7 @@ void main() {
 
   group('secuencia', () {
     setUp(() {
-      final v = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first as TestFlutterView;
+      final v = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
       v.physicalSize = const Size(390, 1400);
       v.devicePixelRatio = 1;
       addTearDown(v.reset);
@@ -217,7 +217,7 @@ void main() {
           overrides: [
             currentUserIdProvider.overrideWithValue('me'),
             matchProvider('m1').overrideWith((ref) => Stream.value(_match(sets: const [SetScore(7, 6), SetScore(6, 7), SetScore(10, 8)]))),
-            myRatingProvider.overrideWith((ref) async => _rating()),
+            myRatingSummaryProvider.overrideWith((ref) async => _rating()),
             achievementsProvider.overrideWith((ref) async => _achData()),
             gamificationRepositoryProvider.overrideWithValue(_Repo()),
           ],

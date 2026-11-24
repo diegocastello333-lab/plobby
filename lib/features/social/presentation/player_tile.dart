@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../domain/social_models.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Colores de las iniciales (`.av` del prototipo): tinta con lima, tinta con marfil, lima con tinta o salvia con tinta.
 const _palette = [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
@@ -18,7 +19,7 @@ class PlayerAvatar extends StatelessWidget {
     return Stack(clipBehavior: Clip.none, children: [
       ClipOval(child: SizedBox(width: size, height: size, child: p.avatarUrl == null || p.avatarUrl!.isEmpty
           ? initials
-          : Image.network(p.avatarUrl!, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => initials))),
+          : NetImage(p.avatarUrl!, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => initials))),
       if (p.online)
         Positioned(right: -1, bottom: -1, child: Semantics(label: 'En línea', child: Container(width: size * .28, height: size * .28,
             decoration: BoxDecoration(color: AppColors.brand, shape: BoxShape.circle, border: Border.all(color: AppColors.bg, width: 2))))),

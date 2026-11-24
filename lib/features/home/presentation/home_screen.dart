@@ -24,6 +24,8 @@ import '../../profile/application/profile_providers.dart';
 import '../../profile/domain/models.dart';
 import '../../social/application/social_providers.dart';
 import 'home_wiring.dart';
+import '../application/home_snapshot.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Últimas partidas confirmadas de amigos (fuente: feed, filtro «Partidos»; la RLS limita a amigos).
 final friendMatchesProvider = FutureProvider.autoDispose<List<FeedPost>>((ref) async {
@@ -56,6 +58,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = ref.watch(homeCountersProvider);
     final view = ref.watch(profileViewProvider('me'));
+    ref.watch(homeSnapshotWriterProvider);   // guarda la cabecera para el próximo arranque
     return Scaffold(
       backgroundColor: Colors.transparent,   // fondo vivo de la barra inferior (AmbientBackground)
       body: RefreshIndicator(
@@ -65,7 +68,7 @@ class HomeScreen extends ConsumerWidget {
           try { await ref.read(profileProvider('me').future); } catch (_) {/* el error se muestra en la sección */}
         },
         child: ListView(padding: EdgeInsets.zero, children: [
-          _Banner(counters: c, profile: view.valueOrNull?.data.profile),
+          _Banner(counters: c, profile: view.valueOrNull?.data.profile, snapshot: ref.watch(homeSnapshotProvider)),
           // margin-top: −34px del HTML: TODO el bloque sube 34 px (las tarjetas solapan el banner y las secciones las
           // siguen sin hueco). Padding lateral 20 y 150 abajo (espacio para la barra inferior).
           Transform.translate(offset: const Offset(0, -34), child: Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 150), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -163,18 +166,21 @@ class _BannerBackdropState extends ConsumerState<_BannerBackdrop> {
 }
 
 class _Banner extends StatelessWidget {
-  const _Banner({required this.counters, required this.profile});
+  const _Banner({required this.counters, required this.profile, this.snapshot});
   final HomeCounters counters; final PlayerProfile? profile;
+  /// Lo último que se vio (al abrir la app, hasta que llega el perfil).
+  final HomeSnapshot? snapshot;
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
-    final first = (profile?.fullName ?? '').trim().split(RegExp(r'\s+')).first;
+    final first = (profile?.fullName ?? snapshot?.name ?? '').trim().split(RegExp(r'\s+')).first;
+    final avatarUrl = profile != null ? profile!.avatarUrl : snapshot?.avatarUrl;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       child: SizedBox(height: homeBannerHeight(context), child: Stack(fit: StackFit.expand, children: [
         const ColoredBox(color: AppColors.ink900),
         // Banner dinámico: colección elegida (Banner 1/2) + imagen según la hora local. Mantener pulsado abre el selector.
-        GestureDetector(onLongPress: () => showBannerSheet(context), child: _BannerBackdrop(banner: HomeBanner.fromId(profile?.bannerId))),
+        GestureDetector(onLongPress: () => showBannerSheet(context), child: _BannerBackdrop(banner: HomeBanner.fromId(profile != null ? profile!.bannerId : snapshot?.bannerId))),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Color(0x94171C19), Color(0x0D171C19), Color(0x1F171C19), Color(0xC7171C19)], stops: [0, .30, .52, 1]))),
         // Logo: Unbounded 700 24px −0.03em lima, sombra 0 1 8 .55
@@ -192,8 +198,8 @@ class _Banner extends StatelessWidget {
         Positioned(left: 20, right: 76, bottom: 46, child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
           Semantics(button: true, label: 'Ver mi perfil', excludeSemantics: true, child: GestureDetector(onTap: () => HomeNav.profile(context),
               child: Container(width: 68, height: 68, padding: const EdgeInsets.all(3), decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.lime300),
-                  child: ClipOval(child: profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty
-                      ? Image.network(profile!.avatarUrl!, fit: BoxFit.cover, cacheWidth: 186, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: profile?.id ?? 'me', size: 62))
+                  child: ClipOval(child: avatarUrl != null && avatarUrl.isNotEmpty
+                      ? NetImage(avatarUrl, fit: BoxFit.cover, cacheWidth: 186, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: profile?.id ?? 'me', size: 62))
                       : SilhouetteAvatar(seed: profile?.id ?? 'me', size: 62))))),
           const SizedBox(height: 10),
           Text(greeting(DateTime.now()), style: PlobbyText.hello.copyWith(shadows: const [Shadow(color: Color(0x66000000), blurRadius: 14, offset: Offset(0, 2))])),
@@ -246,7 +252,7 @@ class _Counters extends ConsumerWidget {
               for (var i = friends.length - 1; i >= 0; i--)
                 Positioned(left: 17.0 * i, child: Container(width: 26, height: 26, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
                     child: ClipOval(child: friends[i].player.avatarUrl != null
-                        ? Image.network(friends[i].player.avatarUrl!, fit: BoxFit.cover, cacheWidth: 66, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: friends[i].player.id, size: 22))
+                        ? NetImage(friends[i].player.avatarUrl!, fit: BoxFit.cover, cacheWidth: 66, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: friends[i].player.id, size: 22))
                         : SilhouetteAvatar(seed: friends[i].player.id, size: 22)))),
             ])),
             const SizedBox(width: 10),
@@ -369,7 +375,7 @@ class _Story extends StatelessWidget {
       AnimatedContainer(duration: Motion.normal, width: 66, height: 66, padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.ink900, width: 2), color: selected ? AppColors.ink900 : Colors.transparent),
           child: ClipOval(child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-              ? Image.network(user.avatarUrl!, fit: BoxFit.cover, cacheWidth: 168, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: user.id, size: 56))
+              ? NetImage(user.avatarUrl!, fit: BoxFit.cover, cacheWidth: 168, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: user.id, size: 56))
               : SilhouetteAvatar(seed: user.id, size: 56))),
       const SizedBox(height: 12),
       Text(first, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.3, letterSpacing: 0,
@@ -428,7 +434,7 @@ class _PlayedCard extends StatelessWidget {
     final m = match, win = m.won;
     final fg = win ? AppColors.text : AppColors.textMuted;
     Widget avatar = m.partner.avatarUrl != null && m.partner.avatarUrl!.isNotEmpty
-        ? Image.network(m.partner.avatarUrl!, fit: BoxFit.cover, cacheWidth: 132, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: m.partner.id, size: 44))
+        ? NetImage(m.partner.avatarUrl!, fit: BoxFit.cover, cacheWidth: 132, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: m.partner.id, size: 44))
         : SilhouetteAvatar(seed: m.partner.id, size: 44);
     if (!win) avatar = Opacity(opacity: .7, child: ColorFiltered(colorFilter: const ColorFilter.matrix(_grayscale), child: avatar));
     return Semantics(button: true, label: '${win ? 'Victoria' : 'Derrota'} con ${m.partner.name}, ${m.sets.map((s) => '${s.$1}-${s.$2}').join(' ')}', excludeSemantics: true,

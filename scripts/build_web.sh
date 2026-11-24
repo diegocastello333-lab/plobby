@@ -46,13 +46,18 @@ BUILD_ID="${BUILD_ID:0:12}"
 flutter pub get
 # --no-web-resources-cdn: CanvasKit se sirve desde nuestro dominio (no de gstatic.com): menos dependencias externas y
 # la PWA puede guardarlo en caché. --pwa-strategy no se usa: el service worker es el nuestro (web/sw.js).
-flutter build web --release --no-web-resources-cdn --no-wasm-dry-run \
+# --wasm: Chrome, Edge, Firefox y Safari 18.2+ usan WebAssembly (skwasm): en 4G lento el contenido útil llega en
+# ~11 s frente a ~20 s con JavaScript+CanvasKit (medido, docs/rendimiento). Los navegadores sin WasmGC siguen usando la
+# versión JavaScript, que también se genera. --enable-wasm-deferred-loading: las pantallas secundarias se descargan al
+# abrirlas (o en segundo plano tras la carga), no al principio.
+ENGINE_ID=$(flutter --version --machine 2>/dev/null | sed -n 's/.*"engineRevision": *"\([0-9a-f]*\)".*/\1/p' | cut -c1-12)
+flutter build web --release --wasm --enable-wasm-deferred-loading --no-web-resources-cdn \
   --dart-define=SUPABASE_URL="$SUPABASE_URL" \
   --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY" \
   --dart-define=PLOBBY_BUILD="web.$BUILD_ID"
 
 # Versión del service worker = commit: cada despliegue invalida la caché de la app (nunca la de datos: no hay).
-sed -i.bak "s/__PLOBBY_BUILD_ID__/$BUILD_ID/" build/web/sw.js && rm -f build/web/sw.js.bak
+sed -i.bak "s/__PLOBBY_BUILD_ID__/$BUILD_ID/; s/__PLOBBY_ENGINE_ID__/${ENGINE_ID:-$BUILD_ID}/" build/web/sw.js && rm -f build/web/sw.js.bak
 # El service worker de Flutter 3.50 es un stub que se da de baja; no se registra (web/flutter_bootstrap.js).
 rm -f build/web/flutter_service_worker.js
 

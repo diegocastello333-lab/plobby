@@ -14,6 +14,7 @@ import '../application/messaging_providers.dart';
 import '../data/messaging_repository.dart';
 import '../domain/messaging_models.dart';
 import 'group_avatar.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Info del grupo (desde la cabecera del chat): participantes con rol, edición de nombre/foto (admins), añadir/quitar, abandonar.
 class GroupInfoScreen extends ConsumerWidget {
@@ -76,7 +77,7 @@ class GroupInfoScreen extends ConsumerWidget {
                 child: Padding(padding: const EdgeInsets.symmetric(vertical: 11), child: Row(children: [
                   ClipOval(child: Container(width: 44, height: 44, color: AppColors.ink900, alignment: Alignment.center,
                       child: m.avatarUrl == null ? Text(m.initials, style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.lime300, fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 0))
-                          : Image.network(m.avatarUrl!, width: 44, height: 44, fit: BoxFit.cover, cacheWidth: 132, errorBuilder: (_, __, ___) => Text(m.initials, style: const TextStyle(color: AppColors.lime300, fontWeight: FontWeight.w800))))),
+                          : NetImage(m.avatarUrl!, width: 44, height: 44, fit: BoxFit.cover, cacheWidth: 132, errorBuilder: (_, __, ___) => Text(m.initials, style: const TextStyle(color: AppColors.lime300, fontWeight: FontWeight.w800))))),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Row(children: [

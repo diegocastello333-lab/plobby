@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/plobby_icon.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Imágenes predeterminadas para grupos (se guarda solo el id en `conversations.avatar_id`). Colores e iconos de
 /// `GPRE` del prototipo HTML; los ids p1–p8 no cambian.
@@ -33,7 +34,7 @@ class GroupAvatar extends StatelessWidget {
     if (bytes != null) {
       inner = Image.memory(bytes!, width: size, height: size, fit: BoxFit.cover);
     } else if (url != null && url!.isNotEmpty) {
-      inner = Image.network(url!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => _preset());
+      inner = NetImage(url!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => _preset());
     } else {
       inner = _preset();
     }

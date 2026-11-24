@@ -78,8 +78,8 @@ void main() {
       expect(HomeBanner.values.map((b) => b.name), ['Seaside', 'Tropical']);
       final all = [for (final b in HomeBanner.values) ...b.assets];
       expect(all.toSet().length, 8);
-      expect(HomeBanner.banner1.assets, [for (final p in ['amanecer', 'dia', 'atardecer', 'noche']) 'assets/images/banners/banner1/$p.jpg']);
-      expect(HomeBanner.banner2.assets, [for (final p in ['amanecer', 'dia', 'atardecer', 'noche']) 'assets/images/banners/banner2/$p.jpg']);
+      expect(HomeBanner.banner1.assets, [for (final p in ['amanecer', 'dia', 'atardecer', 'noche']) 'assets/images/banners/banner1/$p.webp']);
+      expect(HomeBanner.banner2.assets, [for (final p in ['amanecer', 'dia', 'atardecer', 'noche']) 'assets/images/banners/banner2/$p.webp']);
     });
 
     test('preferencia: null o un banner antiguo → Seaside; «banner2» → Tropical', () {
@@ -89,13 +89,13 @@ void main() {
       for (final b in HomeBanner.values) { expect(RegExp(r'^[a-z0-9_-]{1,32}$').hasMatch(b.id), isTrue); }   // restricción de la columna
     });
 
-    testWidgets('las 8 imágenes están empaquetadas, son JPEG válidos y todas con el mismo encuadre (1376×768)', (t) async {
+    testWidgets('las 8 imágenes están empaquetadas, son WebP válidos, ligeros y con el mismo encuadre (1376×768)', (t) async {
       for (final b in HomeBanner.values) {
         for (final a in b.assets) {
           final bytes = (await t.runAsync(() => rootBundle.load(a)))!.buffer.asUint8List();
-          final im = (await t.runAsync(() async => img.decodeJpg(bytes)))!;
+          final im = (await t.runAsync(() async => img.decodeWebP(bytes)))!;
           expect((im.width, im.height), (1376, 768), reason: a);
-          expect(bytes.length, lessThan(400 * 1024), reason: a);
+          expect(bytes.length, lessThan(250 * 1024), reason: a);
         }
       }
     });
@@ -168,9 +168,9 @@ void main() {
       now = DateTime(2026, 11, 13, 15, 30);
       final repo = MockProfileRepository();
       await app(t, repo);
-      expect(_asset('assets/images/banners/banner1/dia.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner1/dia.webp'), findsOneWidget);
       // Ocupa todo el banner (cover, sin deformar ni bandas).
-      expect(t.getSize(_asset('assets/images/banners/banner1/dia.jpg')), Size(390, homeBannerHeight(t.element(find.byType(Scaffold).first))));
+      expect(t.getSize(_asset('assets/images/banners/banner1/dia.webp')), Size(390, homeBannerHeight(t.element(find.byType(Scaffold).first))));
 
       await t.tap(find.bySemanticsLabel('Personalizar banner'));
       await settle(t);
@@ -186,15 +186,15 @@ void main() {
       final sheet = find.ancestor(of: find.byType(SheetHeader), matching: find.byType(Column)).first;
       expect(find.descendant(of: sheet, matching: find.textContaining(RegExp(r'\d\d:\d\d'))), findsNothing);
       // Cada tarjeta enseña la imagen de SU colección para la hora actual (15:30 → día).
-      expect(_asset('assets/images/banners/banner2/dia.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/dia.webp'), findsOneWidget);
 
       await t.tap(find.bySemanticsLabel('Tropical'));
       await settle(t);
       expect((await t.runAsync(() => repo.load('me')))!.profile.bannerId, 'banner2');
       expect(find.text('Tropical aplicado'), findsOneWidget);
       await settle(t, 6);
-      expect(_asset('assets/images/banners/banner2/dia.jpg'), findsOneWidget);
-      expect(_asset('assets/images/banners/banner1/dia.jpg'), findsNothing);
+      expect(_asset('assets/images/banners/banner2/dia.webp'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner1/dia.webp'), findsNothing);
       expect(t.takeException(), isNull);
     });
 
@@ -203,16 +203,16 @@ void main() {
       final repo = MockProfileRepository();
       await t.runAsync(() => repo.setBanner('banner2'));
       await app(t, repo);
-      expect(_asset('assets/images/banners/banner2/dia.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/dia.webp'), findsOneWidget);
       now = DateTime(2026, 11, 13, 18, 0, 1);
       await t.pump(const Duration(seconds: 2));
       await t.pump(const Duration(milliseconds: 300));
       // A mitad del fundido conviven las dos: nunca hay un fotograma vacío.
-      expect(_asset('assets/images/banners/banner2/dia.jpg'), findsOneWidget);
-      expect(_asset('assets/images/banners/banner2/atardecer.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/dia.webp'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/atardecer.webp'), findsOneWidget);
       await settle(t, 6);
-      expect(_asset('assets/images/banners/banner2/dia.jpg'), findsNothing);
-      expect(_asset('assets/images/banners/banner2/atardecer.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/dia.webp'), findsNothing);
+      expect(_asset('assets/images/banners/banner2/atardecer.webp'), findsOneWidget);
     });
 
     testWidgets('la preferencia se mantiene al cerrar y volver a abrir la app', (t) async {
@@ -220,11 +220,11 @@ void main() {
       final repo = MockProfileRepository();
       await t.runAsync(() => repo.setBanner('banner2'));
       await app(t, repo);
-      expect(_asset('assets/images/banners/banner2/noche.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/noche.webp'), findsOneWidget);
       await t.pumpWidget(const SizedBox());           // «cierra» la app
       now = DateTime(2026, 11, 14, 7);
       await app(t, repo);                             // la vuelve a abrir al día siguiente
-      expect(_asset('assets/images/banners/banner2/amanecer.jpg'), findsOneWidget);
+      expect(_asset('assets/images/banners/banner2/amanecer.webp'), findsOneWidget);
     });
   });
 }

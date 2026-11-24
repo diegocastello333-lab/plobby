@@ -8,6 +8,7 @@ import '../../../../core/widgets/plobby_icon.dart';
 import '../../../profile/presentation/widgets/win_streak_badge.dart';
 import '../../domain/feed_models.dart';
 import 'reaction_bar.dart';
+import '../../../../core/widgets/net_image.dart';
 
 String timeAgo(DateTime d) {
   final m = DateTime.now().difference(d).inMinutes;
@@ -27,7 +28,7 @@ Widget feedAvatarFill(FeedUser u, double size) {
   final fallback = ColoredBox(color: bg, child: Center(child: Text(initials.isEmpty ? '?' : initials,
       style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: size * .36, fontWeight: FontWeight.w800, letterSpacing: 0, color: fg))));
   return u.avatarUrl != null && u.avatarUrl!.isNotEmpty
-      ? Image.network(u.avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => fallback)
+      ? NetImage(u.avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => fallback)
       : fallback;
 }
 

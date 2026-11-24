@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/plobby_theme.dart';
 import '../../application/profile_providers.dart';
-import '../../data/profile_repository.dart';
 import '../../domain/models.dart';
 import '../../../../core/widgets/state_views.dart';
 import '../../../../core/errors/failure.dart';
@@ -13,6 +12,7 @@ import '../../../clubs/application/club_providers.dart' show isCatalogClubId;
 import '../../../clubs/presentation/club_search_sheet.dart' show pickClub, clubRemoved;
 import '../../../matches/domain/match_models.dart' show PlayerOption;
 import '../../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
+import '../../../../core/widgets/net_image.dart';
 
 /// Club base (opcional), pareja habitual (requiere aceptación) y lado de juego.
 class IdentityCard extends ConsumerWidget {
@@ -80,7 +80,7 @@ class _Row extends StatelessWidget {
       onTap: onTap, minVerticalPadding: 10,
       leading: avatar != null
           ? ClipOval(child: SizedBox(width: 34, height: 34, child: avatarUrl != null && avatarUrl!.isNotEmpty
-              ? Image.network(avatarUrl!, fit: BoxFit.cover, cacheWidth: 102, errorBuilder: (_, __, ___) => avatar!) : avatar))
+              ? NetImage(avatarUrl!, fit: BoxFit.cover, cacheWidth: 102, errorBuilder: (_, __, ___) => avatar!) : avatar))
           : Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.ink900))),
       title: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

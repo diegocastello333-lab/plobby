@@ -8,6 +8,7 @@ import '../../../core/widgets/plobby_components.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../../auth/presentation/avatar_catalog.dart';
 import '../domain/league_models.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// SVG de portada (`cover(kind)` del prototipo HTML, viewBox 390×120, recorte «slice»). Los ids que guarda la base de
 /// datos ([leagueCovers]) se asignan a los diseños del HTML: waves → arcs, diagonal → diag. Los patrones SVG
@@ -118,7 +119,7 @@ class LeagueAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final initials = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
     final w = avatarUrl != null && avatarUrl!.isNotEmpty
-        ? ClipOval(child: Image.network(avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => _initials(initials)))
+        ? ClipOval(child: NetImage(avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => _initials(initials)))
         : avatarId != null ? PlobbyAvatar(id: avatarId!, size: size) : _initials(initials);
     return Container(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: highlight ? AppColors.brand : AppColors.surface, width: 2)), child: w);
   }

@@ -17,6 +17,8 @@ abstract class AuthRepository {
   /// Borra de Storage las imágenes de `avatars/<uid>/` salvo la de [keepUrl] (la vigente). Se llama tras cambiar o
   /// quitar la foto para no dejar ficheros huérfanos. Nunca lanza: si falla, el perfil ya está guardado.
   Future<void> deleteAvatarFiles({String? keepUrl});
+  /// Fotos subidas con versiones anteriores: crea sus miniaturas (96/256 px) si faltan. Best-effort, una vez.
+  Future<void> ensureAvatarThumbs(String avatarUrl) async {}
   Future<void> completeOnboarding();
 
   // ── Legal y privacidad (Seguridad Fase 8) ──

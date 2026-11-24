@@ -13,6 +13,7 @@ import '../../profile/application/profile_providers.dart';
 import '../application/feed_providers.dart';
 import '../domain/feed_models.dart';
 import 'widgets/activity_cards.dart';
+import '../../../core/widgets/net_image.dart';
 
 const _filters = {FeedFilter.all: 'Todo', FeedFilter.friends: 'Amigos', FeedFilter.matches: 'Partidos', FeedFilter.achievements: 'Logros', FeedFilter.leagues: 'Competiciones'};
 
@@ -93,7 +94,7 @@ class _Header extends ConsumerWidget {
             width: 44, height: 44,
             decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
             child: ClipOval(child: me?.avatarUrl != null && me!.avatarUrl!.isNotEmpty
-                ? Image.network(me.avatarUrl!, fit: BoxFit.cover, cacheWidth: 120, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: me.id, size: 40))
+                ? NetImage(me.avatarUrl!, fit: BoxFit.cover, cacheWidth: 120, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: me.id, size: 40))
                 : SilhouetteAvatar(seed: me?.id ?? 'me', size: 40)),
           )))),
         ])),

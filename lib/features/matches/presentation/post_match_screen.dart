@@ -72,7 +72,7 @@ class PostMatchScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final m = ref.watch(matchProvider(matchId));
     final uid = ref.watch(currentUserIdProvider);
-    final rating = ref.watch(myRatingProvider), ach = ref.watch(achievementsProvider);
+    final rating = ref.watch(myRatingSummaryProvider), ach = ref.watch(achievementsProvider);
     final match = m.valueOrNull;
     if (m.hasError && match == null) {
       return Scaffold(body: Column(children: [

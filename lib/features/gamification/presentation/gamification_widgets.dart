@@ -5,6 +5,7 @@ import '../../../core/theme/plobby_text.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/plobby_icon.dart';
 import '../domain/gamification_models.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Piezas visuales compartidas por Head to Head, Ranking, Wrapped y Logros (mismo lenguaje que el resto de Plobby:
 /// tinta, lima, marfil; Unbounded para cifras, Inter para el texto).
@@ -23,7 +24,7 @@ class GAvatar extends StatelessWidget {
     final initials = Container(color: bg, alignment: Alignment.center, child: Text(player.initials,
         style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: size * .36, fontWeight: FontWeight.w800, letterSpacing: 0, color: fg)));
     final img = player.avatarUrl != null && player.avatarUrl!.isNotEmpty
-        ? Image.network(player.avatarUrl!, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => initials)
+        ? NetImage(player.avatarUrl!, fit: BoxFit.cover, cacheWidth: (size * 3).round(), errorBuilder: (_, __, ___) => initials)
         : initials;
     return Container(
       width: size, height: size,

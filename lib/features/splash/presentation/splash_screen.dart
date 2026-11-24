@@ -30,8 +30,9 @@ class SplashScreen extends StatefulWidget {
   /// Altura de la P en dp: la misma que en el splash nativo de Android e iOS.
   static const markHeight = 120.0;
 
-  /// Duración de la animación de entrada.
-  static const introDuration = Duration(milliseconds: 2100);  // timing
+  /// Duración de la animación de entrada: como mucho ~1 s. La pantalla se va en cuanto acaban esta animación y la
+  /// carga real (sesión + perfil); si la carga tarda más, se queda el indicador de carga.
+  static const introDuration = Duration(milliseconds: 900);  // timing
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -55,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     final ready = (widget.ready ?? Future<void>.value()).catchError((Object _) {});
     if (reduceMotion) {
       _intro.value = 1;
-      await Future.wait([ready, Future<void>.delayed(const Duration(milliseconds: 700))]);  // timing
+      await ready;
     } else {
       unawaited(_loader.repeat());
       await Future.wait([ready, _intro.forward().orCancel.catchError((Object _) {})]);

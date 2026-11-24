@@ -19,7 +19,13 @@ class BannerImage extends StatelessWidget {
 }
 
 /// Franjas que Inicio decodifica por adelantado: la actual y la siguiente (noche → amanecer al dar la vuelta).
-List<DayPhase> bannerPhasesToPrecache(DayPhase now) => [now, DayPhase.values[(now.index + 1) % DayPhase.values.length]];
+/// La franja actual y, solo si el cambio llega en menos de [nextPhaseWindow], también la siguiente. Antes se precargaba
+/// siempre la siguiente: una descarga extra en cada apertura que casi nunca se llegaba a ver.
+const nextPhaseWindow = Duration(minutes: 20);   // timing
+List<DayPhase> bannerPhasesToPrecache(DayPhase now, {Duration? untilNext}) => [
+      now,
+      if (untilNext == null || untilNext <= nextPhaseWindow) DayPhase.values[(now.index + 1) % DayPhase.values.length],
+    ];
 
 /// Decodifica de antemano las imágenes de una colección para que los cambios de franja sean instantáneos.
 ///
@@ -27,6 +33,7 @@ List<DayPhase> bannerPhasesToPrecache(DayPhase now) => [now, DayPhase.values[(no
 /// cuatro (≈1 MB de descarga en la web y ≈16 MB de memoria decodificada, 1376×768×4 bytes cada una) aunque solo se ve
 /// una. En Safari de iPhone esa memoria importa: si la página usa demasiada, iOS la recarga.
 Future<void> precacheBanner(BuildContext context, HomeBanner b, {List<DayPhase>? phases}) {
-  final list = phases ?? bannerPhasesToPrecache(dayPhaseAt(DateTime.now()));
+  final now = DateTime.now();
+  final list = phases ?? bannerPhasesToPrecache(dayPhaseAt(now), untilNext: nextPhaseChange(now).difference(now));
   return Future.wait([for (final p in list) precacheImage(AssetImage(b.asset(p)), context, onError: (_, __) {})]);
 }

@@ -39,8 +39,8 @@ enum HomeBanner {
   const HomeBanner(this.id, this.name);
   final String id, name;
 
-  /// Ruta del asset de un momento del día: `assets/images/banners/<id>/<momento>.jpg`.
-  String asset(DayPhase p) => 'assets/images/banners/$id/${p.name}.jpg';
+  /// Ruta del asset de un momento del día: `assets/images/banners/<id>/<momento>.webp` (WebP: −32 % frente al JPEG).
+  String asset(DayPhase p) => 'assets/images/banners/$id/${p.name}.webp';
 
   /// Las cuatro imágenes de la colección (para precargarlas).
   List<String> get assets => [for (final p in DayPhase.values) asset(p)];

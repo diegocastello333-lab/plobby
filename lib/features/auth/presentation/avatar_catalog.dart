@@ -1,6 +1,7 @@
 import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import '../domain/auth_models.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Avatares deportivos predefinidos (no son círculos de color liso): fondo de pista con degradado, líneas de pista,
 /// pelota, jugador con visera/cinta/gorra. Se guarda solo el id (`a1`..`a12`) en `profiles.avatar_id`.
@@ -85,7 +86,7 @@ class AvatarPicker extends StatelessWidget {
     final hasPhoto = data.avatarUrl != null && data.avatarUrl!.isNotEmpty;
     return Column(children: [
       Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFD2F548), width: 2)),
-          child: hasPhoto ? ClipOval(child: Image.network(data.avatarUrl!, width: 104, height: 104, fit: BoxFit.cover, cacheWidth: 312, errorBuilder: (_, __, ___) => const SizedBox(width: 104, height: 104)))
+          child: hasPhoto ? ClipOval(child: NetImage(data.avatarUrl!, width: 104, height: 104, fit: BoxFit.cover, cacheWidth: 312, errorBuilder: (_, __, ___) => const SizedBox(width: 104, height: 104)))
               : data.avatarId != null ? PlobbyAvatar(id: data.avatarId!, size: 104)
               : const CircleAvatar(radius: 52, backgroundColor: Color(0xFFEEF1EA), child: Icon(Icons.person_outline, size: 44))),
       const SizedBox(height: 16),

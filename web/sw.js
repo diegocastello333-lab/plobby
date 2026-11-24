@@ -11,6 +11,12 @@
  */
 const BUILD_ID = '__PLOBBY_BUILD_ID__';
 const CACHE = `plobby-app-${BUILD_ID}`;
+// Motor de Flutter (canvaskit/skwasm) y fuentes de respaldo: solo cambian al actualizar Flutter, no en cada despliegue.
+// Van en su propia caché, identificada por la versión del motor, que SOBREVIVE a los despliegues de la app: tras
+// publicar una versión nueva no se vuelven a descargar ~1,4 MB de motor.
+const ENGINE_ID = '__PLOBBY_ENGINE_ID__';
+const ENGINE_CACHE = `plobby-engine-${ENGINE_ID}`;
+const isEngine = (path) => path.startsWith('/canvaskit/') || path.startsWith('/fonts/fallback/');
 
 // La página (index.html) y los ficheros que la arrancan: primero red, para recoger despliegues nuevos.
 const NETWORK_FIRST = ['/', '/index.html', '/flutter_bootstrap.js', '/app_boot.js', '/manifest.json'];
@@ -25,6 +31,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     for (const key of await caches.keys()) {
       if (key.startsWith('plobby-app-') && key !== CACHE) await caches.delete(key);
+      if (key.startsWith('plobby-engine-') && key !== ENGINE_CACHE) await caches.delete(key);
     }
     await self.clients.claim();
   })());
@@ -43,7 +50,7 @@ self.addEventListener('fetch', (event) => {
   if (NEVER.includes(url.pathname) || req.headers.has('range')) return;
 
   const isPage = req.mode === 'navigate' || NETWORK_FIRST.includes(url.pathname);
-  event.respondWith(isPage ? networkFirst(req) : cacheFirst(req));
+  event.respondWith(isPage ? networkFirst(req) : cacheFirst(req, isEngine(url.pathname) ? ENGINE_CACHE : CACHE));
 });
 
 async function networkFirst(req) {
@@ -58,8 +65,8 @@ async function networkFirst(req) {
   }
 }
 
-async function cacheFirst(req) {
-  const cache = await caches.open(CACHE);
+async function cacheFirst(req, name) {
+  const cache = await caches.open(name);
   const hit = await cache.match(req);
   if (hit) return hit;
   const res = await fetch(req);

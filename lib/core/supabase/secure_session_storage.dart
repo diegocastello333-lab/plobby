@@ -23,7 +23,10 @@ class SecureSessionStorage extends LocalStorage {
   /// Opciones únicas para toda la app. `resetOnError`: si el Keystore se corrompe (pasa en algunos móviles tras
   /// restaurar el sistema), se borra el almacén en vez de bloquear la app; el usuario solo tendría que volver a entrar.
   static const secureStorage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true, resetOnError: true),
+    // v10: los datos guardados por la v9 (EncryptedSharedPreferences) se migran solos al cifrado nuevo la primera vez
+    // (`migrateOnAlgorithmChange`, por defecto) con copia de seguridad durante la migración (`migrateWithBackup`).
+    // ignore: deprecated_member_use
+    aOptions: AndroidOptions(encryptedSharedPreferences: true, resetOnError: true, migrateWithBackup: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
   );
 

@@ -17,6 +17,7 @@ import 'widgets/avatar_gallery_sheet.dart';
 import '../application/profile_providers.dart';
 import '../domain/models.dart';
 import '../../../core/errors/failure.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Validación pura de «Editar perfil» (mismas reglas que el servidor en save_onboarding_step). Campo → mensaje.
 Map<String, String> validateProfileEdit({required String first, required String last, required String username, required String bio}) => {
@@ -184,7 +185,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Center(child: SizedBox(width: 98, height: 96, child: Stack(clipBehavior: Clip.none, children: [
                       Semantics(button: true, label: 'Foto de perfil', excludeSemantics: true, child: GestureDetector(onTap: _uploading ? null : _openPhotoSheet,
                           child: ClipOval(child: SizedBox(width: 92, height: 92, child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                              ? Image.network(_avatarUrl!, fit: BoxFit.cover, cacheWidth: 276, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: p.id, size: 92))
+                              ? NetImage(_avatarUrl!, fit: BoxFit.cover, cacheWidth: 276, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: p.id, size: 92))
                               : _avatarId != null ? PlobbyAvatar(id: _avatarId!, size: 92) : SilhouetteAvatar(seed: p.id, size: 92))))),
                       if (_uploading) const Positioned.fill(right: 6, bottom: 4, child: Center(child: CircularProgressIndicator(color: AppColors.lime300))),
                       Positioned(right: 0, bottom: 0, child: IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Cambiar foto o avatar', size: 34, onPressed: _uploading ? null : _openPhotoSheet)),

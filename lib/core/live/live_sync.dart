@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../motion/app_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,7 +154,13 @@ class _LiveSyncState extends ConsumerState<LiveSync> with WidgetsBindingObserver
       final auth = ref.read(authRepositoryProvider);
       final d = await auth.loadOnboarding();
       final id = d.avatarId;
-      if (!isValidAvatarId(id) || (d.avatarUrl ?? '').isNotEmpty) return;
+      final current = d.avatarUrl ?? '';
+      if (current.isNotEmpty) {
+        // Fotos subidas antes de las miniaturas: se crean una vez (se recuerda por foto en este dispositivo).
+        if (!ThumbsHealed.done(current)) { await auth.ensureAvatarThumbs(current); ThumbsHealed.mark(current); }
+        return;
+      }
+      if (!isValidAvatarId(id)) return;
       final url = await auth.uploadAvatar(await renderAvatarPng(id!), 'image/png');
       await auth.saveStep(3, d.copyWith(avatarUrl: url, avatarId: id));
       await auth.deleteAvatarFiles(keepUrl: url);
@@ -282,4 +289,14 @@ class LiveBannerCard extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// Fotos de perfil cuyas miniaturas ya se comprobaron en este dispositivo (evita repetir la comprobación al arrancar).
+class ThumbsHealed {
+  ThumbsHealed._();
+  static const _key = 'plobby.thumbs_ok';
+  static SharedPreferences? _prefs;
+  static Future<void> load() async { try { _prefs = await SharedPreferences.getInstance(); } catch (_) {} }
+  static bool done(String url) => _prefs?.getString(_key) == url;
+  static void mark(String url) { try { _prefs?.setString(_key, url); } catch (_) {} }
 }

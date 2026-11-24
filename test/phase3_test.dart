@@ -22,6 +22,8 @@ class _Presence implements PresenceService {
   void setActive(bool a) => active = a;
   @override
   Stream<bool> watch(String userId) async* { yield false; yield* ctl.stream; }
+  @override
+  void dispose() {}
 }
 
 Future<void> _settle(WidgetTester t, [int n = 6]) async { for (var i = 0; i < n; i++) { await t.pump(const Duration(milliseconds: 250)); } }

@@ -14,6 +14,8 @@ abstract class PresenceService {
   void setActive(bool active);
   /// ¿Está ese amigo en línea ahora? Emite el valor actual y cada cambio.
   Stream<bool> watch(String userId);
+  /// Libera temporizadores y canales (al cerrar sesión o cambiar de cuenta se crea un servicio nuevo).
+  void dispose() {}
 }
 
 /// Modo demo y sin sesión: nadie aparece en línea.
@@ -23,6 +25,8 @@ class NoPresenceService implements PresenceService {
   void setActive(bool active) {}
   @override
   Stream<bool> watch(String userId) => Stream.value(false);
+  @override
+  void dispose() {}
 }
 
 /// Cada cuánto se renueva la presencia propia (heartbeat) y a partir de cuánto se considera caducada la de un amigo.
@@ -67,6 +71,19 @@ class SupabasePresenceService implements PresenceService {
 
   @override
   Stream<bool> watch(String userId) => (_watchers[userId] ??= _Watch(_db, userId, () => _watchers.remove(userId))).stream;
+
+  @override
+  void dispose() {
+    _active = false;
+    _heartbeat?.cancel();
+    _heartbeat = null;
+    final own = _own;
+    _own = null;
+    _ownJoined = false;
+    if (own != null) unawaited(_db.removeChannel(own).then((_) {}, onError: (_) {}));
+    for (final w in _watchers.values.toList()) { w.dispose(); }
+    _watchers.clear();
+  }
 }
 
 /// Un canal por amigo observado, compartido por todas las pantallas que lo muestran y cerrado al dejar de usarse.
@@ -116,6 +133,8 @@ class _Watch {
       });
     _expiry = Timer.periodic(const Duration(seconds: 15), (_) => _evaluate());  // timing
   }
+
+  void dispose() { _close(); if (!_ctl.isClosed) unawaited(_ctl.close()); }
 
   void _close() {
     final ch = _ch;

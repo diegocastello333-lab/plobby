@@ -14,8 +14,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart' show compute, kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
+import '../../../core/widgets/net_image.dart' show AvatarThumbs;
+import 'avatar_thumbs.dart' deferred as thumbs;
 import '../domain/auth_models.dart';
 import '../domain/legal.dart';
 import 'auth_repository.dart';
@@ -48,10 +50,28 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signOut() => _c.auth.signOut();
+  Future<void> signOut() { _forgetOnboarding(); return _c.auth.signOut(); }
+
+  /// Lectura compartida de `get_my_profile`: la guardia de acceso y la reparación de avatares la piden a la vez al
+  /// arrancar; con esto viaja UNA sola petición. Vale unos segundos y cualquier escritura la descarta.
+  Future<OnboardingData>? _onboarding;
+  DateTime _onboardingAt = DateTime(0);
+  static const _onboardingFresh = Duration(seconds: 5);   // timing: reutilizar la misma lectura al arrancar
+  void _forgetOnboarding() => _onboarding = null;
 
   @override
-  Future<OnboardingData> loadOnboarding() async {
+  Future<OnboardingData> loadOnboarding() {
+    final now = DateTime.now();
+    final cached = _onboarding;
+    if (cached != null && now.difference(_onboardingAt) < _onboardingFresh) return cached;
+    _onboardingAt = now;
+    final f = _loadOnboarding();
+    _onboarding = f;
+    f.catchError((Object _) { if (identical(_onboarding, f)) _onboarding = null; return const OnboardingData(); });
+    return f;
+  }
+
+  Future<OnboardingData> _loadOnboarding() async {
     // get_my_profile (security definer): birth_date / first_name / last_name / onboarding_* ya no son legibles con select() sobre `profiles`.
     final r = await _c.rpc('get_my_profile') as Map<String, dynamic>?;
     if (r == null || r['id'] == null) return const OnboardingData();
@@ -71,6 +91,7 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> saveStep(int step, OnboardingData d) async {
+    _forgetOnboarding();
     final data = switch (step) {
       1 => {'first_name': d.firstName, 'last_name': d.lastName, 'username': d.username, 'city': d.city, 'birth_date': d.birthDate!.toIso8601String().substring(0, 10)},
       2 => {'level': d.selfLevel!.db, 'side': d.side == CourtSide.left ? 'left' : 'right', 'hand': d.hand == Hand.left ? 'left' : 'right', 'club': d.habitualClub ?? '', 'club_id': d.habitualClubId ?? '', 'partner_id': d.habitualPartnerId ?? ''},
@@ -86,9 +107,39 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<String> uploadAvatar(List<int> bytes, String mime) async {
     final uid = _c.auth.currentUser!.id;
     final ext = mime == 'image/png' ? 'png' : mime == 'image/webp' ? 'webp' : 'jpg';
-    final path = '$uid/avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';     // la política de Storage exige la carpeta <uid>/
-    await _c.storage.from('avatars').uploadBinary(path, Uint8List.fromList(bytes), fileOptions: sb.FileOptions(contentType: mime, upsert: true));
+    final base = 'avatar_${DateTime.now().millisecondsSinceEpoch}';
+    final path = '$uid/$base.$ext';     // la política de Storage exige la carpeta <uid>/
+    final data = Uint8List.fromList(bytes);
+    await _c.storage.from('avatars').uploadBinary(path, data, fileOptions: sb.FileOptions(contentType: mime, upsert: true));
+    await _uploadThumbs(uid, base, data);
     return _c.storage.from('avatars').getPublicUrl(path);
+  }
+
+  /// Miniaturas de 96 y 256 px (las listas y el perfil ya no descargan la foto entera). Si fallan, la app usa la
+  /// original: nunca bloquean la subida.
+  Future<void> _uploadThumbs(String uid, String base, Uint8List data) async {
+    try {
+      await thumbs.loadLibrary();
+      final out = kIsWeb ? thumbs.buildAvatarThumbs((data, AvatarThumbs.sizes)) : await compute(thumbs.buildAvatarThumbs, (data, AvatarThumbs.sizes));
+      await Future.wait([
+        for (final (px, jpg) in out)
+          _c.storage.from('avatars').uploadBinary('$uid/${AvatarThumbs.thumbName(base, px)}', jpg,
+              fileOptions: const sb.FileOptions(contentType: 'image/jpeg', upsert: true, cacheControl: '31536000')),
+      ]);
+    } catch (_) {/* sin miniaturas: se muestra la original */}
+  }
+
+  @override
+  Future<void> ensureAvatarThumbs(String avatarUrl) async {
+    final uid = _c.auth.currentUser?.id;
+    final m = RegExp(r'/avatars/([^/]+)/(avatar_[^/?#]+?)\.(jpg|jpeg|png|webp)$').firstMatch(avatarUrl);
+    if (uid == null || m == null || m[1] != uid) return;   // solo la foto propia
+    final base = m[2]!;
+    final bucket = _c.storage.from('avatars');
+    final have = {for (final f in await bucket.list(path: uid, searchOptions: sb.SearchOptions(search: base))) f.name};
+    if (AvatarThumbs.sizes.every((s) => have.contains(AvatarThumbs.thumbName(base, s)))) return;
+    final original = await bucket.download('$uid/$base.${m[3]}');
+    await _uploadThumbs(uid, base, original);
   }
 
   @override
@@ -99,13 +150,17 @@ class SupabaseAuthRepository implements AuthRepository {
       final bucket = _c.storage.from('avatars');
       final files = await bucket.list(path: uid);
       // Solo fotos de perfil (`avatar_*`): en la misma carpeta vive el banner de Inicio (`banner_*`).
-      final stale = [for (final f in files) if (f.name.startsWith('avatar_') && bucket.getPublicUrl('$uid/${f.name}') != keepUrl) '$uid/${f.name}'];
+      // Las miniaturas de la foto que se conserva (`<nombre>_t96.jpg`…) también se conservan.
+      final keepBase = keepUrl == null ? null : RegExp(r'/(avatar_[^/]+?)\.[a-z]+$').firstMatch(keepUrl)?.group(1);
+      bool kept(String name) => bucket.getPublicUrl('$uid/$name') == keepUrl || (keepBase != null && name.startsWith('${keepBase}_t'));
+      final stale = [for (final f in files) if (f.name.startsWith('avatar_') && !kept(f.name)) '$uid/${f.name}'];
       if (stale.isNotEmpty) await bucket.remove(stale);   // política de Storage: solo se puede borrar en la carpeta propia
     } catch (_) {/* limpieza best-effort: el registro del perfil ya no apunta a esos ficheros */}
   }
 
   @override
   Future<void> completeOnboarding() async {
+    _forgetOnboarding();
     try { await _c.rpc('complete_onboarding'); }
     on sb.PostgrestException catch (e) { throw AuthException(e.message.contains('consent_required') ? 'consent_required' : 'onboarding_incomplete'); }
   }
@@ -134,6 +189,7 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<LegalStatus> acceptLegal({required bool marketing}) async {
+    _forgetOnboarding();
     try {
       final r = await _c.rpc('accept_legal', params: {'p_terms': true, 'p_privacy': true, 'p_age_confirmed': true, 'p_marketing': marketing, 'p_platform': _platform});
       return LegalStatus.fromJson((r as Map).cast<String, dynamic>());

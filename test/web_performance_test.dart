@@ -48,8 +48,9 @@ void main() {
     expect(t.binding.hasScheduledFrame, isFalse);
   });
 
-  test('Inicio solo decodifica la franja actual y la siguiente del banner (antes, las cuatro)', () {
-    expect(bannerPhasesToPrecache(DayPhase.dia), [DayPhase.dia, DayPhase.atardecer]);
+  test('Inicio solo precarga la franja actual; la siguiente, solo si el cambio está cerca (antes, las cuatro)', () {
+    expect(bannerPhasesToPrecache(DayPhase.dia, untilNext: const Duration(hours: 3)), [DayPhase.dia]);
+    expect(bannerPhasesToPrecache(DayPhase.dia, untilNext: const Duration(minutes: 10)), [DayPhase.dia, DayPhase.atardecer]);
     expect(bannerPhasesToPrecache(DayPhase.noche), [DayPhase.noche, DayPhase.amanecer]);
   });
 

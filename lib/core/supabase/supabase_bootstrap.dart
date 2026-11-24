@@ -67,7 +67,13 @@ class SupabaseBootstrap {
         tournamentRepositoryProvider.overrideWithValue(SupabaseTournamentRepository(c, channel: channel)),
         gamificationRepositoryProvider.overrideWithValue(SupabaseGamificationRepository(c)),
         clubRepositoryProvider.overrideWithValue(SupabaseClubRepository(c)),
-        presenceServiceProvider.overrideWithValue(uid == null ? const NoPresenceService() : SupabasePresenceService(c, uid)),
+        // Se libera con el ProviderScope (al cerrar sesión o cambiar de cuenta): antes el latido de la sesión anterior
+        // seguía activo hasta reiniciar la app.
+        presenceServiceProvider.overrideWith((ref) {
+          final s = uid == null ? const NoPresenceService() : SupabasePresenceService(c, uid);
+          ref.onDispose(s.dispose);
+          return s;
+        }),
         ratingRepositoryProvider.overrideWithValue(SupabaseRatingRepository(c)),
         matchRepositoryProvider.overrideWithValue(SupabaseMatchRepository(c)),
         lifecycleRepositoryProvider.overrideWithValue(SupabaseLifecycleRepository(c)),

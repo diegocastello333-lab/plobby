@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plobby/core/router/app_router.dart' show deferredScreenLoaders;
+import 'package:plobby/core/router/deferred_screen.dart';
 import 'package:plobby/core/widgets/ambient_background.dart';
 
 /// Carga Inter y Unbounded (las mismas fuentes empaquetadas que usa la app) antes de cada archivo de test.
@@ -12,7 +14,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   AmbientBackground.driftEnabled = false;
   const families = {
     'Inter': ['Regular', 'Medium', 'SemiBold', 'Bold', 'ExtraBold'],
-    'Unbounded': ['Medium', 'SemiBold', 'Bold'],
+    'Unbounded': ['SemiBold', 'Bold'],
   };
   for (final e in families.entries) {
     final loader = FontLoader(e.key);
@@ -21,5 +23,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
     }
     await loader.load();
   }
+  // Pantallas en carga diferida: registradas antes de cada archivo, como hace la app en Android/iOS.
+  await DeferredScreen.preload(deferredScreenLoaders);
   await testMain();
 }

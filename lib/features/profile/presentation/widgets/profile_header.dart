@@ -16,6 +16,7 @@ import '../../../social/application/social_providers.dart';
 import '../../../social/domain/social_models.dart' show RelationState;
 import '../../../auth/domain/auth_models.dart' show isValidAvatarId;
 import '../../../auth/presentation/avatar_catalog.dart' show PlobbyAvatar;
+import '../../../../core/widgets/net_image.dart';
 
 /// Cabecera oscura del perfil — `.ph` del prototipo HTML (medidas de getComputedStyle):
 /// fila superior «MI PERFIL» (o Volver) + botones de cristal; avatar 84 px con aro lima (padding 3 + anillo 2);
@@ -52,7 +53,7 @@ class ProfileHeader extends ConsumerWidget {
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.lime300, width: 2)),
             child: ClipOval(child: SizedBox(width: 84, height: 84, child: p.avatarUrl != null && p.avatarUrl!.isNotEmpty
-                ? Image.network(p.avatarUrl!, fit: BoxFit.cover, cacheWidth: 252, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: p.id, size: 84))
+                ? NetImage(p.avatarUrl!, fit: BoxFit.cover, cacheWidth: 252, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: p.id, size: 84))
                 : p.avatarId != null && isValidAvatarId(p.avatarId!) ? PlobbyAvatar(id: p.avatarId!, size: 84) : SilhouetteAvatar(seed: p.id, size: 84))),
           ),
           const SizedBox(width: 16),

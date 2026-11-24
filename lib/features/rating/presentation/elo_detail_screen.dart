@@ -12,6 +12,7 @@ import '../../../core/widgets/state_views.dart';
 import '../application/rating_providers.dart';
 import '../domain/rating_models.dart';
 import 'elo_bar.dart';
+import '../../../core/widgets/net_image.dart';
 
 /// Número con separador de miles español (1.482).
 String _n(int v) => v.abs() >= 1000 ? '${v < 0 ? '-' : ''}${v.abs() ~/ 1000}.${(v.abs() % 1000).toString().padLeft(3, '0')}' : '$v';
@@ -64,7 +65,7 @@ class _Body extends ConsumerWidget {
           Row(children: [
             Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.brand, width: 2)),
                 child: ClipOval(child: SizedBox(width: 62, height: 62, child: d.avatarUrl != null && d.avatarUrl!.isNotEmpty
-                    ? Image.network(d.avatarUrl!, fit: BoxFit.cover, cacheWidth: 186, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: d.username, size: 62))
+                    ? NetImage(d.avatarUrl!, fit: BoxFit.cover, cacheWidth: 186, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: d.username, size: 62))
                     : SilhouetteAvatar(seed: d.username, size: 62)))),
             const SizedBox(width: 14),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
