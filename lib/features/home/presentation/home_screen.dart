@@ -1,4 +1,5 @@
 import '../../../core/motion/app_motion.dart';
+import '../../../core/widgets/frosted_bar.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import '../../gamification/presentation/gamification_widgets.dart';
 import '../../gamification/domain/gamification_models.dart';
@@ -220,10 +221,10 @@ class _GlassButton extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
         button: true, label: badge > 0 ? '$label, $badge sin leer' : label, excludeSemantics: true,
         child: Pressable(child: SizedBox(width: 44, height: 44, child: Stack(clipBehavior: Clip.none, children: [
-          ClipOval(child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10), child: Material(
+          FrostedBar(oval: true, sigma: 10, child: Material(
             color: const Color(0x29F6F8F1), shape: const CircleBorder(side: BorderSide(color: Color(0x52F6F8F1))),
             child: InkWell(customBorder: const CircleBorder(), onTap: onTap, child: const SizedBox(width: 44, height: 44)),
-          ))),
+          )),
           IgnorePointer(child: Center(child: PlobbyIcon(icon, size: 24, color: AppColors.ink50))),
           if (badge > 0) Positioned(top: -4, right: -4, child: IgnorePointer(child: Container(
             constraints: const BoxConstraints(minWidth: 18), height: 18, padding: const EdgeInsets.symmetric(horizontal: 4),

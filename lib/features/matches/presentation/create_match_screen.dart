@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import '../../../core/widgets/frosted_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -215,7 +216,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
         Text(_friendly ? 'Un amistoso no pertenece a ninguna liga.' : 'El partido quedará vinculado a la liga elegida.', style: PlobbyText.help.copyWith(fontSize: 12)),
       ])),
       // Acción principal fija abajo (siempre a mano, sobre material translúcido), con el error justo encima.
-      bottomNavigationBar: ClipRect(child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur), child: Container(
+      bottomNavigationBar: FrostedBar(child: Container(
         decoration: BoxDecoration(color: AppMaterials.bar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
         padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.paddingOf(context).bottom),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -225,7 +226,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
           ])),
           PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(habitual)),
         ]),
-      ))),
+      )),
     );
   }
 

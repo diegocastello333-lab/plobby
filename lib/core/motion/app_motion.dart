@@ -182,7 +182,9 @@ class AppHaptics {
 /// calor. En Android e iOS nativos el comportamiento no cambia.
 class IdleMotion {
   IdleMotion._();
-  static bool limitLoops = kIsWeb;   // modificable en tests
+  // Antes solo en la web; ahora en todas partes: un bucle infinito obliga a pintar 60 veces/s aunque no se toque nada,
+  // compite con el scroll y gasta batería. Modificable en tests.
+  static bool limitLoops = true;
   static const cycles = 3;
 
   /// Igual que `c.repeat(reverse: …)`, pero en la web se detiene tras [cycles] ciclos y vuelve a [rest] (si se da).

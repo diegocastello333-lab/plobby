@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import '../widgets/frosted_bar.dart';
 import '../../features/gamification/presentation/achievements_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +81,7 @@ class AppShell extends ConsumerWidget {
       extendBody: true,
       // Como en iOS, las etiquetas de la barra de pestañas no crecen con el tamaño de texto del sistema (cada pestaña ya
       // tiene su etiqueta para VoiceOver/TalkBack); el resto de la app sí escala.
-      bottomNavigationBar: MediaQuery.withNoTextScaling(child: ClipRect(child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur), child: Container(
+      bottomNavigationBar: MediaQuery.withNoTextScaling(child: FrostedBar(child: Container(
         height: AppInsets.tabBarHeight(context),
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
         // Material translúcido: el contenido pasa por debajo (extendBody) y se intuye desenfocado, como en iOS.
@@ -91,7 +92,7 @@ class AppShell extends ConsumerWidget {
           const Expanded(child: _PlusTab()),
           tab(2), tab(3),
         ]),
-      )))),
+      ))),
     );
   }
 }

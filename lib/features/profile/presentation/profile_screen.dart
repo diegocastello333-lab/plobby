@@ -137,9 +137,11 @@ class _TabsDelegate extends SliverPersistentHeaderDelegate {
   @override double get minExtent => 66;
   @override double get maxExtent => 66;
   @override
-  Widget build(BuildContext c, double shrink, bool overlaps) => Container(
+  Widget build(BuildContext c, double shrink, bool overlaps) => _w;
+  // Se construye en cada fotograma de scroll: misma instancia → sin reconstruir ni repintar las pestañas.
+  late final Widget _w = RepaintBoundary(child: Container(
       color: PlobbyColors.ivory, padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-      child: SlidingTabs(labels: names, index: sel, onChanged: onTap));
+      child: SlidingTabs(labels: names, index: sel, onChanged: onTap)));
   @override
   bool shouldRebuild(_TabsDelegate o) => o.sel != sel;
 }

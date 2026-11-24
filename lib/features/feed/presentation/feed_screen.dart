@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import '../../../core/widgets/frosted_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -145,13 +146,16 @@ class _Chips extends SliverPersistentHeaderDelegate {
   // y una línea fina inferior.
   Widget build(BuildContext c, double s, bool o) {
     final under = s > 0 || o;
-    return ClipRect(child: BackdropFilter(
-      filter: under ? ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur) : ui.ImageFilter.blur(),
+    return FrostedBar(active: under,
       child: AnimatedContainer(duration: AppAnimations.scaled(c, AppAnimations.tab), curve: AppAnimations.standard,
       decoration: BoxDecoration(color: under ? AppMaterials.bar : AppMaterials.bar.withValues(alpha: 0),
           border: Border(bottom: BorderSide(width: .5, color: under ? AppMaterials.hairline : const Color(0x00000000)))),
-      child: _chips())));
+      child: _list));
   }
+
+  // La cabecera fija se construye en CADA fotograma de scroll (SliverPersistentHeader): la fila de filtros se crea una
+  // sola vez por filtro elegido (misma instancia → Flutter no la reconstruye) y va en su propia capa de pintado.
+  late final Widget _list = RepaintBoundary(child: _chips());
 
   Widget _chips() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 14, 20, 10), children: [
         for (final e in _filters.entries) Padding(padding: const EdgeInsets.only(right: 8), child: Semantics(button: true, selected: sel == e.key, label: e.value, excludeSemantics: true, child: Material(

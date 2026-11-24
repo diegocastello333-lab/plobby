@@ -79,12 +79,15 @@ class AppColorsDark {
 class AppMaterials {
   AppMaterials._();
   /// Fondo de barra fija sobre contenido (marfil al 85 %; en oscuro, el fondo oscuro al 85 %).
-  static Color get bar => AppColors.isDark ? const Color(0xD90D110F) : const Color(0xD9F6F8F1);
+  static Color get bar => !blur ? AppColors.bg : AppColors.isDark ? const Color(0xD90D110F) : const Color(0xD9F6F8F1);
   /// Barra de pestañas: blanco al 90 % sobre el contenido que pasa por debajo. Con 80 % las etiquetas grises bajaban a
   /// 3,9:1 sobre una tarjeta oscura; al 90 % el peor caso es 4,86:1 (AA). En oscuro: superficie oscura al 90 %.
-  static Color get tabBar => AppColors.isDark ? const Color(0xE6171C19) : const Color(0xE6FFFFFF);
+  // Sin desenfoque (por defecto, ver [blur]) las barras son opacas: translúcidas sin desenfoque dejaban ver el texto de debajo.
+  static Color get tabBar => !blur ? AppColors.surface : AppColors.isDark ? const Color(0xE6171C19) : const Color(0xE6FFFFFF);
   /// Desenfoque de las barras translúcidas (sigma).
   static const barBlur = 20.0;
+  /// Si las barras desenfocan el contenido de debajo (ver `FrostedBar`).
+  static const blur = bool.fromEnvironment('PLOBBY_BLUR', defaultValue: false);
   /// Línea divisoria de 0,5 px bajo una barra cuando hay contenido debajo.
   static Color get hairline => AppColors.inkA(0x1F);
 }

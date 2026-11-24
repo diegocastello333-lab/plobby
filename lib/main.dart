@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'core/a11y/web_a11y.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/errors/app_errors.dart';
@@ -19,7 +20,6 @@ import 'core/theme/plobby_theme.dart';
 /// sin credenciales arranca en modo demo con datos de ejemplo (repositorios mock).
 /// Mantiene activa la semántica en la web mientras viva la app.
 // ignore: unused_element
-SemanticsHandle? _semantics;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,9 +31,9 @@ Future<void> main() async {
     ThumbsHealed.load(),
   ]);
   final client = await SupabaseBootstrap.init();
-  // Web: Flutter solo crea el árbol de accesibilidad cuando alguien pulsa el botón oculto «Enable accessibility»; un
-  // lector de pantalla no encontraba nada más. Con esto la app es navegable desde el primer momento.
-  if (kIsWeb) _semantics = SemanticsBinding.instance.ensureSemantics();
+  // Web: accesibilidad bajo demanda (botón «Activar lector de pantalla», recordado). Siempre activa costaba ~40 % de
+  // cada fotograma al desplazar. Ver core/a11y/web_a11y.dart.
+  if (kIsWeb) installWebA11yToggle();
   if (kIsWeb) {
     // Web: el código de las pantallas secundarias se descarga en segundo plano cuando la app ya está a la vista.
     WidgetsBinding.instance.addPostFrameCallback((_) => Timer(const Duration(seconds: 4), () => unawaited(DeferredScreen.preload(deferredScreenLoaders))));  // timing

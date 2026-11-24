@@ -407,3 +407,11 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - REGLAS a11y: un Tooltip junto a una etiqueta semántica igual lleva `excludeFromSemantics: true`; los encabezados van con
   `Semantics(header: true, container: true, …)` (sin container se fusionan con sus vecinos).
 - APK 1.9.0+17: `dist/plobby-1.9.0-arm64.apk` (25,3 MB) y `-armv7` (23,4 MB), ofuscados, firma debug.
+
+## Fluidez (24 nov 2026, rama `fluidez`, informe `docs/rendimiento/fluidez.md`)
+- Medir con build `--profile` + perfil de CPU (scratchpad/perf/cpu_profile.js) y trazas (trace_cost.js), comparando con
+  `backup/web-v4-antes-de-rendimiento`. Los fps de este entorno no sirven (GPU por software).
+- REGLAS: nada de `ensureSemantics()` global (accesibilidad web bajo demanda, `core/a11y/web_a11y*.dart`); nada de
+  `BackdropFilter` directo (usar `FrostedBar`; `AppMaterials.blur` = false → barras opacas); cabeceras de
+  `SliverPersistentHeader` devuelven una instancia guardada; bucles decorativos con `IdleMotion.loop` (limitados en todas
+  partes); `vercel.json` con COOP same-origin + COEP credentialless (motor en hilo aparte). Vigilado por test/fluidity_test.dart.
