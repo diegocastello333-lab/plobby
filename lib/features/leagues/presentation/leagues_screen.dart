@@ -63,8 +63,7 @@ class LeaguesScreen extends ConsumerWidget {
           const SizedBox(height: 34),
           Semantics(header: true, child: const Text('Descubrir ligas', style: PlobbyText.t2)),
           const SizedBox(height: 4),
-          // En el HTML `.sub` hereda la tipografía de `.sec` (Unbounded 14/700): se reproduce tal cual.
-          const Text('Encuentra tu próxima competición.', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 14, height: 1.4, fontWeight: FontWeight.w700, letterSpacing: -0.28, color: AppColors.textMuted)),
+          Text('Encuentra tu próxima competición.', style: PlobbyText.subhead.copyWith(color: AppColors.textMuted)),
           const SizedBox(height: 12),
           Semantics(button: true, label: 'Buscar ligas por nombre, club o zona', excludeSemantics: true, child: Material(
             color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),

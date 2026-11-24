@@ -1,3 +1,4 @@
+import 'dart:ui' show FontFeature;
 import 'package:flutter/painting.dart';
 import 'design_tokens.dart';
 
@@ -13,10 +14,32 @@ class PlobbyText {
   // ── Titulares (Unbounded) ──
   /// `.t1` — título de pantalla: Unbounded 28/700, lh 1.2, −0.02em.
   static const t1 = TextStyle(fontFamily: _d, fontSize: 28, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: -0.56, color: AppColors.text);
-  /// `.t2` — subtítulo de bloque: Unbounded 17/600, lh 1.3, −0.01em.
-  static const t2 = TextStyle(fontFamily: _d, fontSize: 17, height: 1.3, fontWeight: FontWeight.w600, letterSpacing: -0.17, color: AppColors.text);
-  /// `h2.sec` — título de sección (Inicio, Ligas…): Unbounded 18/700, −0.02em.
-  static const sec = TextStyle(fontFamily: _d, fontSize: 18, height: 22 / 18, fontWeight: FontWeight.w700, letterSpacing: -0.36, color: AppColors.text);
+  /// Título de bloque o de formulario («Mis ligas», «Crear partido»): Inter 20/700 (Title 3 de iOS, algo más firme).
+  static const t2 = TextStyle(fontFamily: _s, fontSize: 20, height: 1.25, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: AppColors.text);
+  /// Título de sección (Próximos partidos, Logros…): Inter 22/700 (Title 2). Unbounded queda para títulos de pantalla y cifras.
+  static const sec = TextStyle(fontFamily: _s, fontSize: 22, height: 28 / 22, fontWeight: FontWeight.w700, letterSpacing: -0.44, color: AppColors.text);
+
+  // ── Escala tipográfica (inspirada en iOS). Unbounded SOLO en títulos grandes y cifras destacadas. ──
+  /// Large Title 34: título grande de pantalla.
+  static const largeTitle = TextStyle(fontFamily: _d, fontSize: 34, height: 41 / 34, fontWeight: FontWeight.w700, letterSpacing: -0.68, color: AppColors.text);
+  /// Title 1 28 (= [t1]).
+  static const title1 = t1;
+  /// Title 2 22 (= [sec]).
+  static const title2 = sec;
+  /// Headline 17 semibold.
+  static const headline = TextStyle(fontFamily: _s, fontSize: 17, height: 22 / 17, fontWeight: FontWeight.w600, letterSpacing: -0.2, color: AppColors.text);
+  /// Body 17.
+  static const body = TextStyle(fontFamily: _s, fontSize: 17, height: 22 / 17, fontWeight: FontWeight.w400, letterSpacing: -0.2, color: AppColors.text);
+  /// Callout 16.
+  static const callout = TextStyle(fontFamily: _s, fontSize: 16, height: 21 / 16, fontWeight: FontWeight.w400, letterSpacing: -0.15, color: AppColors.text);
+  /// Subhead 15.
+  static const subhead = TextStyle(fontFamily: _s, fontSize: 15, height: 20 / 15, fontWeight: FontWeight.w400, letterSpacing: -0.1, color: AppColors.text);
+  /// Footnote 13.
+  static const footnote = TextStyle(fontFamily: _s, fontSize: 13, height: 18 / 13, fontWeight: FontWeight.w400, letterSpacing: 0, color: AppColors.textMuted);
+  /// Caption 12.
+  static const caption = TextStyle(fontFamily: _s, fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w400, letterSpacing: 0, color: AppColors.textMuted);
+  /// Cifras (ELO, marcador, contadores): dígitos tabulares para que no «bailen» al cambiar.
+  static const tabular = [FontFeature.tabularFigures()];
 
   // ── Texto (Inter) ──
   /// `.sub` — entradilla bajo el título: Inter 14/400, lh 1.4, gris.
@@ -50,7 +73,7 @@ class PlobbyText {
   /// Etiqueta de la barra inferior: Inter 12 (700 activa / 500 inactiva).
   static const navLabel = TextStyle(fontFamily: _s, fontSize: 12, height: 15 / 12, fontWeight: FontWeight.w500, letterSpacing: 0);
   /// Cifra grande de tarjeta (Inicio: amigos, ELO): Inter 22/800, −0.01em.
-  static const stat = TextStyle(fontFamily: _s, fontSize: 22, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.22, color: AppColors.text);
+  static const stat = TextStyle(fontFamily: _s, fontSize: 22, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.22, color: AppColors.text, fontFeatures: tabular);
   /// Saludo del banner de Inicio: Inter 27/800, lh 1.12, −0.01em, blanco.
   static const hello = TextStyle(fontFamily: _s, fontSize: 27, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -0.27, color: AppColors.surface);
 }

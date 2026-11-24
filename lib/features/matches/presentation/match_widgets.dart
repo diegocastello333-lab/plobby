@@ -168,7 +168,7 @@ class MatchCtaButton extends StatelessWidget {
             if (busy) SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
             else ...[
               if (icon != null) ...[PlobbyIcon(icon!, size: 20, strokeWidth: 2.2, color: fg), const SizedBox(width: 10)],
-              Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: .28, color: fg))),
+              Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: .28, color: fg))),
             ],
           ])),
         )),

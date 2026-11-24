@@ -108,7 +108,7 @@ ThemeData buildPlobbyTheme() {
     focusColor: AppColors.focus,
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.bg, foregroundColor: AppColors.text, elevation: 0, scrolledUnderElevation: 0, centerTitle: true,
-      titleTextStyle: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.text, letterSpacing: -0.2),
+      titleTextStyle: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.text, letterSpacing: -0.2),
     ),
     filledButtonTheme: FilledButtonThemeData(style: AppButtonStyles.primary()),
     elevatedButtonTheme: ElevatedButtonThemeData(style: AppButtonStyles.primary()),

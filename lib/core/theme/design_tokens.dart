@@ -44,6 +44,8 @@ class AppMaterials {
   AppMaterials._();
   /// Fondo de barra fija sobre contenido (marfil al 85 %): se intuye lo de debajo, el texto sigue legible.
   static const bar = Color(0xD9F6F8F1);
+  /// Barra de pestañas: blanco al 80 % sobre el contenido que pasa por debajo.
+  static const tabBar = Color(0xCCFFFFFF);
   /// Desenfoque de las barras translúcidas (sigma).
   static const barBlur = 20.0;
   /// Línea divisoria de 0,5 px bajo una barra cuando hay contenido debajo.
@@ -54,16 +56,16 @@ class AppMaterials {
 class AppInsets {
   AppInsets._();
   /// Alto de la barra de pestañas sin la zona segura, cuánto sobresale el «+» por encima y aire extra.
-  static const tabBarBase = 66.0, tabBarMinSafe = 26.0, plusOverhang = 30.0, breathing = 20.0;
+  static const tabBarBase = 66.0, tabBarMinSafe = 26.0, breathing = 20.0;
   /// Alto total de la barra de pestañas (incluida la zona segura inferior).
   static double tabBarHeight(BuildContext c) {
     final b = MediaQuery.paddingOf(c).bottom;
     return tabBarBase + (b > tabBarMinSafe ? b : tabBarMinSafe);
   }
   /// Margen inferior que necesita el contenido de una pestaña para que su último elemento (título, tarjeta, botón) no
-  /// quede debajo de la barra ni del «+» central.
+  /// quede debajo de la barra (el «+» ya va dentro de la barra, no sobresale).
   static double tabBarClearance(BuildContext c) =>
-      WideLayout.isWide(c) ? breathing * 2 + MediaQuery.paddingOf(c).bottom : tabBarHeight(c) + plusOverhang + breathing;
+      WideLayout.isWide(c) ? breathing * 2 + MediaQuery.paddingOf(c).bottom : tabBarHeight(c) + breathing;
 }
 
 /// Pantallas anchas (escritorio, tablet en horizontal): a partir de [breakpoint] px la app se muestra en una columna
@@ -79,21 +81,36 @@ class WideLayout extends InheritedWidget {
 
 class AppSpacing {
   AppSpacing._();
-  static const s1 = 4.0, s2 = 8.0, s3 = 12.0, s4 = 16.0, s6 = 24.0, s8 = 32.0;
-  static const screenH = s4; // margen lateral
+  // Rejilla de 8 pt (4 para ajustes finos).
+  static const s1 = 4.0, s2 = 8.0, s3 = 12.0, s4 = 16.0, s5 = 20.0, s6 = 24.0, s8 = 32.0;
+  static const screenH = s5; // margen lateral (20, como iOS)
 }
 
 class AppRadius {
   AppRadius._();
-  static const sm = 8.0, md = 14.0, lg = 22.0, pill = 999.0;
+  // Tres radios en toda la app (estilo iOS): 12 pequeño (botones pequeños, chips), 16 tarjetas y campos, 24 hojas y
+  // bloques grandes. En tarjetas, botones y hojas se dibujan con esquinas continuas ([AppShapes]).
+  static const sm = 12.0, md = 16.0, lg = 24.0, pill = 999.0;
+  /// Radio de las formas continuas (squircle, `ContinuousRectangleBorder`): equivale visualmente a ~12 px redondos.
+  static const squircleSm = 26.0;
   static const rSm = BorderRadius.all(Radius.circular(sm)), rMd = BorderRadius.all(Radius.circular(md)),
       rLg = BorderRadius.all(Radius.circular(lg)), rPill = BorderRadius.all(Radius.circular(pill));
   static const sheetTop = BorderRadius.vertical(top: Radius.circular(lg));
 }
 
+/// Formas con esquinas continuas (superelipse, como iOS): sin el «codo» de un arco de círculo.
+class AppShapes {
+  AppShapes._();
+  static RoundedSuperellipseBorder of(double radius, {BorderSide side = BorderSide.none}) =>
+      RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(radius)), side: side);
+  static final card = of(AppRadius.md), small = of(AppRadius.sm), large = of(AppRadius.lg);
+  static const sheet = RoundedSuperellipseBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)));
+}
+
 class AppShadows {
   AppShadows._();
-  static const card = [BoxShadow(color: Color(0x0F171C19), blurRadius: 2, offset: Offset(0, 1)), BoxShadow(color: Color(0x0F171C19), blurRadius: 16, offset: Offset(0, 4))];
+  /// Una sola elevación sutil para tarjetas (sin borde a la vez).
+  static const card = [BoxShadow(color: Color(0x0D171C19), blurRadius: 12, offset: Offset(0, 2))];
   static const pop = [BoxShadow(color: Color(0x29171C19), blurRadius: 32, offset: Offset(0, 8))];
   /// Tarjetas que solapan el banner de Inicio (`#hb-fr`, `#hb-elo`, `#hb-st`): 0 6 18 −8 .28 + 0 1 0 .04.
   static const lifted = [BoxShadow(color: Color(0x47171C19), blurRadius: 18, offset: Offset(0, 6), spreadRadius: -8), BoxShadow(color: Color(0x0A171C19), offset: Offset(0, 1))];

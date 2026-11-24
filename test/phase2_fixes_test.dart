@@ -74,12 +74,12 @@ void main() {
   });
 
   group('Barra inferior y escritorio', () {
-    testWidgets('el margen inferior de las pestañas cubre la barra, la zona segura y el «+»', (t) async {
+    testWidgets('el margen inferior de las pestañas cubre la barra (con el «+» dentro) y la zona segura', (t) async {
       late double clearance, bar;
       await t.pumpWidget(MediaQuery(data: const MediaQueryData(size: Size(390, 844), padding: EdgeInsets.only(bottom: 34)),
           child: Builder(builder: (c) { clearance = AppInsets.tabBarClearance(c); bar = AppInsets.tabBarHeight(c); return const SizedBox(); })));
       expect(bar, 66 + 34);
-      expect(clearance, greaterThanOrEqualTo(bar + AppInsets.plusOverhang));
+      expect(clearance, greaterThanOrEqualTo(bar + AppInsets.breathing));
     });
 
     Future<void> pumpApp(WidgetTester t, Size size) async {

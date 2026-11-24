@@ -65,9 +65,9 @@ class PlobbyButton extends StatelessWidget {
       opacity: enabled ? 1 : .45,
       child: Material(
         color: bg,
-        shape: RoundedRectangleBorder(borderRadius: radius, side: _outline ? const BorderSide(color: AppColors.borderStrong, width: 1.5) : BorderSide.none),
+        shape: RoundedSuperellipseBorder(borderRadius: radius, side: _outline ? const BorderSide(color: AppColors.borderStrong, width: 1.5) : BorderSide.none),
         child: InkWell(
-          borderRadius: radius,
+          customBorder: RoundedSuperellipseBorder(borderRadius: radius),
           // Háptico solo en la acción principal (HIG: no abusar): el resto de botones responden con la animación.
           onTap: enabled ? () { if (kind == PlobbyButtonKind.primary || kind == PlobbyButtonKind.dark) AppHaptics.light(); onPressed!(); } : null,
           child: SizedBox(height: h, child: Padding(padding: EdgeInsets.symmetric(horizontal: _small ? 14 : 12), child: Center(widthFactor: 1, child: content))),
@@ -245,8 +245,8 @@ class SurfaceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final card = Container(
       margin: margin,
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: radius, boxShadow: AppShadows.card),
-      child: Material(type: MaterialType.transparency, borderRadius: radius, clipBehavior: Clip.antiAlias,
+      decoration: ShapeDecoration(color: AppColors.surface, shape: RoundedSuperellipseBorder(borderRadius: radius), shadows: AppShadows.card),
+      child: Material(type: MaterialType.transparency, shape: RoundedSuperellipseBorder(borderRadius: radius), clipBehavior: Clip.antiAlias,
           child: onTap == null ? Padding(padding: padding, child: child) : InkWell(onTap: onTap, child: Padding(padding: padding, child: child))),
     );
     return onTap == null ? card : Pressable(child: card);
@@ -341,7 +341,7 @@ class PlobbyHeaderBar extends StatelessWidget {
   final VoidCallback? onBack;
   /// Botón de la derecha (p. ej. «Más opciones»); si es null se deja un hueco de 40 px para centrar el título.
   final Widget? trailing;
-  static const titleStyle = TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, height: 22 / 18, fontWeight: FontWeight.w600, letterSpacing: -0.36, color: AppColors.text);
+  static const titleStyle = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, height: 25 / 20, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: AppColors.text);
   @override
   Widget build(BuildContext context) => Padding(
         padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 16, 20, 0),
@@ -403,7 +403,7 @@ class SheetListItem extends StatelessWidget {
 
 /// Hoja inferior con el aspecto del prototipo (`.sheet`: radio 22 arriba, asa 40×4, padding 20) y el contenido dado.
 Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => showModalBottomSheet<T>(
-      context: context, isScrollControlled: true, showDragHandle: false, backgroundColor: AppColors.bg,
+      context: context, isScrollControlled: true, showDragHandle: false, backgroundColor: AppColors.bg, shape: AppShapes.sheet, clipBehavior: Clip.antiAlias,
       useRootNavigator: true,   // por encima de la barra inferior, como `.shs` en el HTML
       // Entrada algo más larga y con frenada suave (sensación de muelle), salida rápida.
       sheetAnimationStyle: AppAnimations.reduceMotion(context)
@@ -412,7 +412,7 @@ Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => sh
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 14), decoration: BoxDecoration(color: const Color(0x33171C19), borderRadius: BorderRadius.circular(2)))),
+          Center(child: Container(width: 36, height: 5, margin: const EdgeInsets.only(bottom: 14), decoration: const BoxDecoration(color: Color(0x33171C19), borderRadius: AppRadius.rPill))),
           builder(ctx),
         ]))),
       ),

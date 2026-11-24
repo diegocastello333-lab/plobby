@@ -401,7 +401,7 @@ class _Performance extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 16), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
         child: Row(children: [
           ConstrainedBox(constraints: const BoxConstraints(minWidth: 112), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: Color(0xA6F6F8F1))),
+            const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: Color(0xA6F6F8F1))),
             const SizedBox(height: 4),
             Text(r == null ? '—' : '#${r.rank}', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 64, height: .9, fontWeight: FontWeight.w800, letterSpacing: -3.2, color: AppColors.brand)),
             if (total > 0) Padding(padding: const EdgeInsets.only(top: 8), child: Text('de $total', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: Color(0xA6F6F8F1)))),
@@ -426,7 +426,7 @@ class _JoinCta extends StatelessWidget {
   Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.all(18), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(league.visibility == LeagueVisibility.club ? 'Liga de club' : '¿Te apuntas?', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, letterSpacing: -0.17, color: Colors.white, fontSize: 17)),
+        Text(league.visibility == LeagueVisibility.club ? 'Liga de club' : '¿Te apuntas?', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w600, letterSpacing: -0.17, color: Colors.white, fontSize: 17)),
         const SizedBox(height: 6),
         Text(league.visibility.description, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: Color(0xB3FFFFFF))),
         const SizedBox(height: 14),

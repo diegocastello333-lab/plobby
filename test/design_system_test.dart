@@ -1,3 +1,4 @@
+import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plobby/core/theme/plobby_text.dart';
@@ -85,10 +86,15 @@ void main() {
     expect(t.getSize(find.byType(SlidingTabs)).height, 46);
   });
 
-  test('tipografía: familias empaquetadas, tamaños del CSS', () {
+  test('tipografía: escala iOS; Unbounded solo en títulos grandes, secciones en Inter', () {
     expect(PlobbyText.t1.fontFamily, 'Unbounded');
     expect(PlobbyText.t1.fontSize, 28);
-    expect(PlobbyText.sec.fontSize, 18);
+    expect(PlobbyText.largeTitle.fontSize, 34);
+    expect((PlobbyText.sec.fontFamily, PlobbyText.sec.fontSize), ('Inter', 22));
+    expect(PlobbyText.t2.fontFamily, 'Inter');
+    expect([PlobbyText.headline, PlobbyText.body, PlobbyText.callout, PlobbyText.subhead, PlobbyText.footnote, PlobbyText.caption].map((s) => s.fontSize),
+        [17, 17, 16, 15, 13, 12]);
+    expect(PlobbyText.stat.fontFeatures, contains(const FontFeature.tabularFigures()));
     expect(PlobbyText.sub.fontFamily, 'Inter');
     expect(buildPlobbyTheme().textTheme.bodyMedium?.fontFamily, 'Inter');
     expect(buildPlobbyTheme().textTheme.displayMedium?.fontFamily, 'Unbounded');

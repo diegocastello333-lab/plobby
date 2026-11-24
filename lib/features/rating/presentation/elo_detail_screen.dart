@@ -174,7 +174,7 @@ class _Title extends StatelessWidget {
   final String t;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(20, 28, 20, 12), child: Semantics(header: true,
-      child: Text(t, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: -0.18, color: AppColors.text))));
+      child: Text(t, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 18, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: -0.18, color: AppColors.text))));
 }
 
 class _Card extends StatelessWidget {

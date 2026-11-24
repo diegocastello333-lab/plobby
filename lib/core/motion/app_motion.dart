@@ -17,6 +17,8 @@ import '../theme/design_tokens.dart';
 class Motion {
   Motion._();
   // ── Duraciones ──
+  /// Al pulsar: el elemento encoge (escala 0,97) en 100 ms.
+  static const press = Duration(milliseconds: 100);
   /// Taps, toggles, cambios de estado pequeños.
   static const fast = Duration(milliseconds: 150);
   /// Transiciones y entradas de elementos.
@@ -71,7 +73,7 @@ class Motion {
 /// Duraciones, curvas y escalas con NOMBRE de uso. Todas salen de [Motion].
 class AppAnimations {
   AppAnimations._();
-  static const press = Motion.fast;
+  static const press = Motion.press;
   static const pressRelease = Motion.normal;   // vuelta con muelle
   static const tab = Motion.normal;
   static const appear = Motion.normal;

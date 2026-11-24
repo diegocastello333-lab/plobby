@@ -95,7 +95,7 @@ class _OptionCardState extends State<_OptionCard> {
                   child: Center(child: PlobbyIcon(widget.icon, size: 26, color: AppColors.brandInk))),
               const SizedBox(width: 14),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(widget.title, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 15, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: -0.15, color: fg)),
+                Text(widget.title, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: -0.15, color: fg)),
                 const SizedBox(height: 4),
                 Text(widget.text, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, height: 1.35, letterSpacing: 0, color: fg.withValues(alpha: .82))),
               ])),

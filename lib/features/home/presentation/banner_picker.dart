@@ -84,7 +84,7 @@ class _CollectionCard extends StatelessWidget {
           const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
               colors: [Color(0x00171C19), Color(0xCC171C19)], stops: [.5, 1]))),
           Positioned(left: 14, right: 14, bottom: 14, child: Text(banner.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, height: 1.1, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: Colors.white))),
+              style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 18, height: 1.1, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: Colors.white))),
           if (busy) const ColoredBox(color: Color(0x66171C19), child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.lime300)))),
           Positioned(right: 10, top: 10, child: AnimatedScale(scale: selected && !busy ? 1 : 0, duration: Motion.normal, curve: Motion.spring,
               child: Container(width: 28, height: 28, decoration: const BoxDecoration(color: AppColors.brand, shape: BoxShape.circle),

@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import '../../features/gamification/presentation/achievements_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +50,7 @@ class AppShell extends ConsumerWidget {
               key: ValueKey(on), tween: Tween(begin: on && !AppAnimations.reduceMotion(context) ? .82 : 1, end: 1),
               duration: Motion.emphasis, curve: AppAnimations.settle,
               builder: (_, sc, child) => Transform.scale(scale: sc, child: child),
-              child: PlobbyIcon(icon, size: 24, color: col ?? color)),
+              child: PlobbyIcon(icon, size: 24, color: col ?? color, filled: on)),
             const SizedBox(height: 4),
             // «Competiciones» es más largo que el resto: se reduce lo justo para caber en su columna (sin cortarse).
             FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0,
@@ -79,43 +80,20 @@ class AppShell extends ConsumerWidget {
       extendBody: true,
       // Como en iOS, las etiquetas de la barra de pestañas no crecen con el tamaño de texto del sistema (cada pestaña ya
       // tiene su etiqueta para VoiceOver/TalkBack); el resto de la app sí escala.
-      bottomNavigationBar: MediaQuery.withNoTextScaling(child: Container(
+      bottomNavigationBar: MediaQuery.withNoTextScaling(child: ClipRect(child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur), child: Container(
         height: AppInsets.tabBarHeight(context),
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
-        decoration: const BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: Color(0x14171C19)))),
+        // Material translúcido: el contenido pasa por debajo (extendBody) y se intuye desenfocado, como en iOS.
+        decoration: const BoxDecoration(color: AppMaterials.tabBar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           tab(0), tab(1),
-          Expanded(child: SizedBox(height: 56, child: OverflowBox(alignment: Alignment.topCenter, maxHeight: 90, child: Transform.translate(offset: const Offset(0, -30), child: const _PlusButton())))),
+          // «+» (nuevo partido) como pestaña central, dentro de la barra: ya no flota ni tapa contenido.
+          const Expanded(child: _PlusTab()),
           tab(2), tab(3),
         ]),
-      )),
+      )))),
     );
   }
-}
-
-class _PlusButton extends StatelessWidget {
-  const _PlusButton();
-  @override
-  Widget build(BuildContext context) => Semantics(
-        button: true, label: 'Nuevo partido', excludeSemantics: true,
-        child: Pressable(scale: .9, child: Container(
-          width: 60, height: 60,
-          decoration: const BoxDecoration(shape: BoxShape.circle, boxShadow: [
-            BoxShadow(color: AppColors.surface, spreadRadius: 6),                                         // 0 0 0 6px #fff
-            BoxShadow(color: Color(0x59171C19), blurRadius: 20, offset: Offset(0, 10), spreadRadius: -4),  // 0 10 20 −4 .35
-          ]),
-          child: Material(
-            color: AppColors.brand, shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () { AppHaptics.light(); HomeNav.newMatch(context); },
-              // Icono «+» del HTML: 28 px, trazo 2.6, extremos redondeados.
-              child: Center(child: SvgPicture.string('<svg viewBox="0 0 24 24" fill="none" stroke="#171C19" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-                  width: 28, height: 28)),
-            ),
-          ),
-        )),
-      );
 }
 
 /// Cambio de pestaña de la barra inferior: el contenido nuevo entra con un fundido rápido y sube 6 px (fade-through).
@@ -161,7 +139,7 @@ class _SideRail extends StatelessWidget {
           Semantics(label: 'Plobby', image: true, child: const Text('plobby', style: TextStyle(fontFamily: AppTypography.displayFamily,
               fontWeight: FontWeight.w700, fontSize: 18, height: 1, letterSpacing: -0.54, color: AppColors.text))),
           const SizedBox(height: 24),
-          Transform.scale(scale: .8, child: const _PlusButton()),
+          const PlusSquare(),
           const SizedBox(height: 20),
           for (var i = 0; i < tabs.length; i++) Semantics(button: true, selected: i == current, label: tabs[i].$2, excludeSemantics: true, child: InkWell(
             onTap: () => onTap(i),
@@ -176,4 +154,27 @@ class _SideRail extends StatelessWidget {
           )),
         ])),
       );
+}
+
+/// «+» de la barra: pestaña central sin etiqueta, con el botón cuadrado lima centrado a la altura de los iconos.
+class _PlusTab extends StatelessWidget {
+  const _PlusTab();
+  @override
+  Widget build(BuildContext context) => const SizedBox(height: 56, child: Center(child: PlusSquare()));
+}
+
+/// Botón «Nuevo partido»: cuadrado lima de 44 px, esquinas continuas de 12 (radio pequeño del sistema), «+» en tinta.
+/// Mismo botón en la barra inferior y en la barra lateral de escritorio.
+class PlusSquare extends StatelessWidget {
+  const PlusSquare({super.key});
+  static const size = 44.0;
+  @override
+  Widget build(BuildContext context) => Semantics(button: true, label: 'Nuevo partido', excludeSemantics: true, child: Pressable(scale: .92, child: Material(
+        color: AppColors.brand,
+        shape: const ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(AppRadius.squircleSm))),
+        child: InkWell(
+          customBorder: const ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(AppRadius.squircleSm))),
+          onTap: () { AppHaptics.light(); HomeNav.newMatch(context); },
+          child: const SizedBox.square(dimension: size, child: Center(child: PlobbyIcon(PlobbyIcons.plus, size: 22, strokeWidth: 2.4, color: AppColors.brandInk)))),
+      )));
 }

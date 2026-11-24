@@ -67,9 +67,21 @@ const _paths = <PlobbyIcons, String>{
 
 /// Dibuja un icono de [PlobbyIcons]. El color sale de [color] o, si no se da, del `IconTheme` actual (como
 /// `currentColor` en el HTML). [strokeWidth] equivale al tercer parámetro de `ic(n, s, w)`.
+/// Variantes rellenas (pestaña activa, como iOS: contorno inactivo, relleno activo). `#hole` = color del hueco.
+const _filled = <PlobbyIcons, String>{
+  PlobbyIcons.home: '<path d="M3.2 10.2 12 3l8.8 7.2V20a1.2 1.2 0 0 1-1.2 1.2H15v-6.2H9v6.2H4.4A1.2 1.2 0 0 1 3.2 20z" fill="currentColor" stroke="currentColor"/>',
+  PlobbyIcons.feed: '<rect x="3.500" y="4" width="17" height="16" rx="2.500" fill="currentColor"/><path d="M3.500 9h17M7.500 13h6M7.500 16.500h9" stroke="#hole"/>',
+  PlobbyIcons.trophy: '<path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z" fill="currentColor"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  PlobbyIcons.user: '<circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z" fill="currentColor"/>',
+};
+
 class PlobbyIcon extends StatelessWidget {
-  const PlobbyIcon(this.icon, {super.key, this.size = 20, this.strokeWidth = 1.8, this.color, this.semanticLabel});
+  const PlobbyIcon(this.icon, {super.key, this.size = 20, this.strokeWidth = 1.8, this.color, this.semanticLabel, this.filled = false, this.holeColor = const Color(0xFFFFFFFF)});
   final PlobbyIcons icon;
+  /// Versión rellena (si existe para este icono; si no, el contorno).
+  final bool filled;
+  /// Color de los huecos de la versión rellena (el del fondo sobre el que va).
+  final Color holeColor;
   final double size, strokeWidth;
   final Color? color;
   final String? semanticLabel;
@@ -78,8 +90,10 @@ class PlobbyIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = color ?? IconTheme.of(context).color ?? const Color(0xFF171C19);
     final svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-        'stroke-width="$strokeWidth" stroke-linecap="round" stroke-linejoin="round">${icon.paths}</svg>';
+        'stroke-width="$strokeWidth" stroke-linecap="round" stroke-linejoin="round">${filled && _filled.containsKey(icon) ? _filled[icon]!.replaceAll('#hole', _hex(holeColor)) : icon.paths}</svg>';
     final pic = SvgPicture.string(svg, width: size, height: size, theme: SvgTheme(currentColor: c), excludeFromSemantics: semanticLabel == null);
     return semanticLabel == null ? pic : Semantics(label: semanticLabel, image: true, child: pic);
   }
 }
+
+String _hex(Color c) => '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
