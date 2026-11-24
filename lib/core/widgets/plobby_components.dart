@@ -51,7 +51,13 @@ class PlobbyButton extends StatelessWidget {
       PlobbyButtonKind.danger => AppColors.dangerSoft,
       _ => Colors.transparent,
     };
-    final fg = switch (kind) { PlobbyButtonKind.dark => AppColors.surface, PlobbyButtonKind.danger => AppColors.danger, _ => AppColors.text };
+    // Sobre lima siempre tinta (brandInk); sobre el bloque inverso, blanco en claro y lima en oscuro.
+    final fg = switch (kind) {
+      PlobbyButtonKind.primary || PlobbyButtonKind.small => AppColors.brandInk,
+      PlobbyButtonKind.dark => AppColors.isDark ? AppColors.onInverse : AppColors.surface,
+      PlobbyButtonKind.danger => AppColors.danger,
+      _ => AppColors.text,
+    };
     final radius = _small ? AppRadius.rSm : AppRadius.rMd;
     final h = height ?? (_small ? 36.0 : 48.0);
     final style = (_small ? PlobbyText.buttonSmall : PlobbyText.button).copyWith(color: fg);
@@ -188,7 +194,7 @@ class PlobbyFilterChip extends StatelessWidget {
               border: Border.all(color: selected ? AppColors.brand : AppColors.inkA(0x1F))),
           child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rSm, onTap: () { if (!selected) AppHaptics.light(); onTap(); },
               child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 32), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),   // 32 + borde 1+1 = 34 (.fc)
-                  child: Center(widthFactor: 1, heightFactor: 1, child: Text(label, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text))))))),
+                  child: Center(widthFactor: 1, heightFactor: 1, child: Text(label, style: PlobbyText.buttonSmall.copyWith(color: selected ? AppColors.brandInk : AppColors.text))))))),
         )),
       );
 }

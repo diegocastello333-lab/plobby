@@ -170,7 +170,7 @@ class _AchievementState extends State<_Achievement> with SingleTickerProviderSta
           Text('Nuevo logro', style: PlobbyText.footnote),
           Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: PlobbyText.headline),
           const SizedBox(height: 2),
-          Text(p.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: PlobbyText.footnote.copyWith(color: AppColors.ink700)),
+          Text(p.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: PlobbyText.footnote.copyWith(color: AppColors.textBody)),
         ])),
         if (p.milestone != null) Padding(padding: const EdgeInsets.only(left: 8), child: Pill(p.milestone!, tone: PillTone.lime)),
       ])),
@@ -197,7 +197,7 @@ class _Streak extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(child: Text.rich(TextSpan(style: PlobbyText.subhead, children: [
           TextSpan(text: own ? 'Estás' : 'Está', style: const TextStyle(fontWeight: FontWeight.w700)),
-          TextSpan(text: ' en racha\n${p.count} victorias seguidas${p.count >= 7 ? ' · ¡a por las 10!' : ''}', style: PlobbyText.footnote.copyWith(color: AppColors.ink700)),
+          TextSpan(text: ' en racha\n${p.count} victorias seguidas${p.count >= 7 ? ' · ¡a por las 10!' : ''}', style: PlobbyText.footnote.copyWith(color: AppColors.textBody)),
         ]))),
       ]));
 }

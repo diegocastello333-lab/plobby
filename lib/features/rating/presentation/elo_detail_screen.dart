@@ -47,7 +47,7 @@ class _Body extends ConsumerWidget {
     final range = ref.watch(historyRangeProvider);
     final pts = d.inRange(range, DateTime.now());
     final pct = ((d.elo - d.scale.min) * 100 / (d.scale.max - d.scale.min)).round().clamp(0, 100);
-    const body = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.5, letterSpacing: 0, color: AppColors.ink700);
+    final body = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.5, letterSpacing: 0, color: AppColors.textBody);
     final b = TextStyle(fontWeight: FontWeight.w700, color: AppColors.text);
     final soft = AppColors.ink50.withValues(alpha: .7);
     return ListView(padding: EdgeInsets.only(bottom: 40 + MediaQuery.paddingOf(context).bottom), children: [

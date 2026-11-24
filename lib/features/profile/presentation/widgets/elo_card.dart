@@ -54,7 +54,7 @@ class EloCard extends ConsumerWidget {
   Widget _chip(String t, bool hi) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(color: hi ? PlobbyColors.lime : const Color(0x1FF6F8F1), borderRadius: BorderRadius.circular(6)),
-      child: Text(t, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: hi ? PlobbyColors.forest : PlobbyColors.ivory)));
+      child: Text(t, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: hi ? PlobbyColors.forest : AppColors.ink50)));
 }
 
 class _EloChart extends CustomPainter {

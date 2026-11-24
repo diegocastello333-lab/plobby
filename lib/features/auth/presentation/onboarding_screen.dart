@@ -65,7 +65,7 @@ Widget _chips<T>(List<T> vals, T? sel, String Function(T) lab, ValueChanged<T> o
         color: sel == v ? AppColors.brand : AppColors.surface,
         shape: StadiumBorder(side: BorderSide(color: sel == v ? AppColors.brand : AppColors.borderStrong, width: 1.5)),
         child: InkWell(customBorder: const StadiumBorder(), onTap: () => on(v), child: Container(height: 42, padding: const EdgeInsets.symmetric(horizontal: 16), alignment: Alignment.center,
-            child: Text(lab(v), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.ink900)))),
+            child: Text(lab(v), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: sel == v ? AppColors.brandInk : AppColors.text)))),
       )),
     ]);
 

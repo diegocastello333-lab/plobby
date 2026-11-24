@@ -101,7 +101,7 @@ class _BodyState extends ConsumerState<_Body> {
           Text(admin ? 'Administrador del club' : 'Organizador de la liga', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text)),
           const SizedBox(height: 2),
           Text(admin ? 'Gestionas la liga, las sedes y las temporadas del club. Los resultados los validas tú.' : 'Gestionas participantes, reglas y resultados de esta liga.',
-              style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.4, letterSpacing: 0, color: AppColors.ink700)),
+              style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.4, letterSpacing: 0, color: AppColors.textBody)),
         ])),
       ])),
       const SizedBox(height: 16),

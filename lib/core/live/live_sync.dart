@@ -281,7 +281,7 @@ class LiveBannerCard extends StatelessWidget {
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                     Text(banner.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
                     const SizedBox(height: 2),
-                    Text(banner.body, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.35, letterSpacing: 0, color: AppColors.ink700)),
+                    Text(banner.body, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.35, letterSpacing: 0, color: AppColors.textBody)),
                   ])),
                 ]),
               )),

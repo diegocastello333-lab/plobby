@@ -99,7 +99,7 @@ class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
         return Transform.scale(scale: c.isAnimating ? s : 1, child: child);
       }, child: AnimatedContainer(
         duration: Motion.fast, height: 32, constraints: const BoxConstraints(minWidth: 40), padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : AppColors.inkA(0x0F)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.text, width: 1.5) : null),
+        decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : AppColors.inkA(0x0F)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.brandInk, width: 1.5) : null),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           // partículas: el emoji «salta» al elegirlo (decoración; no cambia el tamaño de la píldora)
           Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [

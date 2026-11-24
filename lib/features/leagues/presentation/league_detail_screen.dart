@@ -58,7 +58,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
               SliverPadding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0), sliver: SliverList.list(children: [
                 _InfoGrid(league: l, members: standings.valueOrNull?.length, uid: uid),
                 if (l.description.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 14), child: Text(l.description,
-                    style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.5, letterSpacing: 0, color: AppColors.ink700))),
+                    style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.5, letterSpacing: 0, color: AppColors.textBody))),
                 const SizedBox(height: 18),
                 if (l.isMember) _Performance(row: mine, total: standings.valueOrNull?.length ?? 0) else _JoinCta(league: l, busy: _busy, onJoin: () => _join(l)),
                 const SizedBox(height: 6),
@@ -454,12 +454,12 @@ class _TabsDelegate extends SliverPersistentHeaderDelegate {
 class _RankRow extends StatelessWidget {
   const _RankRow({required this.pos, required this.row, required this.me, required this.metric});
   final int pos; final StandingRow row; final bool me; final String metric;
-  static const _c = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: AppColors.ink700, fontFeatures: [FontFeature.tabularFigures()]);
+  static TextStyle get _c => TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: AppColors.textBody, fontFeatures: [FontFeature.tabularFigures()]);
   @override
   Widget build(BuildContext context) {
     final pn = Container(width: 24, height: 24, alignment: Alignment.center,
         decoration: BoxDecoration(shape: BoxShape.circle, color: pos == 1 ? AppColors.brand : null, border: pos == 2 || pos == 3 ? Border.all(color: AppColors.borderStrong, width: 1.5) : null),
-        child: Text('$pos', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: pos <= 3 ? AppColors.text : AppColors.textMuted)));
+        child: Text('$pos', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: pos == 1 ? AppColors.brandInk : pos <= 3 ? AppColors.text : AppColors.textMuted)));
     return Semantics(button: true, label: 'Puesto $pos, ${row.name}${me ? ' (tú)' : ''}, ${row.played} jugados, ${row.wins} ganados, ${row.losses} perdidos, $metric', excludeSemantics: true,
       child: Material(color: Colors.transparent, child: InkWell(
         onTap: () => context.push('/player/${row.userId}'),

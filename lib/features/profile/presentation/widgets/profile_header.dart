@@ -87,7 +87,7 @@ class ProfileHeader extends ConsumerWidget {
           ])),
         ]),
         if (p.bio.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 16), child: Text(p.bio,
-            style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink700, fontSize: 14, height: 1.5, letterSpacing: 0))),
+            style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.textBody, fontSize: 14, height: 1.5, letterSpacing: 0))),
         const SizedBox(height: 12),
         Wrap(spacing: 6, runSpacing: 6, children: [
           level != null ? _Chip('Nivel', level!) : _Chip('Nivel inicial', p.declaredLevel), _Chip('Posición', p.limited ? '—' : (p.side == PlaySide.right ? 'Derecha' : 'Izquierda')), _Chip('Mano', p.limited ? '—' : p.dominantHand),
@@ -169,7 +169,7 @@ class _Btn extends StatelessWidget {
   final String t; final PlobbyIcons i; final bool hi; final VoidCallback f;
   @override
   Widget build(BuildContext context) {
-    final fg = AppColors.text;
+    final fg = hi ? AppColors.brandInk : AppColors.text;
     final shape = AppShapes.of(AppRadius.sm, side: hi ? BorderSide.none : BorderSide(color: AppColors.border));
     return Semantics(button: true, label: t, excludeSemantics: true, child: Pressable(child: Material(
       color: hi ? AppColors.lime300 : AppColors.surface, shape: shape,

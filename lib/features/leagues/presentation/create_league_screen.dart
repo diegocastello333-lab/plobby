@@ -182,7 +182,7 @@ class _Step3 extends ConsumerWidget {
         padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(12)),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const PlobbyIcon(PlobbyIcons.shield, size: 18), const SizedBox(width: 10),
-          Expanded(child: Text('Confirman los capitanes de los dos equipos. Si no coinciden, el resultado queda en disputa.', style: PlobbyText.sub.copyWith(color: AppColors.ink700))),
+          Expanded(child: Text('Confirman los capitanes de los dos equipos. Si no coinciden, el resultado queda en disputa.', style: PlobbyText.sub.copyWith(color: AppColors.textBody))),
         ]),
       ),
     ]);

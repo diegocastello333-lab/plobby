@@ -391,3 +391,12 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   iOS en todo + atrás predictivo Android; `Motion.press` 100 ms y `Motion.skeletonDelay` 300 ms; Hero solo del ELO
   ('elo-me'; avatares/partidos se repiten en pantalla); perfil con cabecera clara; feed con `groupFeed` (logros) y
   reacciones discretas; crear partido con botón fijo; Competiciones con la liga activa primero.
+
+## Modo oscuro (24 nov 2026, rama `dark`, informe `docs/rendimiento/fase3b_oscuro.md`)
+- Sigue el sistema (`PlobbyApp` observa `platformBrightness`; `KeyedSubtree(ValueKey(isDark))`). `AppColors.isDark` + getters
+  semánticos; paleta en `AppColorsDark`. REGLAS: sobre lima siempre `brandInk`; texto de cuerpo = `AppColors.textBody`
+  (nunca `ink700` fijo, lo vigila `test/dark_mode_test.dart`); bloques oscuros por diseño usan `ink50`/`ink900` fijos;
+  los colores semánticos NO pueden ir en `const` ni en `static final` (capturarían el modo): getters.
+  Pintores de imágenes para compartir dentro de `AppColors.light(...)`. `AppColors.inkA(alpha)` = tinta/blanco con alfa.
+- `CollapsingTitleScaffold` (título grande que se encoge) en Competiciones.
+- Herramienta: `scratchpad/tools/fix_const.py <salida de dart analyze --format=machine>` quita `const` inválidos.

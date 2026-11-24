@@ -30,6 +30,8 @@ class AppColors {
   static Color get onInverse => lime300;
   static Color get text => _m(ink900, AppColorsDark.text);
   static Color get textMuted => _m(ink500, AppColorsDark.textMuted);
+  /// Texto de cuerpo (descripciones, explicaciones): un punto menos que [text], más legible que [textMuted].
+  static Color get textBody => _m(ink700, const Color(0xFFC9D0CB));
   static Color get textDisabled => _m(ink400, AppColorsDark.textDisabled);
   static Color get border => _m(ink200, AppColorsDark.border);
   static Color get borderStrong => _m(ink400, AppColorsDark.borderStrong);

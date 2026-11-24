@@ -86,7 +86,7 @@ class _FlamePainter extends CustomPainter {
       canvas.drawPath(outer, Paint()..color = PlobbyColors.lime.withOpacity(.55)..maskFilter = MaskFilter.blur(BlurStyle.normal, glow));
     }
     canvas.drawPath(outer, Paint()..color = active ? PlobbyColors.lime : PlobbyColors.sage);
-    canvas.drawPath(flameInner(), Paint()..color = (active ? PlobbyColors.forest : PlobbyColors.ivory).withOpacity(.85));
+    canvas.drawPath(flameInner(), Paint()..color = (active ? PlobbyColors.forest : AppColors.ink50).withOpacity(.85));
   }
   @override
   bool shouldRepaint(_FlamePainter o) => o.active != active || o.glow != glow;

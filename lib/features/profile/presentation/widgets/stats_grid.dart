@@ -27,7 +27,7 @@ class StatsGrid extends ConsumerWidget {
         const SizedBox(width: 10),
         Expanded(child: _Tile(count: s.winRate, suffix: '%', label: '% de victorias', bg: PlobbyColors.lime, fg: PlobbyColors.forest)),
         const SizedBox(width: 10),
-        Expanded(child: _Tile(child: WinStreakBadge(streak: k.current), label: 'Racha actual', bg: PlobbyColors.forest, fg: PlobbyColors.ivory)),
+        Expanded(child: _Tile(child: WinStreakBadge(streak: k.current), label: 'Racha actual', bg: PlobbyColors.forest, fg: AppColors.ink50)),
       ])),
       if (full) ...[
         const SizedBox(height: 10),

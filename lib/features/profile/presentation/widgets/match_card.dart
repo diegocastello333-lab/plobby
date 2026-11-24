@@ -59,7 +59,7 @@ class _Avatar extends StatelessWidget {
       padding: const EdgeInsets.only(right: 3),
       child: CircleAvatar(radius: 14, backgroundColor: PlobbyColors.forest,
           backgroundImage: p.avatarUrl != null ? NetworkImage(p.avatarUrl!) : null,
-          child: p.avatarUrl == null ? Text(p.name.characters.first, style: TextStyle(fontSize: 11, color: PlobbyColors.ivory, fontWeight: FontWeight.w700)) : null));
+          child: p.avatarUrl == null ? Text(p.name.characters.first, style: TextStyle(fontSize: 11, color: AppColors.ink50, fontWeight: FontWeight.w700)) : null));
 }
 
 class _Badge extends StatelessWidget {

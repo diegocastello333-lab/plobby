@@ -42,16 +42,21 @@ class _EloBarState extends State<EloBar> with TickerProviderStateMixin {
             builder: (_, __) => CustomPaint(painter: _BarPainter(widget.scale, widget.elo, Motion.enter.transform(_fill.value), _glow.value, _reduced)),
           )),
           const SizedBox(height: 8),
-          LayoutBuilder(builder: (_, c) => SizedBox(height: 32, child: Stack(children: [
-            for (final t in widget.scale.tiers)
-              Positioned(
-                left: (c.maxWidth * (t.from - widget.scale.min) / (widget.scale.max - widget.scale.min)).clamp(0, c.maxWidth - 60).toDouble(),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(t.name, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: PlobbyColors.ivory)),
-                  Text('${t.from}', style: TextStyle(fontSize: 11, color: PlobbyColors.ivory.withOpacity(.6))),
-                ]),
-              ),
-          ]))),
+          LayoutBuilder(builder: (_, c) {
+            final tiers = widget.scale.tiers;
+            double x(int i) => (c.maxWidth * (tiers[i].from - widget.scale.min) / (widget.scale.max - widget.scale.min)).clamp(0, c.maxWidth - 60).toDouble();
+            return SizedBox(height: 32, child: Stack(children: [
+              for (var i = 0; i < tiers.length; i++)
+                // Cada etiqueta llega como mucho hasta la siguiente marca: si no cabe, se reduce (antes se solapaban
+                // «Intermedio» y «Avanzado» en pantallas de 375 px).
+                Positioned(left: x(i), width: ((i + 1 < tiers.length ? x(i + 1) : c.maxWidth) - x(i) - 4).clamp(24.0, c.maxWidth),
+                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(tiers[i].name, maxLines: 1, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.ink50)),
+                    Text('${tiers[i].from}', maxLines: 1, style: TextStyle(fontSize: 11, color: AppColors.ink50.withOpacity(.6))),
+                  ])),
+                ),
+            ]));
+          }),
         ]),
       );
 }
@@ -78,7 +83,7 @@ class _BarPainter extends CustomPainter {
       }
       final cx = w;
       canvas.drawCircle(Offset(cx, s.height / 2), 13, Paint()..color = PlobbyColors.lime.withOpacity(.25 + (reduced ? 0 : .15 * math.sin(glow * 2 * math.pi))));
-      canvas.drawCircle(Offset(cx, s.height / 2), 8, Paint()..color = PlobbyColors.ivory);
+      canvas.drawCircle(Offset(cx, s.height / 2), 8, Paint()..color = AppColors.ink50);
       canvas.drawCircle(Offset(cx, s.height / 2), 8, Paint()..color = PlobbyColors.lime..style = PaintingStyle.stroke..strokeWidth = 3);
     }
     for (final tier in scale.tiers.skip(1)) {

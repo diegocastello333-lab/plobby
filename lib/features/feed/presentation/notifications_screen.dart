@@ -115,7 +115,7 @@ class _Row extends StatelessWidget {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             const SizedBox(height: 2),
-            Text(n.text, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, height: 1.4, letterSpacing: 0, color: AppColors.ink700)),
+            Text(n.text, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, height: 1.4, letterSpacing: 0, color: AppColors.textBody)),
             const SizedBox(height: 3),
             Text(timeAgo(n.createdAt), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
             if (n.actionable) Padding(padding: const EdgeInsets.only(top: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [

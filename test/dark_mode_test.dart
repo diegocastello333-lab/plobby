@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plobby/core/theme/design_tokens.dart';
+import 'package:plobby/core/widgets/plobby_components.dart';
 import 'package:plobby/features/splash/application/splash_boot.dart';
 import 'package:plobby/main.dart' show PlobbyApp;
 
@@ -65,5 +67,33 @@ void main() {
       for (var i = 0; i < 6; i++) { await t.pump(const Duration(milliseconds: 200)); }
       expect(t.takeException(), isNull, reason: tab);
     }
+  });
+
+  testWidgets('botones lima: el texto va en tinta también en oscuro; el cuerpo de texto es legible', (t) async {
+    AppColors.isDark = true;
+    addTearDown(() => AppColors.isDark = false);
+    await t.pumpWidget(MaterialApp(home: Scaffold(body: Column(children: [
+      PlobbyButton(label: 'Aceptar', kind: PlobbyButtonKind.small, onPressed: () {}),
+      PlobbyButton(label: 'Crear partido', onPressed: () {}),
+    ]))));
+    for (final l in ['Aceptar', 'Crear partido']) {
+      final c = t.widget<Text>(find.text(l)).style!.color!;
+      expect(c, AppColors.brandInk, reason: l);
+      expect(contrast(c, AppColors.brand), greaterThanOrEqualTo(4.5));
+    }
+    expect(contrast(AppColors.textBody, AppColors.surface), greaterThanOrEqualTo(7));
+    expect(contrast(AppColors.textBody, AppColors.bg), greaterThanOrEqualTo(7));
+  });
+
+  test('en pantallas no hay texto con tinta fija ink700 (en oscuro sería invisible): se usa AppColors.textBody', () {
+    final bad = <String>[];
+    for (final f in Directory('lib/features').listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart'))) {
+      final lines = f.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        // post_match y splash: tinta sobre lima (correcto en ambos modos).
+        if (lines[i].contains('AppColors.ink700') && !f.path.contains('post_match_screen') && !f.path.contains('splash_screen')) bad.add('${f.path}:${i + 1}');
+      }
+    }
+    expect(bad, isEmpty);
   });
 }
