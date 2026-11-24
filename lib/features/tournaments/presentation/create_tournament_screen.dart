@@ -106,7 +106,7 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
             for (var i = 0; i < _steps.length; i++) ...[
               if (i > 0) const SizedBox(width: 6),
               Expanded(child: AnimatedContainer(duration: Motion.normal, height: 4,
-                  decoration: BoxDecoration(color: i <= _step ? AppColors.text : const Color(0x1F171C19), borderRadius: BorderRadius.circular(2)))),
+                  decoration: BoxDecoration(color: i <= _step ? AppColors.text : AppColors.inkA(0x1F), borderRadius: BorderRadius.circular(2)))),
             ],
           ])),
           Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 0), child: Align(alignment: Alignment.centerLeft,
@@ -120,12 +120,12 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
                 _ => _summary(),
               })))),
           if (_error != null) Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Padding(padding: EdgeInsets.only(top: 1, right: 6), child: PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger)),
-            Expanded(child: Text(_error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
+            Padding(padding: EdgeInsets.only(top: 1, right: 6), child: PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger)),
+            Expanded(child: Text(_error!, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
           ])),
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.border))),
+            decoration: BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.border))),
             child: Row(children: [
               Expanded(flex: 10, child: PlobbyButton(label: _step == 0 ? 'Cancelar' : 'Atrás', kind: PlobbyButtonKind.outline, onPressed: _busy ? null : _back)),
               const SizedBox(width: 10),
@@ -144,17 +144,17 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
           child: Stack(children: [
             TournamentCover(bytes: _d.coverBytes == null ? null : Uint8List.fromList(_d.coverBytes!), seed: _name.text, height: 150),
             Positioned.fill(child: Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(color: const Color(0x99171C19), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(color: AppColors.inkA(0x99), borderRadius: BorderRadius.circular(20)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   _coverBusy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.lime300))
-                      : const PlobbyIcon(PlobbyIcons.image, size: 16, color: AppColors.surface),
+                      : PlobbyIcon(PlobbyIcons.image, size: 16, color: AppColors.surface),
                   const SizedBox(width: 8),
-                  Text(_d.coverBytes == null ? 'Añadir portada' : 'Cambiar portada', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.surface)),
+                  Text(_d.coverBytes == null ? 'Añadir portada' : 'Cambiar portada', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.surface)),
                 ])))),
           ]),
         )),
         if (_d.coverBytes != null) Align(alignment: Alignment.centerRight, child: TextButton(onPressed: () => setState(() => _d = _d.copyWith(clearCover: true)),
-            child: const Text('Quitar portada', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger)))),
+            child: Text('Quitar portada', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger)))),
         const SizedBox(height: 14),
         LabeledField(label: 'Nombre del torneo', controller: _name, maxLength: 60, hint: 'p. ej. Open de Otoño', textCapitalization: TextCapitalization.sentences, onChanged: (_) => setState(() {})),
         LabeledField(label: 'Descripción (opcional)', controller: _desc, maxLength: 500, maxLines: 4, minLines: 2, hint: 'Normas, premios, cómo se juega…', textCapitalization: TextCapitalization.sentences),
@@ -174,9 +174,9 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
   List<Widget> _format() {
     final n = _d.teams.length;
     return [
-      const Text('¿Cómo se juega?', style: PlobbyText.t2),
+      Text('¿Cómo se juega?', style: PlobbyText.t2),
       const SizedBox(height: 4),
-      const Text('Plobby crea los partidos, los grupos y el cuadro automáticamente.', style: PlobbyText.sub),
+      Text('Plobby crea los partidos, los grupos y el cuadro automáticamente.', style: PlobbyText.sub),
       const SizedBox(height: 14),
       for (final f in TournamentFormat.values) _FormatCard(format: f, selected: _d.format == f, onTap: () => setState(() { _d = _d.copyWith(format: f); _error = null; })),
       if (_d.format == TournamentFormat.groupsKnockout) ...[
@@ -219,7 +219,7 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
             onRemove: () => setState(() => _d = _d.copyWith(teams: [..._d.teams]..removeAt(i)))),
         if (_d.teams.length > 2) Align(alignment: Alignment.centerLeft, child: TextButton.icon(
             onPressed: () => setState(() => _d = _d.copyWith(teams: [..._d.teams]..shuffle())),
-            icon: const PlobbyIcon(PlobbyIcons.refresh, size: 16), label: const Text('Sortear el orden de las semillas', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)))),
+            icon: const PlobbyIcon(PlobbyIcons.refresh, size: 16), label: Text('Sortear el orden de las semillas', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)))),
       ],
     ];
   }
@@ -242,11 +242,11 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
       if (d.coverBytes != null) ...[TournamentCover(bytes: Uint8List.fromList(d.coverBytes!), seed: d.name, height: 120), const SizedBox(height: 14)],
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: Column(children: [
           for (var i = 0; i < rows.length; i++) Container(
             padding: const EdgeInsets.symmetric(vertical: 11),
-            decoration: BoxDecoration(border: i == 0 ? null : const Border(top: BorderSide(color: Color(0x14171C19)))),
+            decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: AppColors.inkA(0x14)))),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SizedBox(width: 92, child: Text(rows[i].$1.toUpperCase(), style: PlobbyText.eb)),
               Expanded(child: Text(rows[i].$2, style: PlobbyText.value)),
@@ -256,11 +256,11 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
       ),
       if (d.description.trim().isNotEmpty) ...[const SizedBox(height: 12), Text(d.description.trim(), style: PlobbyText.desc)],
       const SizedBox(height: 18),
-      const Text('PAREJAS INSCRITAS', style: PlobbyText.eb),
+      Text('PAREJAS INSCRITAS', style: PlobbyText.eb),
       const SizedBox(height: 6),
       for (var i = 0; i < n; i++) _TeamRow(seed: i + 1, a: d.teams[i].$1, b: d.teams[i].$2),
       const SizedBox(height: 10),
-      const Text('Al crear el torneo se generan los partidos y el cuadro, y se avisa a todos los jugadores.', style: PlobbyText.help),
+      Text('Al crear el torneo se generan los partidos y el cuadro, y se avisa a todos los jugadores.', style: PlobbyText.help),
     ];
   }
 }
@@ -278,7 +278,7 @@ class _FormatCard extends StatelessWidget {
     return Padding(padding: const EdgeInsets.only(bottom: 10), child: Semantics(button: true, selected: selected, label: '${format.label}. $text', excludeSemantics: true,
       child: Material(color: selected ? AppColors.brandSoft : AppColors.surface, borderRadius: AppRadius.rMd, child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap,
         child: AnimatedContainer(duration: Motion.fast, padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(borderRadius: AppRadius.rMd, border: Border.all(color: selected ? AppColors.text : const Color(0x1F171C19), width: selected ? 2 : 1)),
+          decoration: BoxDecoration(borderRadius: AppRadius.rMd, border: Border.all(color: selected ? AppColors.text : AppColors.inkA(0x1F), width: selected ? 2 : 1)),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(width: 38, height: 38, decoration: BoxDecoration(color: selected ? AppColors.inverse : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(10)),
                 child: Center(child: PlobbyIcon(icon, size: 18, color: selected ? AppColors.brand : AppColors.text))),
@@ -299,13 +299,13 @@ class _TeamRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x14171C19)))),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x14)))),
         child: Row(children: [
           Container(width: 28, height: 28, alignment: Alignment.center, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(8)),
-              child: Text('$seed', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
+              child: Text('$seed', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
           const SizedBox(width: 12),
           Expanded(child: TeamLine(team: TTeam(id: '$seed', seed: seed, p1: a, p2: b), size: 28)),
-          if (onRemove != null) IconButton(onPressed: onRemove, tooltip: 'Quitar pareja $seed', icon: const PlobbyIcon(PlobbyIcons.close, size: 18, color: AppColors.textMuted)),
+          if (onRemove != null) IconButton(onPressed: onRemove, tooltip: 'Quitar pareja $seed', icon: PlobbyIcon(PlobbyIcons.close, size: 18, color: AppColors.textMuted)),
         ]),
       );
 }
@@ -318,13 +318,13 @@ class _DateBox extends StatelessWidget {
         Text(label, style: PlobbyText.label),
         const SizedBox(height: 8),
         Semantics(button: true, label: '$label: ${value == null ? 'sin fecha' : tournamentDates(value!, null)}', excludeSemantics: true, child: Material(
-          color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
+          color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
           child: InkWell(borderRadius: AppRadius.rMd, onTap: () async {
             final now = DateTime.now();
             final d = await showDatePicker(context: context, firstDate: first ?? DateTime(now.year - 1), lastDate: DateTime(now.year + 3), initialDate: value ?? first ?? now);
             if (d != null) onPick(d);
           }, child: SizedBox(height: 48, child: Row(children: [
-            const SizedBox(width: 12), const PlobbyIcon(PlobbyIcons.cal, size: 17, color: AppColors.textMuted), const SizedBox(width: 8),
+            const SizedBox(width: 12), PlobbyIcon(PlobbyIcons.cal, size: 17, color: AppColors.textMuted), const SizedBox(width: 8),
             Expanded(child: Text(value == null ? 'Sin fecha' : tournamentDates(value!, null), style: PlobbyText.input.copyWith(color: value == null ? AppColors.textMuted : AppColors.text))),
             if (onClear != null) IconButton(onPressed: onClear, tooltip: 'Quitar fecha de fin', icon: const PlobbyIcon(PlobbyIcons.close, size: 15)),
           ]))),

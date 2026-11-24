@@ -69,7 +69,7 @@ class _Body extends StatelessWidget {
             _ => 'Logro: ${a.items.where((i) => i.id == e.source).firstOrNull?.title ?? e.source}' }, style: PlobbyText.value)),
           Text(shortDate(e.at), style: PlobbyText.help),
           const SizedBox(width: 12),
-          Text('+${e.xp} XP', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text)),
+          Text('+${e.xp} XP', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text)),
         ])),
       ],
     ]);
@@ -154,7 +154,7 @@ class _PrefsSheetState extends ConsumerState<_PrefsSheet> {
         title: Text(title, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w700)), subtitle: Text(sub, style: PlobbyText.help));
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SheetHeader(title: 'Avisos de competición', subtitle: 'Como mucho 3 avisos de ranking al día.'),
-      if (p == null) const Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator(color: AppColors.text)))
+      if (p == null) Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator(color: AppColors.text)))
       else ...[
         row('Ranking', 'Si un amigo te adelanta, subes de puesto o termina una temporada.', p.ranking, (x) => p.copyWith(ranking: x)),
         row('Logros', 'Cuando desbloqueas un logro.', p.achievements, (x) => p.copyWith(achievements: x)),
@@ -223,7 +223,7 @@ class _CelebrationSheet extends StatelessWidget {
         if (items.length > 1) Padding(padding: const EdgeInsets.only(top: 10), child: Text('Y además: ${items.skip(1).map((i) => i.title).join(', ')}',
             textAlign: TextAlign.center, style: PlobbyText.help)),
         const SizedBox(height: 10),
-        Text('+${items.fold<int>(0, (a, b) => a + b.xp)} XP', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+        Text('+${items.fold<int>(0, (a, b) => a + b.xp)} XP', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
         const SizedBox(height: 18),
         PlobbyButton(label: 'Ver mis logros', onPressed: () { Navigator.of(context).pop(); context.push('/achievements'); }),
       ]);

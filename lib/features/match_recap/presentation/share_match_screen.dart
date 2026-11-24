@@ -77,7 +77,7 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
       body: Column(children: [
         PlobbyHeaderBar(title: 'Share Match', onBack: () => context.pop()),
         Expanded(child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+        loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
         error: (e, _) => _Blocked(reason: e is RecapException ? e.reason : null),
         data: (d) {
           _ensureImages(d);
@@ -110,7 +110,7 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
             AnimatedSwitcher(duration: AppAnimations.scaled(context, AppAnimations.appear), child: done == null ? const SizedBox(key: ValueKey('n'), height: 0)
                 : Padding(key: ValueKey(done), padding: const EdgeInsets.only(top: AppSpacing.s3), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     PlobbyIcon(done!.startsWith('No') || done!.startsWith('Tu') ? PlobbyIcons.info : PlobbyIcons.check, size: 18, color: done!.startsWith('No') || done!.startsWith('Tu') ? AppColors.warning : AppColors.success),
-                    const SizedBox(width: 8), Flexible(child: Text(done!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
+                    const SizedBox(width: 8), Flexible(child: Text(done!, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
                   ]))),
           ]);
         },
@@ -154,7 +154,7 @@ class _Toggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Opacity(opacity: onChanged == null ? .45 : 1, child: MergeSemantics(child: SwitchListTile(
       dense: true, contentPadding: EdgeInsets.zero, value: value, onChanged: onChanged, activeThumbColor: AppColors.brand, activeTrackColor: AppColors.inverse,
-      title: Text(label, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)))));
+      title: Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)))));
 }
 
 class _Act extends StatelessWidget {
@@ -169,7 +169,7 @@ class _Blocked extends StatelessWidget {
   final RecapRefusal? reason;
   @override
   Widget build(BuildContext context) => Align(alignment: Alignment.topCenter, child: Padding(padding: const EdgeInsets.fromLTRB(32, 48, 32, 32), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const PlobbyIcon(PlobbyIcons.lock, size: 28, color: AppColors.textMuted), const SizedBox(height: 14),
+        PlobbyIcon(PlobbyIcons.lock, size: 28, color: AppColors.textMuted), const SizedBox(height: 14),
         Text(switch (reason) {
           RecapRefusal.notConfirmed => 'Solo se puede compartir un resultado confirmado por los dos capitanes.',
           RecapRefusal.notParticipant => 'Solo los jugadores del partido pueden compartirlo.',

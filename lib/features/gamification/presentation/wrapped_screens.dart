@@ -90,7 +90,7 @@ class _PeriodTile extends StatelessWidget {
         ])),
         if (p.isNew(now)) const Pill('Nuevo', tone: PillTone.lime) else if (p.inProgress) const Pill('En curso'),
         const SizedBox(width: 6),
-        const PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
+        PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
       ])));
 }
 

@@ -204,7 +204,7 @@ class _LinesPainter extends CustomPainter {
   final List<MonthPoint> a, b;
   @override
   void paint(Canvas c, Size s) {
-    final grid = Paint()..color = const Color(0x14171C19)..strokeWidth = 1;
+    final grid = Paint()..color = AppColors.inkA(0x14)..strokeWidth = 1;
     for (final y in [0.0, .5, 1.0]) { c.drawLine(Offset(0, s.height * y), Offset(s.width, s.height * y), grid); }
     void line(List<MonthPoint> pts, Color color) {
       final step = s.width / math.max(pts.length, 1);
@@ -246,7 +246,7 @@ class _BalancePainter extends CustomPainter {
   void paint(Canvas c, Size s) {
     final maxAbs = values.fold<int>(1, (a, v) => math.max(a, v.abs()));
     final mid = s.height / 2;
-    c.drawLine(Offset(0, mid), Offset(s.width, mid), Paint()..color = const Color(0x22171C19)..strokeWidth = 1);
+    c.drawLine(Offset(0, mid), Offset(s.width, mid), Paint()..color = AppColors.inkA(0x22)..strokeWidth = 1);
     final step = s.width / math.max(values.length, 1);
     for (final (i, v) in values.indexed) {
       final h = (s.height / 2 - 4) * v / maxAbs;
@@ -275,7 +275,7 @@ class _DirectTile extends StatelessWidget {
               maxLines: 2, overflow: TextOverflow.ellipsis, style: PlobbyText.help),
         ])),
         const SizedBox(width: 10),
-        Text(m.score, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+        Text(m.score, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
       ])));
 }
 

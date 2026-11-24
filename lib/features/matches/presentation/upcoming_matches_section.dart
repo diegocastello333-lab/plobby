@@ -38,11 +38,11 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(width: double.infinity, padding: const EdgeInsets.all(24), decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, border: Border.all(color: AppColors.border)),
       child: Column(children: [
-        const CircleAvatar(radius: 26, backgroundColor: AppColors.brandSoft, child: Icon(Icons.sports_tennis, color: AppColors.brandText)),
+        CircleAvatar(radius: 26, backgroundColor: AppColors.brandSoft, child: Icon(Icons.sports_tennis, color: AppColors.brandText)),
         const SizedBox(height: 10),
         const Text('Todavía no tienes partidos programados.', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
         const SizedBox(height: 4),
-        const Text('¡Es hora de organizar uno!', style: TextStyle(color: AppColors.textMuted)),
+        Text('¡Es hora de organizar uno!', style: TextStyle(color: AppColors.textMuted)),
         const SizedBox(height: 14),
         ElevatedButton(onPressed: () => showNewMatchMenu(context), style: ElevatedButton.styleFrom(backgroundColor: AppColors.brand, foregroundColor: AppColors.brandInk), child: const Text('Crear partido')),
       ]));
@@ -63,18 +63,18 @@ class UpcomingMatchCard extends ConsumerWidget {
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(formatWhen(m.scheduledAt), style: const TextStyle(fontFamily: 'Unbounded', fontWeight: FontWeight.w600, fontSize: 15)),
-              const SizedBox(height: 3), Text('${m.club}${m.court != null && m.court!.isNotEmpty ? ' · ${m.court}' : ''}', style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+              const SizedBox(height: 3), Text('${m.club}${m.court != null && m.court!.isNotEmpty ? ' · ${m.court}' : ''}', style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
             ])),
             StatusChip(status: m.status),
           ]),
           const SizedBox(height: 14),
-          Row(children: [Expanded(child: _Team(m.team(1), uid: uid)), const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('VS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted))), Expanded(child: _Team(m.team(2), uid: uid))]),
+          Row(children: [Expanded(child: _Team(m.team(1), uid: uid)), Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('VS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted))), Expanded(child: _Team(m.team(2), uid: uid))]),
           const Divider(height: 24),
           Row(children: [
             PlobbyIcon(m.type == MatchType.league ? PlobbyIcons.trophy : PlobbyIcons.racket, size: 14, strokeWidth: 2, color: m.type == MatchType.league ? AppColors.brandText : AppColors.textMuted), const SizedBox(width: 6),
             Expanded(child: Text(m.type == MatchType.league ? 'Liga · ${m.leagueName ?? ''}' : 'Amistoso', overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: m.type == MatchType.league ? AppColors.brandText : AppColors.textMuted))),
-            if (m.status == MatchStatus.live) MatchStopwatch(match: m, compact: true) else const PlobbyIcon(PlobbyIcons.more, size: 18, color: AppColors.textMuted),  // .um-go
+            if (m.status == MatchStatus.live) MatchStopwatch(match: m, compact: true) else PlobbyIcon(PlobbyIcons.more, size: 18, color: AppColors.textMuted),  // .um-go
           ]),
         ]))));
   }

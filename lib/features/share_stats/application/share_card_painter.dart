@@ -32,7 +32,7 @@ class ShareCardPainter extends CustomPainter {
   final ShareCardData d; final ShareTemplate tpl;
   /// Solo para tests/depuración: registra la caja de cada texto y forma (ver `canvas_text.dart`).
   final ShareLayoutLog? log;
-  static const _ivory = PlobbyColors.ivory, _lime = PlobbyColors.lime, _forest = PlobbyColors.forest;
+  static final _ivory = PlobbyColors.ivory, _lime = PlobbyColors.lime, _forest = PlobbyColors.forest;
   static const _m = 80.0; // margen lateral
 
   /// Llama de [h] de alto con la parte superior en [top]; devuelve su caja (para que nada la pise).
@@ -51,7 +51,9 @@ class ShareCardPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas c, Size s) {
+  void paint(Canvas c, Size s) => AppColors.light(() => _paint(c, s));
+
+  void _paint(Canvas c, Size s) {
     final W = s.width, H = s.height, story = H > 1500;
     final t = ShareText(c, log: log);
     c.drawRect(Offset.zero & s, Paint()..color = _forest);

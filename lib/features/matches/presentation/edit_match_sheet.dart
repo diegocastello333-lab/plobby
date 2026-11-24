@@ -59,14 +59,14 @@ class _SS extends ConsumerState<_Sheet> {
     final m = widget.m, league = m.type == MatchType.league;
     Widget field(String label, Widget child) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: PlobbyText.label), const SizedBox(height: 8), child]);
     Widget picker(String label, String value, PlobbyIcons icon, VoidCallback onTap) => field(label, Semantics(button: true, label: '$label: $value', excludeSemantics: true, child: Material(
-          color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: const BorderSide(color: AppColors.borderStrong)),
+          color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
           child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: SizedBox(height: 48, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
             Expanded(child: Text(value, style: PlobbyText.input)), PlobbyIcon(icon, size: 18, color: AppColors.textMuted),
           ])))),
         )));
     Widget capSel(int t, String v, ValueChanged<String> on) => field('Capitán equipo $t', DropdownButtonFormField<String>(
           value: v, isExpanded: true, style: PlobbyText.input, decoration: plobbyInputDecoration(),
-          icon: const PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
+          icon: PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
           items: [for (final p in m.team(t)) DropdownMenuItem(value: p.id, child: Text(p.name, overflow: TextOverflow.ellipsis))],
           onChanged: (x) => setState(() => on(x!)),
         ));
@@ -76,7 +76,7 @@ class _SS extends ConsumerState<_Sheet> {
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Pill(league ? 'Partido de liga' : 'Partido amistoso', tone: PillTone.neutral, icon: league ? PlobbyIcons.trophy : PlobbyIcons.racket),
           const SizedBox(height: 8),
-          Semantics(header: true, child: const Text('Editar partido', style: PlobbyText.t2)),
+          Semantics(header: true, child: Text('Editar partido', style: PlobbyText.t2)),
           if (m.leagueName != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(m.leagueName!, style: PlobbyText.sub)),
         ])),
         const SizedBox(width: 12),
@@ -84,7 +84,7 @@ class _SS extends ConsumerState<_Sheet> {
       ]),
       const SizedBox(height: 16),
       if (leagueLocked(m, DateTime.now())) Padding(padding: const EdgeInsets.only(bottom: 10), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Padding(padding: EdgeInsets.only(top: 1, right: 5), child: PlobbyIcon(PlobbyIcons.lock, size: 13, color: AppColors.textMuted)),
+        Padding(padding: EdgeInsets.only(top: 1, right: 5), child: PlobbyIcon(PlobbyIcons.lock, size: 13, color: AppColors.textMuted)),
         Expanded(child: Text('Regla de liga: a menos de 2 h del inicio no se pueden cambiar los jugadores. Fecha, hora y pista sí.', style: PlobbyText.help.copyWith(fontSize: 12))),
       ])),
       Row(children: [
@@ -100,8 +100,8 @@ class _SS extends ConsumerState<_Sheet> {
       capSel(2, cap2, (x) => cap2 = x),
       const SizedBox(height: 12),
       if (error != null) Row(children: [
-        const PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger), const SizedBox(width: 6),
-        Expanded(child: Text(error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
+        PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger), const SizedBox(width: 6),
+        Expanded(child: Text(error!, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
       ])
       else Text('Los otros jugadores verán los cambios al instante.', style: PlobbyText.help.copyWith(fontSize: 12)),
       const SizedBox(height: 16),

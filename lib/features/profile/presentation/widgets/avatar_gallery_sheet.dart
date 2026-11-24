@@ -24,8 +24,8 @@ class AvatarGallerySheet extends StatelessWidget {
         SheetListItem(icon: PlobbyIcons.image, label: 'Subir foto de la galería', onTap: () => Navigator.of(context).pop(kPhotoFromGallery)),
         Container(
           padding: const EdgeInsets.only(top: 14, bottom: 10),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
-          child: const Text('AVATARES', style: PlobbyText.eb),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
+          child: Text('AVATARES', style: PlobbyText.eb),
         ),
         GridView.count(crossAxisCount: 4, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), mainAxisSpacing: 12, crossAxisSpacing: 12, children: [
           for (final id in avatarIds)
@@ -37,7 +37,7 @@ class AvatarGallerySheet extends StatelessWidget {
                           LayoutBuilder(builder: (_, c) => PlobbyAvatar(id: id, size: c.maxWidth)),
                           if (selectedId == id) Align(alignment: Alignment.bottomRight, child: Container(width: 20, height: 20,
                               decoration: BoxDecoration(color: AppColors.brand, shape: BoxShape.circle, border: Border.all(color: AppColors.bg, width: 2)),
-                              child: const Center(child: PlobbyIcon(PlobbyIcons.check, size: 11, color: AppColors.text)))),
+                              child: Center(child: PlobbyIcon(PlobbyIcons.check, size: 11, color: AppColors.text)))),
                         ])))),
         ]),
         const SizedBox(height: 14),

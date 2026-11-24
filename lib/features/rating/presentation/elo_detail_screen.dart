@@ -27,7 +27,7 @@ class EloDetailScreen extends ConsumerWidget {
     final r = ref.watch(myRatingProvider);
     return Scaffold(
       body: r.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+        loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
         error: (e, _) => SafeArea(child: Column(children: [
           PlobbyHeaderBar(title: 'Mi rating', onBack: () => context.pop()),
           Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudo cargar tu rating', onRetry: () => ref.invalidate(myRatingProvider))),
@@ -48,7 +48,7 @@ class _Body extends ConsumerWidget {
     final pts = d.inRange(range, DateTime.now());
     final pct = ((d.elo - d.scale.min) * 100 / (d.scale.max - d.scale.min)).round().clamp(0, 100);
     const body = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.5, letterSpacing: 0, color: AppColors.ink700);
-    const b = TextStyle(fontWeight: FontWeight.w700, color: AppColors.text);
+    final b = TextStyle(fontWeight: FontWeight.w700, color: AppColors.text);
     final soft = AppColors.ink50.withValues(alpha: .7);
     return ListView(padding: EdgeInsets.only(bottom: 40 + MediaQuery.paddingOf(context).bottom), children: [
       // Cabecera tinta
@@ -106,8 +106,8 @@ class _Body extends ConsumerWidget {
           (3, ['Se calcula un ', 'resultado esperado', '. Cuanto menos se esperaba tu victoria, más puntos ganas.']),
           (4, ['Ganar a rivales más fuertes suma ', 'más', '; perder contra rivales más débiles resta más.']),
         ]) Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(width: 22, height: 22, alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0x0F171C19), borderRadius: BorderRadius.circular(7)),
-              child: Text('$i', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
+          Container(width: 22, height: 22, alignment: Alignment.center, decoration: BoxDecoration(color: AppColors.inkA(0x0F), borderRadius: BorderRadius.circular(7)),
+              child: Text('$i', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
           const SizedBox(width: 10),
           Expanded(child: Text.rich(TextSpan(style: body.copyWith(fontSize: 13.5), children: [TextSpan(text: parts[0]), TextSpan(text: parts[1], style: b), TextSpan(text: parts[2])]))),
         ])),
@@ -132,7 +132,7 @@ class _Body extends ConsumerWidget {
       const _Title('Historial de rating'),
       Container(
         margin: const EdgeInsets.symmetric(horizontal: 20), padding: const EdgeInsets.all(18),
-        decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
+        decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           SlidingTabs(dark: true, labels: const ['30 días', '3 meses', '12 meses', 'Todo'], index: HistoryRange.values.indexOf(range),
               onChanged: (i) => ref.read(historyRangeProvider.notifier).state = HistoryRange.values[i]),
@@ -161,9 +161,9 @@ class _Body extends ConsumerWidget {
       const _Title('Últimos cambios de rating'),
       Container(
         margin: const EdgeInsets.symmetric(horizontal: 20), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: d.history.isEmpty
-            ? const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('Tu ELO cambiará cuando se confirme tu primer partido.', style: PlobbyText.sub))
+            ? Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('Tu ELO cambiará cuando se confirme tu primer partido.', style: PlobbyText.sub))
             : Column(children: [for (var i = 0; i < d.history.length && i < 8; i++) _ChangeRow(d.history[i], first: i == 0)]),
       ),
     ]);
@@ -175,7 +175,7 @@ class _Title extends StatelessWidget {
   final String t;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(20, 28, 20, 12), child: Semantics(header: true,
-      child: Text(t, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 18, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: -0.18, color: AppColors.text))));
+      child: Text(t, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 18, height: 1.25, fontWeight: FontWeight.w600, letterSpacing: -0.18, color: AppColors.text))));
 }
 
 class _Card extends StatelessWidget {
@@ -184,7 +184,7 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.fromLTRB(20, 24, 20, 0), padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Semantics(header: true, child: Text(title, style: PlobbyText.cardTitle)), const SizedBox(height: 10), child,
         ]),
@@ -201,7 +201,7 @@ class _Kpi extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, sub) = switch (tone) {
       _Tone.light => (AppColors.surface, AppColors.text, AppColors.textMuted),
-      _Tone.lime => (AppColors.brand, AppColors.brandInk, const Color(0xB3171C19)),
+      _Tone.lime => (AppColors.brand, AppColors.brandInk, AppColors.inkA(0xB3)),
       _Tone.dark => (AppColors.inverse, AppColors.brand, const Color(0xA6F6F8F1)),
     };
     return Semantics(label: '$l: $v', excludeSemantics: true, child: Container(
@@ -222,11 +222,11 @@ class _KpiRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(label: '$l: $v', excludeSemantics: true, child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: Row(children: [
-          Expanded(child: Text(l, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.2, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.textMuted))),
+          Expanded(child: Text(l, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.2, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.textMuted))),
           const SizedBox(width: 6),
-          Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: Text(v, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: AppColors.text)))),
+          Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: Text(v, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: AppColors.text)))),
         ]),
       ));
 }
@@ -238,16 +238,16 @@ class _ChangeRow extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(label: '${c.won ? 'Victoria' : 'Derrota'} ${c.score} contra ${c.opponents}, ${c.delta > 0 ? '+' : ''}${c.delta} ELO', excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(border: first ? null : const Border(top: BorderSide(color: Color(0x1A171C19)))),
+        decoration: BoxDecoration(border: first ? null : Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
         child: Row(children: [
-          SizedBox(width: 58, child: Text('${c.at.day} ${_months[c.at.month - 1]}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted))),
+          SizedBox(width: 58, child: Text('${c.at.day} ${_months[c.at.month - 1]}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted))),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('${c.won ? 'Victoria' : 'Derrota'} ${c.score}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
-            Text('vs ${c.opponents}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0, color: AppColors.textMuted)),
+            Text('${c.won ? 'Victoria' : 'Derrota'} ${c.score}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text('vs ${c.opponents}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0, color: AppColors.textMuted)),
           ])),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Text('${c.delta > 0 ? '+' : ''}${c.delta}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 0, color: c.delta >= 0 ? AppColors.success : AppColors.danger)),
-            Text('${_n(c.before)} – ${_n(c.after)}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
+            Text('${_n(c.before)} – ${_n(c.after)}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
           ]),
         ]),
       ));

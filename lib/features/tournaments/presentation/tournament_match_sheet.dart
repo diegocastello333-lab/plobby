@@ -67,7 +67,7 @@ class _MatchSheetState extends ConsumerState<_MatchSheet> {
     final async = ref.watch(tournamentDetailProvider(widget.tournamentId));
     final d = async.valueOrNull;
     final m = d?.matches.where((x) => x.id == widget.matchId).firstOrNull;
-    if (d == null || m == null) return const Padding(padding: EdgeInsets.all(30), child: Center(child: CircularProgressIndicator(color: AppColors.text)));
+    if (d == null || m == null) return Padding(padding: EdgeInsets.all(30), child: Center(child: CircularProgressIndicator(color: AppColors.text)));
     final n = ref.read(tournamentDetailProvider(widget.tournamentId).notifier);
     final t1 = d.team(m.team1Id), t2 = d.team(m.team2Id);
     final sets = _sets;
@@ -96,11 +96,11 @@ class _MatchSheetState extends ConsumerState<_MatchSheet> {
       }),
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
-        child: Column(children: [teamRow(t1, 1), Container(height: 1, color: const Color(0x14171C19)), teamRow(t2, 2)]),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+        child: Column(children: [teamRow(t1, 1), Container(height: 1, color: AppColors.inkA(0x14)), teamRow(t2, 2)]),
       ),
       if (next != null && m.stage == MatchStage.knockout) Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-        const PlobbyIcon(PlobbyIcons.arrup, size: 14, color: AppColors.textMuted), const SizedBox(width: 6),
+        PlobbyIcon(PlobbyIcons.arrup, size: 14, color: AppColors.textMuted), const SizedBox(width: 6),
         Expanded(child: Text('El ganador pasa a ${d.matchLabel(next).toLowerCase()}.', style: PlobbyText.help)),
       ])),
       if (d.isAdmin && m.ready) ...[
@@ -110,7 +110,7 @@ class _MatchSheetState extends ConsumerState<_MatchSheet> {
           const SizedBox(height: 8),
           Row(children: [const Spacer(), for (final t in [t1, t2]) SizedBox(width: 80, child: Text(t?.p1.short ?? '', textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.help.copyWith(fontSize: 11.5)))]),
           for (var i = 0; i < 3; i++) Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [
-            Expanded(child: Text(i == 2 ? 'Set 3 (si hace falta)' : 'Set ${i + 1}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
+            Expanded(child: Text(i == 2 ? 'Set 3 (si hace falta)' : 'Set ${i + 1}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
             for (var j = 0; j < 2; j++) Padding(padding: const EdgeInsets.only(left: 8), child: SizedBox(width: 72, height: 44, child: Semantics(label: 'Set ${i + 1}, pareja ${j + 1}', textField: true, child: TextField(
               controller: _c[i][j], keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(1)],
               textAlign: TextAlign.center, style: PlobbyText.input, onChanged: (_) => setState(() => _error = null),

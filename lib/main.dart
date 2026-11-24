@@ -12,6 +12,7 @@ import 'core/widgets/wide_frame.dart';
 import 'features/splash/application/splash_boot.dart';
 import 'features/home/application/home_snapshot.dart' show HomeSnapshotStore;
 import 'core/supabase/supabase_bootstrap.dart';
+import 'core/theme/design_tokens.dart';
 import 'core/theme/plobby_theme.dart';
 
 /// Con `--dart-define-from-file=env.json` (SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY) la app usa Supabase;
@@ -47,11 +48,40 @@ Future<void> main() async {
       : SupabaseSessionScope(client: client, child: const PlobbyApp()));
 }
 
-class PlobbyApp extends ConsumerWidget {
+class PlobbyApp extends ConsumerStatefulWidget {
   const PlobbyApp({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
+  ConsumerState<PlobbyApp> createState() => _PlobbyAppState();
+}
+
+/// Sigue el modo claro/oscuro del sistema. Los colores de Plobby son getters que leen [AppColors.isDark], así que al
+/// cambiar de modo se fija el valor y se reconstruye TODA la app (clave distinta): ningún widget se queda con el color
+/// anterior. La ruta actual no se pierde (el router vive en Riverpod).
+class _PlobbyAppState extends ConsumerState<PlobbyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _sync();
+  }
+
+  @override
+  void dispose() { WidgetsBinding.instance.removeObserver(this); super.dispose(); }
+
+  @override
+  void didChangePlatformBrightness() { if (_sync()) setState(() {}); }
+
+  /// Devuelve true si el modo ha cambiado.
+  bool _sync() {
+    final dark = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+    if (dark == AppColors.isDark) return false;
+    AppColors.isDark = dark;
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) => KeyedSubtree(key: ValueKey(AppColors.isDark), child: MaterialApp.router(
       title: 'Plobby', theme: buildPlobbyTheme(), routerConfig: ref.watch(routerProvider), debugShowCheckedModeBanner: false,
       // Sincronización en vivo y avisos emergentes en cualquier pantalla (no solo en las pestañas).
-      builder: (_, child) => WideFrame(child: LiveSync(child: child ?? const SizedBox.shrink())));
+      builder: (_, child) => WideFrame(child: LiveSync(child: child ?? const SizedBox.shrink()))));
 }

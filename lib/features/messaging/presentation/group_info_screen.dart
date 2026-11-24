@@ -42,7 +42,7 @@ class GroupInfoScreen extends ConsumerWidget {
     final conv = ref.watch(conversationProvider(conversationId)).valueOrNull, members = ref.watch(groupMembersProvider(conversationId)).valueOrNull;
     final me = ref.read(messagingRepositoryProvider).meId, repo = ref.read(messagingRepositoryProvider);
     if (conv == null || members == null) {
-      return Scaffold(body: Column(children: [PlobbyHeaderBar(title: 'Info del grupo', onBack: () => context.pop()), const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.text)))]));
+      return Scaffold(body: Column(children: [PlobbyHeaderBar(title: 'Info del grupo', onBack: () => context.pop()), Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.text)))]));
     }
     final perms = GroupPerms(members, me);
     final sorted = [...members]..sort((a, b) => a.isAdmin == b.isAdmin ? a.name.compareTo(b.name) : (a.isAdmin ? -1 : 1));
@@ -57,20 +57,20 @@ class GroupInfoScreen extends ConsumerWidget {
           const SizedBox(height: 14),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Flexible(child: Semantics(header: true, child: Text(conv.title, textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.text)))),
+                style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.text)))),
             if (perms.canEdit) ...[const SizedBox(width: 8), IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Cambiar nombre', size: 32, onPressed: () => _rename(context, ref, repo, conv.title))],
           ]),
           const SizedBox(height: 4),
           Text('${members.length} participantes', textAlign: TextAlign.center, style: PlobbyText.sub),
           const SizedBox(height: 26),
           Row(children: [
-            const Expanded(child: Text('PARTICIPANTES', style: PlobbyText.eb)),
+            Expanded(child: Text('PARTICIPANTES', style: PlobbyText.eb)),
             if (perms.canAdd) Semantics(button: true, label: 'Añadir participantes', excludeSemantics: true, child: InkWell(onTap: () => _add(context, ref, repo, members),
-                child: const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('+ Añadir', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))))),
+                child: Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('+ Añadir', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))))),
           ]),
           const SizedBox(height: 6),
           for (final m in sorted) Container(
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
             child: Row(children: [
               Expanded(child: Semantics(button: m.id != me, label: '${m.id == me ? '${m.name} (tú)' : m.name}${m.isAdmin ? ', administrador' : ''}', excludeSemantics: true, child: InkWell(
                 onTap: m.id == me ? null : () => context.push('/player/${m.id}'),
@@ -82,10 +82,10 @@ class GroupInfoScreen extends ConsumerWidget {
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Row(children: [
                       Flexible(child: Text(m.id == me ? '${m.name} (tú)' : m.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+                          style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
                       if (m.isAdmin) const _AdminBadge(),
                     ]),
-                    Text('@${m.username}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
+                    Text('@${m.username}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
                   ])),
                 ])),
               ))),
@@ -133,7 +133,7 @@ class GroupInfoScreen extends ConsumerWidget {
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * .7),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const SheetHeader(title: 'Añadir participantes'),
-        if (friends.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('Todos tus amigos ya están en el grupo.', style: PlobbyText.sub)),
+        if (friends.isEmpty) Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('Todos tus amigos ya están en el grupo.', style: PlobbyText.sub)),
         Flexible(child: ListView(shrinkWrap: true, children: [for (final Friend f in friends) CheckboxListTile(contentPadding: EdgeInsets.zero, value: sel.contains(f.player.id), activeColor: AppColors.inverse, checkColor: AppColors.brand,
             title: Text(f.player.name, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w700)), subtitle: Text('@${f.player.username}', style: PlobbyText.help),
             onChanged: (v) => set(() => v == true ? sel.add(f.player.id) : sel.remove(f.player.id)))])),

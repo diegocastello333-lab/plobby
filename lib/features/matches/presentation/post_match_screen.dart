@@ -83,7 +83,7 @@ class PostMatchScreen extends ConsumerWidget {
     }
     // espera a los tres (o a que fallen: entonces se enseña lo que haya)
     if (match == null || (!rating.hasValue && !rating.hasError) || (!ach.hasValue && !ach.hasError)) {   // una recarga NO reinicia la secuencia
-      return const Scaffold(backgroundColor: AppColors.bg, body: Center(child: CircularProgressIndicator(color: AppColors.text)));
+      return Scaffold(backgroundColor: AppColors.bg, body: Center(child: CircularProgressIndicator(color: AppColors.text)));
     }
     if (match.status != MatchStatus.confirmed) {
       return Scaffold(body: Column(children: [
@@ -216,7 +216,7 @@ class _PostMatchViewState extends ConsumerState<_PostMatchView> with SingleTicke
               SizedBox(height: pad.top),
               SizedBox(height: 52, child: Row(children: [
                 SizedBox(width: 84, child: Align(alignment: AlignmentDirectional.centerStart, child: IconButton(tooltip: 'Cerrar', onPressed: () => context.pop(),
-                    icon: const PlobbyIcon(PlobbyIcons.close, size: 22, color: AppColors.text)))),
+                    icon: PlobbyIcon(PlobbyIcons.close, size: 22, color: AppColors.text)))),
                 Expanded(child: Text('Resumen del partido', textAlign: TextAlign.center, style: PlobbyText.t2, maxLines: 2)),
                 SizedBox(width: 84, child: AnimatedOpacity(
                   opacity: _done ? 0 : 1, duration: Motion.of(context, Motion.fast),
@@ -314,7 +314,7 @@ class _Hero extends StatelessWidget {
     ]);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
-      decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
+      decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
       child: Column(children: [
         Text('PARTIDO CONFIRMADO', textAlign: TextAlign.center, style: PlobbyText.eb.copyWith(color: AppColors.brand)),
         const SizedBox(height: 14),
@@ -399,7 +399,7 @@ class _EloBlock extends StatelessWidget {
           if (s.tierUp) ...[
             const SizedBox(height: 10),
             Opacity(opacity: ((t - .8) / .2).clamp(0.0, 1.0), child: Row(children: [
-              const PlobbyIcon(PlobbyIcons.star, size: 16, color: AppColors.text), const SizedBox(width: 6),
+              PlobbyIcon(PlobbyIcons.star, size: 16, color: AppColors.text), const SizedBox(width: 6),
               Flexible(child: Text('Nueva categoría: ${s.tierAfter}', style: PlobbyText.value.copyWith(fontWeight: FontWeight.w700))),
             ])),
           ],
@@ -523,7 +523,7 @@ class _FlipCard extends StatelessWidget {
           ]))
         : Container(
             height: 72, alignment: Alignment.center,
-            decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
+            decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
             child: const PlobbyIcon(PlobbyIcons.lock, size: 22, color: AppColors.brand),
           );
     return Semantics(

@@ -73,7 +73,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         // .chh: volver · avatar con punto «en línea» · nombre y estado (grupo: participantes → info)
         Container(
           padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
-          decoration: const BoxDecoration(color: AppColors.bg, border: Border(bottom: BorderSide(color: Color(0x1A171C19)))),
+          decoration: BoxDecoration(color: AppColors.bg, border: Border(bottom: BorderSide(color: AppColors.inkA(0x1A)))),
           child: Row(children: [
             IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: () => context.pop()),
             const SizedBox(width: 10),
@@ -88,7 +88,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ]),
                 const SizedBox(width: 10),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(conv?.title ?? widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+                  Text(conv?.title ?? widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
                   AnimatedSwitcher(duration: Motion.normal, child: Text(
                       isGroup ? '${conv!.memberCount} participantes · toca para ver info' : (online ? 'En línea' : 'Desconectado'),
                       key: ValueKey(isGroup ? 'g${conv!.memberCount}' : '$online'), maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -101,7 +101,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ]),
         ),
         Expanded(child: msgs.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudo cargar la conversación', onRetry: () => ref.invalidate(chatProvider(widget.conversationId)))),
           data: (l) { _initialCount ??= l.length; return ListView.builder(controller: _scroll, padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), itemCount: l.length + 1, itemBuilder: (_, i) {
                   if (i == 0) {
@@ -123,7 +123,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         // .chi: acciones rápidas · compartir resultado · campo en píldora · enviar (lima)
         Container(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-          decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+          decoration: BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
           child: Row(children: [
             IconSquareButton(icon: PlobbyIcons.plus, tooltip: 'Acciones rápidas', size: 40, onPressed: _quick),
             const SizedBox(width: 8),
@@ -205,7 +205,7 @@ class _SystemMsg extends StatelessWidget {
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Center(child: Container(
       constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * .86),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(12)),
-      child: Text(text, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600, letterSpacing: 0)))));
+      child: Text(text, textAlign: TextAlign.center, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600, letterSpacing: 0)))));
 }
 
 class _Bubble extends StatelessWidget {
@@ -231,7 +231,7 @@ class _Bubble extends StatelessWidget {
       return Align(alignment: align, child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Column(crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start, children: [
         if (showSender && sender != null) _senderLabel(sender!),
         MatchResultCard(payload: m.payload!, sharerId: m.senderId, onTap: () => _openMatch(context)),
-        Padding(padding: const EdgeInsets.only(top: 3), child: Text('$time$status', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted))),
+        Padding(padding: const EdgeInsets.only(top: 3), child: Text('$time$status', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted))),
       ])));
     }
 
@@ -277,7 +277,7 @@ class _Bubble extends StatelessWidget {
 
   /// `.gsn`: nombre del remitente 11.5/800 con la etiqueta ADMIN en lima.
   Widget _senderLabel(GroupMember s) => Padding(padding: const EdgeInsets.only(bottom: 3), child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Text(s.name, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text)),
+        Text(s.name, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text)),
         if (s.isAdmin) Container(margin: const EdgeInsets.only(left: 6), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(5)),
             child: const Text('ADMIN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .76, color: AppColors.brandInk))),
       ]));

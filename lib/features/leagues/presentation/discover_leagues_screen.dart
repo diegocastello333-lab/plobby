@@ -41,9 +41,9 @@ class _DiscoverLeaguesScreenState extends ConsumerState<DiscoverLeaguesScreen> {
           IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
         ]),
         const SizedBox(height: 20),
-        Semantics(header: true, child: const Text('Descubrir ligas', style: PlobbyText.t1)),
+        Semantics(header: true, child: Text('Descubrir ligas', style: PlobbyText.t1)),
         const SizedBox(height: 6),
-        const Text('Encuentra tu próxima competición.', style: PlobbyText.sub),
+        Text('Encuentra tu próxima competición.', style: PlobbyText.sub),
         const SizedBox(height: 16),
         SearchField(hint: 'Buscar por nombre, club o zona', controller: _q,
             onChanged: (v) { _debounce?.cancel(); _debounce = Timer(const Duration(milliseconds: 350), () => _set((x) => x.copyWith(query: v.trim()))); }),  // timing
@@ -90,7 +90,7 @@ class _Dropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) => DropdownButtonFormField<T>(
         value: value, isExpanded: true, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w400, fontSize: 14),
         hint: Text(hint, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w400, fontSize: 14)),
-        icon: const PlobbyIcon(PlobbyIcons.down, size: 16, color: AppColors.textMuted),
+        icon: PlobbyIcon(PlobbyIcons.down, size: 16, color: AppColors.textMuted),
         decoration: plobbyInputDecoration(radius: 12, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10)),
         items: items, onChanged: onChanged,
       );

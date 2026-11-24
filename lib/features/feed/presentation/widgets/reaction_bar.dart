@@ -58,7 +58,7 @@ class _ReactionBarState extends ConsumerState<ReactionBar> {
             child: Text(post.commentCount == 0 ? 'Comentar' : '${post.commentCount} ${post.commentCount == 1 ? 'comentario' : 'comentarios'}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w600, letterSpacing: 0))),
       ]),
       if (post.previewComments.isNotEmpty) ...[
-        Divider(height: 18, thickness: 1, color: onDark ? const Color(0x24F6F8F1) : const Color(0x1A171C19)),
+        Divider(height: 18, thickness: 1, color: onDark ? const Color(0x24F6F8F1) : AppColors.inkA(0x1A)),
         for (final c in post.previewComments) Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text.rich(TextSpan(children: [TextSpan(text: '${c.author.name.split(' ').first} ', style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: c.content)]), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.4, letterSpacing: 0, color: onDark ? AppColors.ink50 : AppColors.text))),
         if (post.commentCount > 2) TextButton(onPressed: () => showCommentsSheet(context, post), style: TextButton.styleFrom(foregroundColor: fg, padding: EdgeInsets.zero, minimumSize: Size.zero), child: Text('Ver los ${post.commentCount} comentarios', style: const TextStyle(fontSize: 12.5))),
       ],
@@ -99,7 +99,7 @@ class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
         return Transform.scale(scale: c.isAnimating ? s : 1, child: child);
       }, child: AnimatedContainer(
         duration: Motion.fast, height: 32, constraints: const BoxConstraints(minWidth: 40), padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : const Color(0x0F171C19)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.text, width: 1.5) : null),
+        decoration: BoxDecoration(color: sel ? AppColors.brand : (widget.onDark ? const Color(0x1FF6F8F1) : AppColors.inkA(0x0F)), borderRadius: BorderRadius.circular(16), border: sel ? Border.all(color: AppColors.text, width: 1.5) : null),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           // partículas: el emoji «salta» al elegirlo (decoración; no cambia el tamaño de la píldora)
           Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [

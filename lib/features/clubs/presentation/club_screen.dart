@@ -48,7 +48,7 @@ class _Body extends StatelessWidget {
     return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 40), children: [
       AppearOnce(child: Container(
         padding: const EdgeInsets.all(18),
-        decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
+        decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Wrap(spacing: 6, runSpacing: 6, children: [
             _DarkTag(c.type.label),
@@ -87,7 +87,7 @@ class _Body extends StatelessWidget {
             child: Row(children: [
               const PlobbyIcon(PlobbyIcons.trophy, size: 18), const SizedBox(width: 10),
               Expanded(child: Text(name, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w700))),
-              const PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
+              PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
             ])),
     ]);
   }

@@ -29,7 +29,7 @@ class ProfileHeader extends ConsumerWidget {
   /// se muestra el nivel con el que empezó, rotulado como tal.
   final String? level;
 
-  static const _soft = AppColors.textMuted;
+  static Color get _soft => AppColors.textMuted;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,25 +63,25 @@ class ProfileHeader extends ConsumerWidget {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Flexible(child: Text(p.fullName, maxLines: 2, overflow: TextOverflow.ellipsis,   // 2 líneas: con texto grande no se corta
-                  style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.text, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
+                  style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.text, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
               if (p.verified) const Padding(padding: EdgeInsets.only(left: 7), child: VerifiedBadge(size: 22)),
             ]),
             const SizedBox(height: 3),
             Row(children: [
-              Flexible(child: Text('@${p.username}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0))),
+              Flexible(child: Text('@${p.username}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0))),
               if (count != null) Semantics(button: isOwner, label: '$count ${count == 1 ? 'amigo' : 'amigos'}', excludeSemantics: true, child: GestureDetector(
                 onTap: isOwner ? () => context.push('/friends') : null,
                 child: Text.rich(TextSpan(text: '  ·  ', children: [
-                  TextSpan(text: '$count', style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w800)),
+                  TextSpan(text: '$count', style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800)),
                   TextSpan(text: count == 1 ? ' amigo' : ' amigos'),
-                ]), style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0)),
+                ]), style: TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0)),
               )),
             ]),
             if (p.location.isNotEmpty) ...[
               const SizedBox(height: 6),
               Row(children: [
-                const PlobbyIcon(PlobbyIcons.pin, size: 13, color: _soft), const SizedBox(width: 5),
-                Flexible(child: Text(p.location, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 12.5, letterSpacing: 0))),
+                PlobbyIcon(PlobbyIcons.pin, size: 13, color: _soft), const SizedBox(width: 5),
+                Flexible(child: Text(p.location, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 12.5, letterSpacing: 0))),
               ]),
             ],
           ])),
@@ -158,9 +158,9 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
       height: 26, padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rSm),
-      child: Center(widthFactor: 1, child: Text.rich(TextSpan(text: '$k ', style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.textMuted, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0),
-          children: [TextSpan(text: v, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w800))]))));
+      decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rSm),
+      child: Center(widthFactor: 1, child: Text.rich(TextSpan(text: '$k ', style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.textMuted, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0),
+          children: [TextSpan(text: v, style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800))]))));
 }
 
 /// `.ph .acts button`: 44 px, radio 11, Inter 14/700; `.g` marfil .14 · `.l` lima.
@@ -169,8 +169,8 @@ class _Btn extends StatelessWidget {
   final String t; final PlobbyIcons i; final bool hi; final VoidCallback f;
   @override
   Widget build(BuildContext context) {
-    const fg = AppColors.text;
-    final shape = AppShapes.of(AppRadius.sm, side: hi ? BorderSide.none : const BorderSide(color: AppColors.border));
+    final fg = AppColors.text;
+    final shape = AppShapes.of(AppRadius.sm, side: hi ? BorderSide.none : BorderSide(color: AppColors.border));
     return Semantics(button: true, label: t, excludeSemantics: true, child: Pressable(child: Material(
       color: hi ? AppColors.lime300 : AppColors.surface, shape: shape,
       child: InkWell(customBorder: shape, onTap: f, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44), child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

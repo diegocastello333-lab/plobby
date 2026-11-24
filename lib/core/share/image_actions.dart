@@ -27,7 +27,7 @@ Future<ImageActionOutcome> runImageAction(BuildContext context, Uint8List png, F
           ConstrainedBox(constraints: const BoxConstraints(maxHeight: 280),
               child: ClipRRect(borderRadius: AppRadius.rMd, child: Image.memory(png, fit: BoxFit.contain, semanticLabel: 'Vista previa de la imagen'))),
           const SizedBox(height: 12),
-          const Text('Pulsa el botón para continuar.', textAlign: TextAlign.center, style: PlobbyText.sub),
+          Text('Pulsa el botón para continuar.', textAlign: TextAlign.center, style: PlobbyText.sub),
           const SizedBox(height: 14),
           PlobbyButton(label: label, icon: PlobbyIcons.share, onPressed: () {
             // Sin `await` antes de la llamada: el navegador la acepta porque nace de este toque.

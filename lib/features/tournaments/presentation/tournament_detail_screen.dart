@@ -76,7 +76,7 @@ class _TournamentDetailScreenState extends ConsumerState<TournamentDetailScreen>
               Positioned(left: 20, right: 20, bottom: 14, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Wrap(spacing: 6, children: [TournamentStatusPill(phase, onCover: true), if (d.isAdmin) const Pill('Organizas', tone: PillTone.lime, icon: PlobbyIcons.shield)]),
                 const SizedBox(height: 8),
-                Text(t.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 22, height: 1.15, fontWeight: FontWeight.w700, letterSpacing: -0.44, color: AppColors.surface)),
+                Text(t.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 22, height: 1.15, fontWeight: FontWeight.w700, letterSpacing: -0.44, color: AppColors.surface)),
                 const SizedBox(height: 4),
                 Text(where, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: Color(0xDDF6F8F1))),
               ])),
@@ -105,7 +105,7 @@ class _TabChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(button: true, selected: selected, label: label, excludeSemantics: true, child: Pressable(child: Material(
         // Selección en lima, como el resto de pestañas y filtros de Plobby (un color = un significado).
-        color: selected ? AppColors.brand : AppColors.surface, shape: StadiumBorder(side: BorderSide(color: selected ? AppColors.brand : const Color(0x26171C19))),
+        color: selected ? AppColors.brand : AppColors.surface, shape: StadiumBorder(side: BorderSide(color: selected ? AppColors.brand : AppColors.inkA(0x26))),
         child: InkWell(customBorder: const StadiumBorder(), onTap: onTap, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Center(widthFactor: 1, child: Text(label, style: PlobbyText.tab.copyWith(color: selected ? AppColors.brandInk : AppColors.text)))))),
       )));
@@ -144,11 +144,11 @@ class _InfoTab extends ConsumerWidget {
       )),
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: Column(children: [
           for (var i = 0; i < rows.length; i++) Container(
             padding: const EdgeInsets.symmetric(vertical: 11),
-            decoration: BoxDecoration(border: i == 0 ? null : const Border(top: BorderSide(color: Color(0x14171C19)))),
+            decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: AppColors.inkA(0x14)))),
             child: Row(children: [
               PlobbyIcon(rows[i].$1, size: 17, color: AppColors.textMuted), const SizedBox(width: 10),
               SizedBox(width: 92, child: Text(rows[i].$2, style: PlobbyText.help)),
@@ -160,7 +160,7 @@ class _InfoTab extends ConsumerWidget {
       if (t.description != null) ...[const SizedBox(height: 16), Text(t.description!, style: PlobbyText.desc)],
       if (d.isAdmin) ...[
         const SizedBox(height: 24),
-        const Text('ORGANIZACIÓN', style: PlobbyText.eb),
+        Text('ORGANIZACIÓN', style: PlobbyText.eb),
         const SizedBox(height: 8),
         PlobbyButton(label: 'Editar información', icon: PlobbyIcons.edit, kind: PlobbyButtonKind.outline, onPressed: () => _editInfo(context, d)),
         const SizedBox(height: 8),
@@ -236,11 +236,11 @@ class _EditTeamsSheetState extends ConsumerState<_EditTeamsSheet> {
       ConstrainedBox(constraints: const BoxConstraints(maxHeight: 320), child: ListView(shrinkWrap: true, children: [
         for (var i = 0; i < _teams.length; i++) Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x14171C19)))),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x14)))),
           child: Row(children: [
             SizedBox(width: 26, child: Text('${i + 1}', style: PlobbyText.value)),
             Expanded(child: TeamLine(team: TTeam(id: '$i', seed: i + 1, p1: _teams[i].$1, p2: _teams[i].$2), size: 26)),
-            IconButton(tooltip: 'Quitar pareja ${i + 1}', onPressed: () => setState(() => _teams = [..._teams]..removeAt(i)), icon: const PlobbyIcon(PlobbyIcons.close, size: 18, color: AppColors.textMuted)),
+            IconButton(tooltip: 'Quitar pareja ${i + 1}', onPressed: () => setState(() => _teams = [..._teams]..removeAt(i)), icon: PlobbyIcon(PlobbyIcons.close, size: 18, color: AppColors.textMuted)),
           ]),
         ),
       ])),
@@ -285,7 +285,7 @@ class _TeamsTab extends StatelessWidget {
             border: d.myTeam?.id == t.id ? Border.all(color: AppColors.brand, width: 2) : null),
         child: Row(children: [
           Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)),
-              child: Text('${t.seed}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
+              child: Text('${t.seed}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             for (final p in [t.p1, t.p2]) Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: InkWell(onTap: () => context.push('/player/${p.id}'), child: Row(children: [
@@ -327,23 +327,23 @@ class _StandingsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = d.standingsOf(group);
-    const h = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .6, color: AppColors.textMuted);
-    const c = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text);
+    final h = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .6, color: AppColors.textMuted);
+    final c = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text);
     Widget num(String s, {bool bold = false}) => SizedBox(width: 30, child: Text(s, textAlign: TextAlign.center, style: bold ? c.copyWith(fontWeight: FontWeight.w800) : c));
     return Container(
-      decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
       child: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(12, 10, 12, 6), child: Row(children: [
-          const SizedBox(width: 22), const Expanded(child: Text('PAREJA', style: h)),
+          const SizedBox(width: 22), Expanded(child: Text('PAREJA', style: h)),
           for (final x in ['PJ', 'G', 'P', '±S']) SizedBox(width: 30, child: Text(x, textAlign: TextAlign.center, style: h)),
-          const SizedBox(width: 30, child: Text('PTS', textAlign: TextAlign.center, style: h)),
+          SizedBox(width: 30, child: Text('PTS', textAlign: TextAlign.center, style: h)),
         ])),
         for (final s in rows) Semantics(container: true, label: '${s.pos}.º ${d.team(s.teamId)?.name}: ${s.played} jugados, ${s.won} ganados, ${s.lost} perdidos, ${s.points} puntos', excludeSemantics: true,
           child: AnimatedContainer(duration: Motion.normal,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: d.myTeam?.id == s.teamId ? AppColors.brandSoft : null,
-              border: const Border(top: BorderSide(color: Color(0x14171C19))),
+              border: Border(top: BorderSide(color: AppColors.inkA(0x14))),
             ),
             child: Row(children: [
               Container(width: 4, height: 22, margin: const EdgeInsets.only(right: 6), decoration: BoxDecoration(color: s.pos <= qualifiers ? AppColors.brand : Colors.transparent, borderRadius: BorderRadius.circular(2))),
@@ -373,7 +373,7 @@ class _BracketTab extends StatelessWidget {
         if (d.tournament.format == TournamentFormat.groupsKnockout && !d.groupsDone)
           Padding(padding: const EdgeInsets.fromLTRB(20, 4, 20, 6), child: Text('Los cruces se completan solos cuando terminen los grupos.', style: PlobbyText.help)),
         Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 6), child: Row(children: [
-          const PlobbyIcon(PlobbyIcons.search, size: 13, color: AppColors.textMuted), const SizedBox(width: 6),
+          PlobbyIcon(PlobbyIcons.search, size: 13, color: AppColors.textMuted), const SizedBox(width: 6),
           Expanded(child: Text('Desliza para recorrer las rondas y pellizca para acercar.', style: PlobbyText.help.copyWith(fontSize: 11.5))),
         ])),
         Expanded(child: ClipRect(child: BracketView(detail: d, onMatch: onMatch))),
@@ -399,7 +399,7 @@ class _MatchesTab extends StatelessWidget {
         ]);
     return ListView(padding: const EdgeInsets.fromLTRB(20, 0, 20, 40), children: [
       section('En juego', live), section('Próximos', next), section('Jugados', played), section('Por decidir', waiting),
-      if (all.isEmpty) const Padding(padding: EdgeInsets.only(top: 20), child: Text('Aún no hay partidos.', style: PlobbyText.help)),
+      if (all.isEmpty) Padding(padding: EdgeInsets.only(top: 20), child: Text('Aún no hay partidos.', style: PlobbyText.help)),
     ]);
   }
 }
@@ -431,7 +431,7 @@ class _MatchRow extends StatelessWidget {
           Row(children: [
             Expanded(child: Text(d.matchLabel(m).toUpperCase(), style: PlobbyText.eb.copyWith(fontSize: 11))),
             if (m.status == TMatchStatus.live) const Text('EN JUEGO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF1FA463))),
-            if (d.isAdmin && m.ready && !m.finished) const PlobbyIcon(PlobbyIcons.edit, size: 13, color: AppColors.textMuted),
+            if (d.isAdmin && m.ready && !m.finished) PlobbyIcon(PlobbyIcons.edit, size: 13, color: AppColors.textMuted),
           ]),
           const SizedBox(height: 6),
           side(1), const SizedBox(height: 4), side(2),

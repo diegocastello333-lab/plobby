@@ -29,8 +29,8 @@ class LeaguesScreen extends ConsumerWidget {
           // .lgh
           Row(crossAxisAlignment: embedded ? CrossAxisAlignment.center : CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              if (!embedded) ...[Semantics(header: true, child: const Text('Ligas', style: PlobbyText.t1)), const SizedBox(height: 6)],
-              const Text('Compite con tu comunidad.', style: PlobbyText.sub),
+              if (!embedded) ...[Semantics(header: true, child: Text('Ligas', style: PlobbyText.t1)), const SizedBox(height: 6)],
+              Text('Compite con tu comunidad.', style: PlobbyText.sub),
             ])),
             IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
           ]),
@@ -38,7 +38,7 @@ class LeaguesScreen extends ConsumerWidget {
           // .sec «Mis ligas» + .sbtn «Crear liga»
           // Un solo «Crear liga»: aquí si ya tienes ligas; si no, en la tarjeta vacía (antes había dos botones a la vez).
           Row(children: [
-            Expanded(child: Semantics(header: true, child: const Text('Mis ligas', style: PlobbyText.t2))),
+            Expanded(child: Semantics(header: true, child: Text('Mis ligas', style: PlobbyText.t2))),
             if (mine.valueOrNull?.isNotEmpty ?? false)
               PlobbyButton(label: 'Crear liga', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/leagues/new')),
           ]),
@@ -58,14 +58,14 @@ class LeaguesScreen extends ConsumerWidget {
           // posición y tu progreso.
           if (mine.valueOrNull?.isNotEmpty ?? false) ...[const SizedBox(height: 20), _Overview(leagues: mine.value!)],
           const SizedBox(height: 34),
-          Semantics(header: true, child: const Text('Descubrir ligas', style: PlobbyText.t2)),
+          Semantics(header: true, child: Text('Descubrir ligas', style: PlobbyText.t2)),
           const SizedBox(height: 4),
           Text('Encuentra tu próxima competición.', style: PlobbyText.subhead.copyWith(color: AppColors.textMuted)),
           const SizedBox(height: 12),
           Semantics(button: true, label: 'Buscar ligas por nombre, club o zona', excludeSemantics: true, child: Material(
-            color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
+            color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
             child: InkWell(borderRadius: AppRadius.rMd, onTap: () => context.push('/leagues/discover'),
-              child: const SizedBox(height: 48, child: Row(children: [
+              child: SizedBox(height: 48, child: Row(children: [
                 SizedBox(width: 14), PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted), SizedBox(width: 10),
                 Expanded(child: Text('Buscar por nombre, club o zona', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, letterSpacing: 0, color: AppColors.textMuted))),
               ]))),
@@ -94,17 +94,17 @@ class _Overview extends StatelessWidget {
     final titles = leagues.where((l) => l.status == LeagueStatus.ended && l.myRank == 1).length;
     Widget cell(String eb, int n, String l, {bool first = false}) => Expanded(child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(border: first ? null : const Border(left: BorderSide(color: Color(0x1A171C19)))),
+          decoration: BoxDecoration(border: first ? null : Border(left: BorderSide(color: AppColors.inkA(0x1A)))),
           child: Semantics(label: '$eb: $n $l', excludeSemantics: true, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(eb.toUpperCase(), maxLines: 1, style: PlobbyText.eb),
             const SizedBox(height: 6),
-            Text('$n', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 28, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.56, color: AppColors.text)),
+            Text('$n', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 28, height: 1, fontWeight: FontWeight.w800, letterSpacing: -0.56, color: AppColors.text)),
             const SizedBox(height: 6),
-            Text(l, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
+            Text(l, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
           ])),
         ));
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16), decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+      padding: const EdgeInsets.symmetric(vertical: 16), decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
       child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         cell('Activas', active, active == 1 ? 'liga' : 'ligas', first: true),
         cell('Jugados', played, 'partidos de liga'),

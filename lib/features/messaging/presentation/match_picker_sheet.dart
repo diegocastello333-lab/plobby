@@ -28,11 +28,11 @@ class _PickerState extends ConsumerState<_Picker> {
   Widget build(BuildContext context) {
     final async = ref.watch(shareableMatchesProvider), uid = ref.watch(currentUserIdProvider);
     return DraggableScrollableSheet(expand: false, initialChildSize: .8, minChildSize: .5, maxChildSize: .95, builder: (_, ctl) => Column(children: [
-      Center(child: Container(width: 40, height: 4, margin: const EdgeInsets.only(top: 10, bottom: 14), decoration: BoxDecoration(color: const Color(0x33171C19), borderRadius: BorderRadius.circular(2)))),
+      Center(child: Container(width: 40, height: 4, margin: const EdgeInsets.only(top: 10, bottom: 14), decoration: BoxDecoration(color: AppColors.inkA(0x33), borderRadius: BorderRadius.circular(2)))),
       const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: SheetHeader(title: 'Compartir resultado', subtitle: 'Partidos finalizados y confirmados.')),
       Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 10), child: SearchField(hint: 'Buscar por rival, club, liga o fecha', onChanged: (v) => setState(() => q = v.trim().toLowerCase()))),
       Expanded(child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+        loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
         error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(shareableMatchesProvider))),
         data: (all) {
           final l = all.where((m) => q.isEmpty || _hay(m, uid).contains(q)).toList();
@@ -56,17 +56,17 @@ class _Row extends StatelessWidget {
     final rivals = m.players.where((p) => p.team != me.team).map((p) => p.name.split(' ').first).join(' y ');
     final mate = m.players.where((p) => p.team == me.team && p.id != uid).map((p) => p.name.split(' ').first).join();
     return Padding(padding: const EdgeInsets.only(bottom: 10), child: Material(color: AppColors.surface, borderRadius: AppRadius.rMd, clipBehavior: Clip.antiAlias, elevation: 0,
-        shadowColor: Colors.transparent, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: Color(0x14171C19))),
+        shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.inkA(0x14))),
         child: InkWell(onTap: onTap, child: Padding(padding: const EdgeInsets.all(14), child: Row(children: [
           Container(width: 4, height: 44, decoration: BoxDecoration(color: won ? AppColors.brand : AppColors.ink400, borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(m.sets.map((s) => '${s.a}-${s.b}').join('  '), style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 16, letterSpacing: 0, color: AppColors.text)),
+            Text(m.sets.map((s) => '${s.a}-${s.b}').join('  '), style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 16, letterSpacing: 0, color: AppColors.text)),
             const SizedBox(height: 2),
-            Text('${won ? 'Victoria' : 'Derrota'} · con $mate vs $rivals', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)),
-            Text('${recapDate(m.endedAt ?? m.scheduledAt)} · ${m.club}${m.type == MatchType.league && m.leagueName != null ? ' · ${m.leagueName}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
+            Text('${won ? 'Victoria' : 'Derrota'} · con $mate vs $rivals', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)),
+            Text('${recapDate(m.endedAt ?? m.scheduledAt)} · ${m.club}${m.type == MatchType.league && m.leagueName != null ? ' · ${m.leagueName}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
           ])),
-          const PlobbyIcon(PlobbyIcons.chev, size: 18, color: AppColors.textMuted),
+          PlobbyIcon(PlobbyIcons.chev, size: 18, color: AppColors.textMuted),
         ])))));
   }
 }

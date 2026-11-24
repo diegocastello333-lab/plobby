@@ -60,11 +60,11 @@ class _S extends ConsumerState<ResultEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final m = ref.watch(matchProvider(widget.matchId)).valueOrNull;
-    if (m == null) return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
+    if (m == null) return Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
     if (!_seeded) { _seeded = true; for (var i = 0; i < m.sets.length; i++) { _c[i * 2].text = '${m.sets[i].a}'; _c[i * 2 + 1].text = '${m.sets[i].b}'; } }
     final sets = _sets(), check = validateSets(sets), edit = m.resultVersion > 0;
     String names(int t) => m.team(t).map((p) => p.name.split(' ').first).join(' y ');
-    const muted = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.textMuted);
+    final muted = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.textMuted);
     return Scaffold(
       body: Column(children: [
         PlobbyHeaderBar(title: 'Resultado', onBack: () => context.pop()),
@@ -86,12 +86,12 @@ class _S extends ConsumerState<ResultEntryScreen> {
               Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
                 const Spacer(),
                 for (final t in [1, 2]) ...[const SizedBox(width: 8), SizedBox(width: 74, child: Text(names(t), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)))],
+                    style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)))],
               ])),
               for (var i = 0; i < 3; i++) Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-                Expanded(child: Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text), children: [
+                Expanded(child: Text.rich(TextSpan(style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text), children: [
                   TextSpan(text: 'Set ${i + 1}'),
-                  if (i == 2) const TextSpan(text: ' (solo si 1-1)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.textMuted)),
+                  if (i == 2) TextSpan(text: ' (solo si 1-1)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.textMuted)),
                 ]))),
                 for (var j = 0; j < 2; j++) ...[const SizedBox(width: 8), SizedBox(width: 74, height: 50, child: _GameField(controller: _c[i * 2 + j], label: 'Set ${i + 1} equipo ${j + 1}', error: _bad(i), onChanged: () => setState(() {})))],
               ])),
@@ -100,19 +100,19 @@ class _S extends ConsumerState<ResultEntryScreen> {
           const SizedBox(height: 12),
           if (sets.isEmpty) Text('Introduce los games de cada set.', style: PlobbyText.help.copyWith(fontSize: 12))
           else if (!check.valid) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(children: [
-            const PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger), const SizedBox(width: 6),
-            Expanded(child: Text(check.error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
+            PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger), const SizedBox(width: 6),
+            Expanded(child: Text(check.error!, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
           ]))
           else Container(   // .rs-pv
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, border: Border.all(color: AppColors.border)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('VISTA PREVIA', style: PlobbyText.eb),
+              Text('VISTA PREVIA', style: PlobbyText.eb),
               Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: ScoreBoard(match: m, sets: check.sets)),
               Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [
                 const PlobbyIcon(PlobbyIcons.trophy, size: 16), const SizedBox(width: 8),
                 Expanded(child: Text('Ganan ${names(check.winner!)} · ${check.sets.where((s) => s.a > s.b).length}-${check.sets.where((s) => s.b > s.a).length}',
-                    style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+                    style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
               ])),
             ]),
           ),
@@ -138,7 +138,7 @@ class _GameField extends StatelessWidget {
     return PopOnEvent(trigger: controller.text, child: Semantics(label: label, textField: true, child: TextField(
       controller: controller, keyboardType: TextInputType.number, textAlign: TextAlign.center, textAlignVertical: TextAlignVertical.center, maxLength: 1, expands: true, maxLines: null, minLines: null,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (v) { if (v.isNotEmpty) AppHaptics.light(); onChanged(); },
-      style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text),
+      style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text),
       decoration: InputDecoration(
         counterText: '', filled: true, fillColor: AppColors.surface, isDense: true, contentPadding: EdgeInsets.zero,
         enabledBorder: b(error ? AppColors.danger : AppColors.borderStrong, error ? 1.5 : 1), focusedBorder: b(error ? AppColors.danger : AppColors.text, 2), border: b(AppColors.borderStrong),

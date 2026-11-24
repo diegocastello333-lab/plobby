@@ -370,7 +370,9 @@ class RecapPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) => AppColors.light(() => _paint(canvas, size));
+
+  void _paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / W, size.height / H);
     _st = ShareText(canvas, log: log);

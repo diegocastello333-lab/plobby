@@ -45,8 +45,10 @@ class StatsGrid extends ConsumerWidget {
 Widget _pair(Widget a, Widget b) => IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: a), const SizedBox(width: 10), Expanded(child: b)]));
 
 class _Tile extends StatelessWidget {
-  const _Tile({this.count, this.suffix = '', this.child, required this.label, this.bg = Colors.white, this.fg = PlobbyColors.charcoal});
-  final int? count; final String suffix; final Widget? child; final String label; final Color bg, fg;
+  const _Tile({this.count, this.suffix = '', this.child, required this.label, Color? bg, Color? fg}) : _bg = bg, _fg = fg;
+  final int? count; final String suffix; final Widget? child; final String label; final Color? _bg, _fg;
+  Color get bg => _bg ?? AppColors.surface;
+  Color get fg => _fg ?? PlobbyColors.charcoal;
   @override
   Widget build(BuildContext context) => Container(
       constraints: const BoxConstraints(minHeight: 100), padding: const EdgeInsets.all(12),
@@ -72,7 +74,7 @@ class _Row extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 48), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
       child: Row(children: [
-        Expanded(child: Text(label, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, color: PlobbyColors.mute, fontWeight: FontWeight.w600, letterSpacing: 0))),
+        Expanded(child: Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, color: PlobbyColors.mute, fontWeight: FontWeight.w600, letterSpacing: 0))),
         const SizedBox(width: 8),
         Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: Text(value, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.2)))),
       ]));

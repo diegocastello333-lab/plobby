@@ -51,7 +51,7 @@ class MatchDetailScreen extends ConsumerWidget {
           trailing: m != null && MatchPerms(m, uid).canEdit ? IconSquareButton(icon: PlobbyIcons.more, tooltip: 'Más opciones', onPressed: () => _showOptions(context, ref, m)) : null,
         ),
         Expanded(child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, message: 'No se pudo cargar el partido.', onRetry: () => ref.invalidate(matchProvider(matchId)))),
           data: (m) => m == null
               ? const Padding(padding: EdgeInsets.all(20), child: EmptyStateCard(icon: Icons.sports_tennis, title: 'Este partido ya no existe', text: 'Puede que se haya eliminado.'))
@@ -213,9 +213,9 @@ class _TimerCard extends StatelessWidget {
         Text(title.toUpperCase(), textAlign: TextAlign.center, style: PlobbyText.eb),
         const SizedBox(height: 6),
         if (live) MatchStopwatch(match: m)
-        else Text(durationText(m.durationSeconds ?? 0), style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 44, height: 55 / 44, letterSpacing: -0.88, color: AppColors.text)),
+        else Text(durationText(m.durationSeconds ?? 0), style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 44, height: 55 / 44, letterSpacing: -0.88, color: AppColors.text)),
         const SizedBox(height: 2),
-        if (sub != null) Text(sub, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0, color: AppColors.textMuted)),
+        if (sub != null) Text(sub, textAlign: TextAlign.center, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0, color: AppColors.textMuted)),
       ]),
     );
   }
@@ -226,7 +226,7 @@ class _CaptainHelp extends StatelessWidget {
   const _CaptainHelp();
   @override
   Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Padding(padding: EdgeInsets.only(top: 1, right: 4), child: PlobbyIcon(PlobbyIcons.info, size: 13, color: AppColors.textMuted)),
+        Padding(padding: EdgeInsets.only(top: 1, right: 4), child: PlobbyIcon(PlobbyIcons.info, size: 13, color: AppColors.textMuted)),
         Expanded(child: Text.rich(TextSpan(style: PlobbyText.help.copyWith(fontSize: 12), children: const [
           TextSpan(text: 'C', style: TextStyle(fontWeight: FontWeight.w700)),
           TextSpan(text: ' = capitán. Si no se designa otro, lo es el primer jugador de cada equipo.'),
@@ -247,12 +247,12 @@ class _ConfirmationCard extends StatelessWidget {
         Container(width: 22, height: 22, decoration: BoxDecoration(shape: BoxShape.circle, color: ok ? AppColors.brand : null, border: ok ? null : Border.all(color: AppColors.borderStrong, width: 2)),
             child: ok ? const Center(child: PlobbyIcon(PlobbyIcons.check, size: 14, strokeWidth: 3, color: AppColors.brandInk)) : null),
         const SizedBox(width: 10),
-        Expanded(child: Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, letterSpacing: 0, color: AppColors.text), children: [
+        Expanded(child: Text.rich(TextSpan(style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, letterSpacing: 0, color: AppColors.text), children: [
           TextSpan(text: 'Capitán equipo $t', style: const TextStyle(fontWeight: FontWeight.w700)),
           TextSpan(text: ' · ${c?.name.split(' ').first ?? '—'}'),
         ]), maxLines: 1, overflow: TextOverflow.ellipsis)),
         const SizedBox(width: 8),
-        Text(ok ? 'Aceptado' : 'Pendiente', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted)),
+        Text(ok ? 'Aceptado' : 'Pendiente', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted)),
       ]));
     }
     return Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(16),
@@ -262,7 +262,7 @@ class _ConfirmationCard extends StatelessWidget {
           const SizedBox(height: 10), ScoreBoard(match: m), const SizedBox(height: 10),
           if (!dis) _EloEstimate(m: m, uid: perms.uid),
           if (dis) Text('Un capitán rechazó el resultado${m.rejectionReason != null && m.rejectionReason!.isNotEmpty ? ': «${m.rejectionReason}»' : ''}. Corregidlo y se volverá a pedir la confirmación a los dos capitanes.',
-              style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.45, letterSpacing: 0, color: AppColors.text))
+              style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.45, letterSpacing: 0, color: AppColors.text))
           else ...[row(1), row(2)],
           if (perms.canConfirm || perms.canSubmitResult) const SizedBox(height: 10),
           if (perms.canConfirm) ...[
@@ -297,7 +297,7 @@ class _RejectSheetState extends State<_RejectSheet> {
   @override
   Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const SheetHeader(title: 'Rechazar resultado'),
-        const Text('El partido pasará a «En disputa».', style: PlobbyText.sub),
+        Text('El partido pasará a «En disputa».', style: PlobbyText.sub),
         const SizedBox(height: 12),
         LabeledField(label: 'Motivo (opcional)', controller: _ctl, maxLength: 200, maxLines: 3, hint: 'p. ej. el segundo set terminó 6-3'),
         Row(children: [
@@ -336,7 +336,7 @@ class _MatchEventLogState extends State<MatchEventLog> {
   @override
   Widget build(BuildContext context) {
     final m = widget.m;
-    const base = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.35, letterSpacing: 0, color: AppColors.text);
+    final base = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.35, letterSpacing: 0, color: AppColors.text);
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 14),
       decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, border: Border.all(color: AppColors.border)),
@@ -352,7 +352,7 @@ class _MatchEventLogState extends State<MatchEventLog> {
         if (_open) Padding(padding: const EdgeInsets.fromLTRB(14, 0, 14, 8), child: Column(children: [
           for (final e in m.events) Container(
             padding: const EdgeInsets.symmetric(vertical: 7),
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(child: Text.rich(TextSpan(style: base, children: [
                 TextSpan(text: m.player(e.actorId ?? '')?.name.split(' ').first ?? 'Servidor', style: const TextStyle(fontWeight: FontWeight.w700)),

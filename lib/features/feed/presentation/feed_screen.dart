@@ -90,7 +90,7 @@ class _Header extends ConsumerWidget {
         // «PLOBBY» lima sobre marfil (≈1,2:1 de contraste) que repetía la marca ya presente en Inicio (HIG › Branding:
         // «Resist the temptation to display your logo throughout your app»).
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Expanded(child: Semantics(header: true, child: const Text('Feed', style: PlobbyText.t1))),
+          Expanded(child: Semantics(header: true, child: Text('Feed', style: PlobbyText.t1))),
           Stack(clipBehavior: Clip.none, children: [
             IconSquareButton(icon: PlobbyIcons.bell, tooltip: unread > 0 ? 'Notificaciones, $unread sin leer' : 'Notificaciones', onPressed: () => context.push('/notifications')),
             if (unread > 0) Positioned(right: -5, top: -5, child: IgnorePointer(child: Container(
@@ -108,7 +108,7 @@ class _Header extends ConsumerWidget {
                 : SilhouetteAvatar(seed: me?.id ?? 'me', size: 40)),
           )))),
         ])),
-        const Padding(padding: EdgeInsets.fromLTRB(20, 6, 20, 0), child: Text('Tu comunidad de pádel está jugando.', style: PlobbyText.sub)),
+        Padding(padding: EdgeInsets.fromLTRB(20, 6, 20, 0), child: Text('Tu comunidad de pádel está jugando.', style: PlobbyText.sub)),
         // .bubs: burbujas de actividad reciente (aro tinta en las nuevas)
         SizedBox(height: 85 + 16 * MediaQuery.textScalerOf(context).scale(11.5) / 11.5, child: ListView.separated(   // crece con el texto
           scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 16, 20, 4), itemCount: friends.length, separatorBuilder: (_, __) => const SizedBox(width: 14),
@@ -118,13 +118,13 @@ class _Header extends ConsumerWidget {
             final fresh = i < 5;
             return Semantics(button: true, label: '${p.author.name}, actividad reciente', excludeSemantics: true, child: GestureDetector(onTap: () => context.push('/player/${p.author.id}'), child: SizedBox(width: 62, child: Column(children: [
               Stack(clipBehavior: Clip.none, children: [
-                Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(borderRadius: BorderRadius.circular(21), border: Border.all(color: fresh ? AppColors.text : const Color(0x1A171C19), width: 2)),
+                Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(borderRadius: BorderRadius.circular(21), border: Border.all(color: fresh ? AppColors.text : AppColors.inkA(0x1A), width: 2)),
                     child: ClipRRect(borderRadius: BorderRadius.circular(17), child: SizedBox(width: 48, height: 48, child: feedAvatarFill(p.author, 48)))),
                 Positioned(right: -4, bottom: -4, child: Container(width: 22, height: 22, decoration: BoxDecoration(color: dark ? AppColors.inverse : AppColors.brand, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.bg, width: 2)),
                     child: Center(child: PlobbyIcon(icon, size: 12, strokeWidth: 2.2, color: dark ? AppColors.brand : AppColors.brandInk)))),
               ]),
               const SizedBox(height: 6),
-              Text(p.author.name.split(' ').first, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)),
+              Text(p.author.name.split(' ').first, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)),
             ]))));
           },
         )),
@@ -156,7 +156,7 @@ class _Chips extends SliverPersistentHeaderDelegate {
   Widget _chips() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 14, 20, 10), children: [
         for (final e in _filters.entries) Padding(padding: const EdgeInsets.only(right: 8), child: Semantics(button: true, selected: sel == e.key, label: e.value, excludeSemantics: true, child: Material(
           color: sel == e.key ? AppColors.brand : Colors.transparent,
-          shape: sel == e.key ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(9), side: const BorderSide(color: Color(0x1A171C19))),
+          shape: sel == e.key ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(9), side: BorderSide(color: AppColors.inkA(0x1A))),
           child: InkWell(customBorder: sel == e.key ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)), onTap: () => onSel(e.key),
             child: Container(height: 34, padding: const EdgeInsets.symmetric(horizontal: 14), alignment: Alignment.center,
               child: Text(e.value, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: sel == e.key ? AppColors.brandInk : AppColors.textMuted)))),

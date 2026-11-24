@@ -70,11 +70,11 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           ? Text(pick.title, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle)
           : Text.rich(TextSpan(children: [
               const TextSpan(text: 'Amigos '),
-              TextSpan(text: '$count', style: const TextStyle(color: AppColors.textMuted)),
+              TextSpan(text: '$count', style: TextStyle(color: AppColors.textMuted)),
             ]), textAlign: TextAlign.center, style: PlobbyHeaderBar.titleStyle))),
       if (pick == null) IconSquareButton(icon: PlobbyIcons.userplus, tooltip: 'Añadir amigos', onPressed: () => context.push('/friends/add'))
       else SizedBox(width: 40, child: Text('${_sel.length}/${pick.max}', textAlign: TextAlign.right,
-          style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted))),
+          style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted))),
     ]));
     return Scaffold(
       body: SafeArea(bottom: false, child: Column(children: [
@@ -82,7 +82,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
         Expanded(child: pick == null ? _browse() : _picker(pick)),
         if (pick != null) Container(
           padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.paddingOf(context).bottom),
-          decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: Color(0x14171C19)))),
+          decoration: BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.inkA(0x14)))),
           child: PlobbyButton(
             label: _sel.isEmpty ? 'Elige ${pick.max == 1 ? 'un amigo' : 'jugadores'}' : '${pick.confirmLabel}${pick.max > 1 ? ' (${_sel.length})' : ''}',
             onPressed: _sel.isEmpty ? null : () => context.pop(List<PlayerOption>.unmodifiable(_sel)),
@@ -118,7 +118,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
         const SizedBox(height: 18),
       ],
       ...all.when(
-        loading: () => [const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator(color: AppColors.text)))],
+        loading: () => [Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator(color: AppColors.text)))],
         error: (e, _) => [ErrorStateCard(error: e, onRetry: () => ref.invalidate(friendsProvider))],
         data: (friends) => friends.isEmpty
             ? [EmptyStateCard(icon: Icons.groups_2_outlined, title: 'Tu comunidad de pádel empieza aquí',
@@ -129,7 +129,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 const SizedBox(height: 12),
                 ...list.maybeWhen(
                   data: (l) => l.isEmpty
-                      ? [const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Ningún amigo coincide con tu búsqueda', textAlign: TextAlign.center, style: PlobbyText.sub))]
+                      ? [Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Ningún amigo coincide con tu búsqueda', textAlign: TextAlign.center, style: PlobbyText.sub))]
                       // Cada amigo entra con una aparición suave UNA vez: al aceptar una solicitud, el nuevo amigo «llega».
                       : [for (var i = 0; i < l.length; i++) AppearOnce(animationKey: 'fr:${l[i].player.id}', index: i, child: _FriendTile(l[i]))],
                   orElse: () => const <Widget>[]),
@@ -150,7 +150,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
         : ref.watch(leagueMembersProvider(pick.leagueId!)).whenData((l) => [for (final p in l) PlayerSummary(id: p.id, name: p.name, username: '', elo: 0, level: '')]);
     final q = _q.trim().toLowerCase();
     return source.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+      loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
       error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudieron cargar los jugadores',
           onRetry: () => pick.leagueId == null ? ref.invalidate(friendsProvider) : ref.invalidate(leagueMembersProvider(pick.leagueId!)))),
       data: (all) {
@@ -166,7 +166,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           const SizedBox(height: 10),
           SearchField(hint: 'Buscar por nombre o usuario', onChanged: (v) => setState(() => _q = v)),
           const SizedBox(height: 8),
-          if (shown.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Ningún jugador coincide con tu búsqueda', textAlign: TextAlign.center, style: PlobbyText.sub)),
+          if (shown.isEmpty) Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Ningún jugador coincide con tu búsqueda', textAlign: TextAlign.center, style: PlobbyText.sub)),
           for (final p in shown) _PickRow(
             player: p,
             order: _sel.indexWhere((x) => x.id == p.id),
@@ -241,7 +241,7 @@ class _IncomingRequestState extends ConsumerState<_IncomingRequest> {
     return PersonRow(
       leading: PlayerAvatar(p), title: p.name, subtitle: '@${p.username} quiere ser tu amigo',
       onTap: () => context.push('/player/${p.id}'),
-      trailing: AnimatedSwitcher(duration: Motion.fast, child: _busy ? const SizedBox(key: ValueKey('busy'), width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)) : Row(key: const ValueKey('actions'), mainAxisSize: MainAxisSize.min, children: [
+      trailing: AnimatedSwitcher(duration: Motion.fast, child: _busy ? SizedBox(key: ValueKey('busy'), width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)) : Row(key: const ValueKey('actions'), mainAxisSize: MainAxisSize.min, children: [
         PlobbyButton(label: 'Aceptar', kind: PlobbyButtonKind.small, onPressed: () => _respond(true)),
         const SizedBox(width: 6),
         PlobbyButton(label: 'Rechazar', kind: PlobbyButtonKind.smallOutline, onPressed: () => _respond(false)),
@@ -262,15 +262,15 @@ class _FriendTile extends ConsumerWidget {
       title: p.name,
       semanticsLabel: '${p.name}, ELO ${p.elo}',
       titleTrailing: f.activity.streak >= 3 ? Row(mainAxisSize: MainAxisSize.min, children: [
-        const PlobbyIcon(PlobbyIcons.flame, size: 13, color: AppColors.brandText),
-        Text('${f.activity.streak}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brandText)),
+        PlobbyIcon(PlobbyIcons.flame, size: 13, color: AppColors.brandText),
+        Text('${f.activity.streak}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brandText)),
       ]) : null,
       subtitle: '@${p.username} · ${p.level}${f.activity.lastMatch == null ? '' : '\n${f.activity.lastMatch}'}',
       onTap: () => context.push('/player/${p.id}'),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text(elo, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.16, color: AppColors.text)),
-          const Text('ELO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
+          Text(elo, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.16, color: AppColors.text)),
+          Text('ELO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
         ]),
         const SizedBox(width: 4),
         Tooltip(message: 'Opciones de ${p.name}', child: Semantics(button: true, label: 'Opciones de ${p.name}', excludeSemantics: true, child: InkResponse(
@@ -300,7 +300,7 @@ class _FriendTile extends ConsumerWidget {
           Navigator.pop(c);
           final ok = await showPlobbySheet<bool>(context, (d) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             SheetHeader(title: '¿Eliminar a ${f.player.name}?'),
-            const Text('Dejaréis de ver vuestra actividad y se cerrará la conversación privada.', style: PlobbyText.sub),
+            Text('Dejaréis de ver vuestra actividad y se cerrará la conversación privada.', style: PlobbyText.sub),
             const SizedBox(height: 16),
             Row(children: [
               Expanded(child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: () => Navigator.pop(d, false))),

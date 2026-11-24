@@ -27,14 +27,14 @@ class ConversationsScreen extends ConsumerWidget {
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Row(children: [
           IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: () => context.pop()),
           const SizedBox(width: 12),
-          Expanded(child: Semantics(header: true, child: const Text('Mensajes', textAlign: TextAlign.center, style: PlobbyHeaderBar.titleStyle))),
+          Expanded(child: Semantics(header: true, child: Text('Mensajes', textAlign: TextAlign.center, style: PlobbyHeaderBar.titleStyle))),
           IconSquareButton(icon: PlobbyIcons.userplus, tooltip: 'Nuevo grupo', onPressed: () => context.push('/messages/group/new')),
           const SizedBox(width: 8),
           IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Nuevo mensaje', onPressed: () => context.push('/friends')),
         ])),
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 8), child: SearchField(hint: 'Buscar conversaciones', onChanged: (v) => ref.read(conversationSearchProvider.notifier).state = v)),
         Expanded(child: ref.watch(conversationsProvider).when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(conversationsProvider))),
           data: (all) {
             final l = all.where((c) => q.isEmpty || c.title.toLowerCase().contains(q)).toList();
@@ -50,14 +50,14 @@ class ConversationsScreen extends ConsumerWidget {
                 onTap: () => context.push('/messages/${c.id}'),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(border: i == 0 ? null : const Border(top: BorderSide(color: Color(0x1A171C19)))),
+                  decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
                   child: Row(children: [
                     c.isGroup ? GroupAvatar(url: c.groupAvatarUrl, bytes: c.groupAvatarBytes, presetId: c.groupAvatarId, size: 48) : PlayerAvatar(c.other!, size: 48),
                     const SizedBox(width: 12),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        Flexible(child: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
-                        if (c.isGroup) const Padding(padding: EdgeInsets.only(left: 6), child: PlobbyIcon(PlobbyIcons.users, size: 14, color: AppColors.textMuted)),
+                        Flexible(child: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+                        if (c.isGroup) Padding(padding: EdgeInsets.only(left: 6), child: PlobbyIcon(PlobbyIcons.users, size: 14, color: AppColors.textMuted)),
                       ]),
                       const SizedBox(height: 2),
                       Text(c.preview, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0,
@@ -65,7 +65,7 @@ class ConversationsScreen extends ConsumerWidget {
                     ])),
                     const SizedBox(width: 10),
                     Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                      if (c.last != null) Text(_when(c.last!.createdAt), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, letterSpacing: 0, color: AppColors.textMuted)),
+                      if (c.last != null) Text(_when(c.last!.createdAt), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, letterSpacing: 0, color: AppColors.textMuted)),
                       if (un) Padding(padding: const EdgeInsets.only(top: 6), child: Container(
                         height: 20, constraints: const BoxConstraints(minWidth: 20), padding: const EdgeInsets.symmetric(horizontal: 6), alignment: Alignment.center,
                         decoration: BoxDecoration(color: AppColors.inverse, borderRadius: BorderRadius.circular(10)),

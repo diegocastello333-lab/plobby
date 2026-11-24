@@ -56,7 +56,7 @@ class _Action extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: PlobbyText.cardTitle), Text(text, style: PlobbyText.help)])),
-        const PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
+        PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
       ])));
 }
 
@@ -66,14 +66,14 @@ class H2HTeaser extends StatelessWidget {
   final String otherId, name;
   @override
   Widget build(BuildContext context) => SurfaceCard(onTap: () => context.push('/h2h/$otherId'), child: Row(children: [
-        Container(width: 44, height: 44, decoration: const BoxDecoration(color: AppColors.inverse, shape: BoxShape.circle),
+        Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.inverse, shape: BoxShape.circle),
             alignment: Alignment.center, child: const PlobbyIcon(PlobbyIcons.swords, size: 20, color: AppColors.brand)),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Head to Head', style: PlobbyText.cardTitle),
           Text('Compárate con ${name.split(' ').first}: estadísticas y enfrentamientos', style: PlobbyText.help),
         ])),
-        const PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
+        PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
       ]));
 }
 

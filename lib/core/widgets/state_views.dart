@@ -21,13 +21,13 @@ class EmptyStateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AppearOnce(child: Container(
         width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, boxShadow: AppShadows.card),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, boxShadow: AppShadows.card),
         child: Column(children: [
           // el icono entra con un pequeño rebote después de la tarjeta (una vez; quieto con «reducir movimiento»)
           TweenAnimationBuilder<double>(
             tween: Tween(begin: Motion.reduced(context) ? 1 : 0, end: 1), duration: Motion.celebration, curve: Motion.springBounce,
             builder: (_, t, c) => Transform.scale(scale: .6 + .4 * t, child: Transform.rotate(angle: -.25 * (1 - t), child: c)),
-            child: Container(width: 64, height: 64, decoration: const BoxDecoration(color: AppColors.brandSoft, shape: BoxShape.circle),
+            child: Container(width: 64, height: 64, decoration: BoxDecoration(color: AppColors.brandSoft, shape: BoxShape.circle),
                 child: ExcludeSemantics(child: Icon(icon, size: 28, color: AppColors.brandText))),
           ),
           const SizedBox(height: 16),
@@ -108,7 +108,7 @@ class _ErrorStateCardState extends State<ErrorStateCard> {
         decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rLg, border: Border.all(color: const Color(0x33C4282E))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(width: 36, height: 36, decoration: const BoxDecoration(color: AppColors.dangerSoft, shape: BoxShape.circle),
+            Container(width: 36, height: 36, decoration: BoxDecoration(color: AppColors.dangerSoft, shape: BoxShape.circle),
                 child: ExcludeSemantics(child: Icon(connectivity ? Icons.wifi_off_rounded : Icons.error_outline_rounded, size: 18, color: AppColors.danger))),
             const SizedBox(width: 12),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

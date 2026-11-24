@@ -58,7 +58,7 @@ class GroupAvatarPicker extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(child: Semantics(button: true, label: 'Subir desde la galería', excludeSemantics: true, child: InkWell(
             borderRadius: BorderRadius.circular(12), onTap: onGallery,
-            child: CustomPaint(painter: _DashedRRect(), child: const SizedBox(height: 48, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            child: CustomPaint(painter: _DashedRRect(), child: SizedBox(height: 48, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               PlobbyIcon(PlobbyIcons.image, size: 18), SizedBox(width: 8),
               Flexible(child: Text('Subir desde la galería', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
             ]))),

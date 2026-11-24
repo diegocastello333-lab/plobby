@@ -75,7 +75,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
       body: Column(children: [
         PlobbyHeaderBar(title: 'Compartir mis stats', onBack: () => context.pop()),
         Expanded(child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudieron cargar tus datos', onRetry: () => ref.invalidate(profileProvider('me')))),
           data: (d) {
             final size = fmt.size;
@@ -91,7 +91,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
               group('Plantilla', const [(ShareTemplate.performance, 'Rendimiento'), (ShareTemplate.streak, 'Racha')], tpl, (v) => setState(() => tpl = v)),
               group('Periodo', const [(StatsPeriod.d30, '30 días'), (StatsPeriod.d90, '3 meses'), (StatsPeriod.all, 'Todo')], period, (v) => setState(() => period = v)),
               group('Formato', const [(ShareFormat.story, 'Story 9:16'), (ShareFormat.post, 'Post 4:5')], fmt, (v) => setState(() => fmt = v)),
-              const Text('Mostrar', style: PlobbyText.label), const SizedBox(height: 8),
+              Text('Mostrar', style: PlobbyText.label), const SizedBox(height: 8),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 Opacity(opacity: hasClub ? 1 : .45, child: PlobbyFilterChip(label: 'Club', selected: showClub && hasClub, onTap: hasClub ? () => setState(() => showClub = !showClub) : () {})),
                 Opacity(opacity: hasPartner ? 1 : .45, child: PlobbyFilterChip(label: 'Pareja habitual', selected: showPartner && hasPartner, onTap: hasPartner ? () => setState(() => showPartner = !showPartner) : () {})),

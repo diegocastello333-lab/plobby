@@ -174,13 +174,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         // .crh: cerrar · «EDITAR PERFIL» · hueco simétrico
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Row(children: [
           IconSquareButton(icon: PlobbyIcons.close, tooltip: 'Cerrar', onPressed: () => context.pop()),
-          const Expanded(child: Center(child: Text('EDITAR PERFIL', style: PlobbyText.eb))),
+          Expanded(child: Center(child: Text('EDITAR PERFIL', style: PlobbyText.eb))),
           const SizedBox(width: 40),
         ])),
         Expanded(child: _loadError != null
             ? Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: _loadErr, title: _loadError!, onRetry: _load))
             : p == null
-                ? const Center(child: CircularProgressIndicator(color: AppColors.text))
+                ? Center(child: CircularProgressIndicator(color: AppColors.text))
                 : ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), children: [
                     Center(child: SizedBox(width: 98, height: 96, child: Stack(clipBehavior: Clip.none, children: [
                       Semantics(button: true, label: 'Foto de perfil', excludeSemantics: true, child: GestureDetector(onTap: _uploading ? null : _openPhotoSheet,
@@ -197,25 +197,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     LabeledField(label: 'Ubicación', controller: _city, maxLength: 60),
                     ValueListenableBuilder(valueListenable: _bio, builder: (_, v, __) => LabeledField(label: 'Bio', controller: _bio, maxLength: 160, maxLines: 4,
                         error: _errors['bio'], helper: '${v.text.length}/160')),
-                    const Text('Nivel con el que empezaste', style: PlobbyText.label),
+                    Text('Nivel con el que empezaste', style: PlobbyText.label),
                     const SizedBox(height: 4),
                     Text('Tu nivel en Plobby lo calcula tu ELO; este solo sirve de punto de partida.', style: PlobbyText.help),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<SelfLevel>(
                       value: _level, isExpanded: true, style: PlobbyText.input, decoration: plobbyInputDecoration(),
-                      icon: const PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
+                      icon: PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
                       items: [for (final l in SelfLevel.values) DropdownMenuItem(value: l, child: Text(l.label))],
                       onChanged: (v) => setState(() => _level = v ?? _level),
                     ),
                     const SizedBox(height: 18),
-                    const Text('Mano preferida', style: PlobbyText.label),
+                    Text('Mano preferida', style: PlobbyText.label),
                     const SizedBox(height: 8),
                     SlidingTabs(labels: const ['Derecha', 'Izquierda'], index: _hand == Hand.right ? 0 : 1, onChanged: (i) => setState(() => _hand = i == 0 ? Hand.right : Hand.left)),
                   ])),
         // .crf: Cancelar · Guardar
         Container(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.border))),
+          decoration: BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.border))),
           child: Row(children: [
             Expanded(flex: 10, child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: _busy ? null : () => context.pop())),
             const SizedBox(width: 10),

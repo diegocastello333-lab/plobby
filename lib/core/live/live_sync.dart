@@ -268,7 +268,7 @@ class LiveBannerCard extends StatelessWidget {
           child: Semantics(container: true, button: true, liveRegion: true, label: '${banner.title}. ${banner.body}', excludeSemantics: true,
             // Sombra y fondo FUERA del recorte (si no, el recorte se come la sombra y la tarjeta se ve gris).
             child: DecoratedBox(
-              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0x14171C19)),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.inkA(0x14)),
                   boxShadow: const [BoxShadow(color: Color(0x29171C19), blurRadius: 24, offset: Offset(0, 8), spreadRadius: -6)]),
               child: Material(
               type: MaterialType.transparency, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
@@ -279,7 +279,7 @@ class LiveBannerCard extends StatelessWidget {
                       child: Center(child: PlobbyIcon(banner.icon, size: 18, color: AppColors.brand))),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                    Text(banner.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+                    Text(banner.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
                     const SizedBox(height: 2),
                     Text(banner.body, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.35, letterSpacing: 0, color: AppColors.ink700)),
                   ])),

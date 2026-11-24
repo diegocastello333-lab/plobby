@@ -51,7 +51,7 @@ class CreateLeagueScreen extends ConsumerWidget {
           ])),
           Container(
             padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.paddingOf(context).bottom),
-            decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: Color(0x14171C19)))),
+            decoration: BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.inkA(0x14)))),
             child: Row(children: [
               if (s.step > 1) ...[Expanded(flex: 10, child: PlobbyButton(label: 'Atrás', kind: PlobbyButtonKind.outline, onPressed: s.busy ? null : c.back)), const SizedBox(width: 10)],
               Expanded(flex: 23, child: PlobbyButton(label: s.step < 5 ? 'Continuar' : 'CREAR LIGA', busy: s.busy, onPressed: next)),
@@ -85,7 +85,7 @@ class _Step1 extends ConsumerWidget {
               child: Stack(children: [
                 Positioned.fill(child: LeagueCover(cover: cv, height: 64, radius: 10)),
                 Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: d.cover == cv ? AppColors.text : const Color(0x1A171C19), width: d.cover == cv ? 3 : 1)))),
+                    border: Border.all(color: d.cover == cv ? AppColors.text : AppColors.inkA(0x1A), width: d.cover == cv ? 3 : 1)))),
                 if (d.cover == cv) Positioned(right: 6, top: 6, child: Container(width: 20, height: 20, decoration: const BoxDecoration(color: AppColors.brand, shape: BoxShape.circle),
                     child: const Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3, color: AppColors.brandInk)))),
               ]))),
@@ -146,13 +146,13 @@ class _InviteRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Semantics(checked: selected, label: '$name, $sub', excludeSemantics: true, child: Material(
         color: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: selected ? AppColors.text : const Color(0x1A171C19), width: selected ? 1.5 : 1)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: selected ? AppColors.text : AppColors.inkA(0x1A), width: selected ? 1.5 : 1)),
         child: InkWell(borderRadius: BorderRadius.circular(12), onTap: () { AppHaptics.light(); onTap(); }, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), child: Row(children: [
           LeagueAvatar(name: name, avatarUrl: avatarUrl, size: 36),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
-            Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
+            Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
           ])),
           Container(width: 22, height: 22, decoration: BoxDecoration(color: selected ? AppColors.inverse : AppColors.surface, borderRadius: BorderRadius.circular(6),
               border: selected ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
@@ -195,12 +195,12 @@ class _ToggleRow extends StatelessWidget {
   final String title, text; final bool value; final ValueChanged<bool> onChanged;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: 10), child: Material(
-        color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0x1A171C19))),
+        color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: AppColors.inkA(0x1A))),
         child: MergeSemantics(child: SwitchListTile(
           value: value, onChanged: onChanged, contentPadding: const EdgeInsets.symmetric(horizontal: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           activeThumbColor: AppColors.brand, activeTrackColor: AppColors.inverse,
-          title: Text(title, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
-          subtitle: Text(text, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
+          title: Text(title, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+          subtitle: Text(text, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
         )),
       ));
 }
@@ -222,14 +222,14 @@ class _Step4 extends ConsumerWidget {
           Semantics(button: true, label: '$l: ${fmtDay(v)}', excludeSemantics: true, child: Material(
             color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: bad ? AppColors.danger : AppColors.borderStrong)),
             child: InkWell(borderRadius: AppRadius.rMd, onTap: () => pick(start), child: SizedBox(height: 48, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
-              Expanded(child: Text(fmtDay(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.input)), const PlobbyIcon(PlobbyIcons.cal, size: 18, color: AppColors.textMuted),
+              Expanded(child: Text(fmtDay(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.input)), PlobbyIcon(PlobbyIcons.cal, size: 18, color: AppColors.textMuted),
             ])))),
           )),
         ]));
     Widget select(String label, String value, List<String> items, ValueChanged<String?> on, {String? error}) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _label(label),
           DropdownButtonFormField<String>(value: value, isExpanded: true, style: PlobbyText.input, decoration: plobbyInputDecoration(error: error),
-              icon: const PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
+              icon: PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
               items: [for (final l in items) DropdownMenuItem(value: l, child: Text(l, overflow: TextOverflow.ellipsis))], onChanged: on),
         ]);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -255,13 +255,13 @@ class _Review extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget row(String k, String v, {bool first = false}) => Container(
           padding: const EdgeInsets.symmetric(vertical: 11),
-          decoration: BoxDecoration(border: first ? null : const Border(top: BorderSide(color: Color(0x1A171C19)))),
+          decoration: BoxDecoration(border: first ? null : Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(k, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, letterSpacing: 0, color: AppColors.textMuted)),
+            Text(k, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, letterSpacing: 0, color: AppColors.textMuted)),
             const SizedBox(width: 16),
-            Expanded(child: Text(v, textAlign: TextAlign.right, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+            Expanded(child: Text(v, textAlign: TextAlign.right, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
           ]));
-    const card = BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card);
+    final card = BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Container(clipBehavior: Clip.antiAlias, decoration: card, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         LeagueCover(cover: d.cover, height: 70, radius: 0),
@@ -306,16 +306,16 @@ class LeagueCreatedScreen extends ConsumerWidget {
     return Scaffold(body: SafeArea(child: Center(child: SingleChildScrollView(padding: const EdgeInsets.all(24), child: Column(children: [
       Container(width: 88, height: 88, decoration: const BoxDecoration(color: AppColors.brand, shape: BoxShape.circle), child: const Center(child: PlobbyIcon(PlobbyIcons.check, size: 44, strokeWidth: 2.6, color: AppColors.brandInk))),
       const SizedBox(height: 18),
-      const Text('LIGA CREADA', style: PlobbyText.eb),
+      Text('LIGA CREADA', style: PlobbyText.eb),
       const SizedBox(height: 8),
-      Text((l?.name ?? '').toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: .72, color: AppColors.text)),
+      Text((l?.name ?? '').toUpperCase(), textAlign: TextAlign.center, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: .72, color: AppColors.text)),
       const SizedBox(height: 6),
       Text('Temporada ${l?.season ?? '01'}', style: PlobbyText.sub),
       const SizedBox(height: 24),
       if (code != null) Container(
         padding: const EdgeInsets.fromLTRB(14, 6, 6, 6), decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, border: Border.all(color: AppColors.border)),
         child: Row(children: [
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(code!, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(code!, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             Text(link!, style: PlobbyText.help.copyWith(fontSize: 12))])),
           PlobbyButton(label: 'Copiar', icon: PlobbyIcons.copy, kind: PlobbyButtonKind.small, onPressed: () { Clipboard.setData(ClipboardData(text: code!)); showPlobbySnack(context, 'Código copiado'); }),
         ])),

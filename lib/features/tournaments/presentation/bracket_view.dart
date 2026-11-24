@@ -48,7 +48,7 @@ class BracketView extends StatelessWidget {
             ])))),
             for (var r = 1; r <= rounds; r++)
               Positioned(left: left(r), top: 0, width: cardW, height: headerH - 8, child: Center(child: Text(roundName(r, rounds).toUpperCase(), style: PlobbyText.eb))),
-            Positioned(left: left(rounds + 1), top: 0, width: cardW, height: headerH - 8, child: const Center(child: Text('CAMPEÓN', style: PlobbyText.eb))),
+            Positioned(left: left(rounds + 1), top: 0, width: cardW, height: headerH - 8, child: Center(child: Text('CAMPEÓN', style: PlobbyText.eb))),
             for (final m in ko)
               Positioned(left: left(m.round), top: centerY(m) - cardH / 2, width: cardW, height: cardH,
                   child: BracketMatchCard(detail: detail, m: m, myTeamId: myTeam, onTap: () => onMatch(m))),
@@ -95,7 +95,7 @@ class BracketMatchCard extends StatelessWidget {
             border: Border(left: BorderSide(color: live ? const Color(0xFF1FA463) : mine ? AppColors.brand : Colors.transparent, width: 4))),
         child: Column(children: [
           row(1),
-          Container(height: 1, color: const Color(0x14171C19)),
+          Container(height: 1, color: AppColors.inkA(0x14)),
           row(2),
           if (live) const Align(alignment: Alignment.centerRight, child: Text('EN JUEGO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: Color(0xFF1FA463)))),
         ]),
@@ -140,7 +140,7 @@ class _Connectors extends CustomPainter {
   final double t;
   @override
   void paint(Canvas c, Size s) {
-    final idle = Paint()..color = const Color(0x33171C19)..strokeWidth = 1.5..style = PaintingStyle.stroke;
+    final idle = Paint()..color = AppColors.inkA(0x33)..strokeWidth = 1.5..style = PaintingStyle.stroke;
     final done = Paint()..color = AppColors.text..strokeWidth = 2..style = PaintingStyle.stroke;
     for (final (a, b, d) in lines) {
       final mid = (a.dx + b.dx) / 2;

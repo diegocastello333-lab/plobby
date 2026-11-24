@@ -37,17 +37,17 @@ class _S extends ConsumerState<CommentsSheet> {
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const SheetHeader(title: 'Comentarios'),
         Flexible(child: async.when(
-          loading: () => const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.text))),
+          loading: () => Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(color: AppColors.text))),
           error: (e, __) => ErrorStateCard(error: e, title: 'No se pudieron cargar', onRetry: () => ref.invalidate(commentsProvider(widget.postId))),
-          data: (list) => list.isEmpty ? const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Aún no hay comentarios. Escribe el primero.', style: PlobbyText.sub))
+          data: (list) => list.isEmpty ? Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Aún no hay comentarios. Escribe el primero.', style: PlobbyText.sub))
               : ListView(shrinkWrap: true, children: [for (final c in list) Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+                  decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     avatar(c.author, 17), const SizedBox(width: 10),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text.rich(TextSpan(children: [TextSpan(text: '${c.author.id == me.id ? 'Tú' : c.author.name} ', style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: c.content)]),
-                          style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.text)),
+                          style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.text)),
                       const SizedBox(height: 2),
                       Text(timeAgo(c.createdAt), style: PlobbyText.help.copyWith(fontSize: 12)),
                     ])),

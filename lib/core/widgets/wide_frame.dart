@@ -16,7 +16,7 @@ class WideFrame extends StatelessWidget {
       width: WideLayout.frameWidth, height: mq.size.height,
       child: MediaQuery(data: mq.copyWith(size: Size(WideLayout.frameWidth, mq.size.height)),
           child: WideLayout(wide: true, child: DecoratedBox(
-            decoration: const BoxDecoration(color: AppColors.bg, border: Border.symmetric(vertical: BorderSide(color: AppColors.border))),
+            decoration: BoxDecoration(color: AppColors.bg, border: Border.symmetric(vertical: BorderSide(color: AppColors.border))),
             child: child))),
     ))));
   }

@@ -68,11 +68,11 @@ class _PairPickerState extends ConsumerState<_PairPicker> {
           Expanded(child: _Slot(label: 'Jugador 2', p: _b, onClear: () => setState(() => _b = null)))]),
       const SizedBox(height: 14),
       TextField(controller: _q, onChanged: _search, style: PlobbyText.input, textInputAction: TextInputAction.search,
-          decoration: plobbyInputDecoration(hint: 'Buscar en Plobby por nombre o usuario').copyWith(prefixIcon: const Padding(padding: EdgeInsets.all(12), child: PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted)))),
+          decoration: plobbyInputDecoration(hint: 'Buscar en Plobby por nombre o usuario').copyWith(prefixIcon: Padding(padding: EdgeInsets.all(12), child: PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted)))),
       const SizedBox(height: 10),
       Text(searching ? 'RESULTADOS' : 'TÚ Y TUS AMIGOS', style: PlobbyText.eb),
       const SizedBox(height: 4),
-      if (searching && _searching) const Padding(padding: EdgeInsets.all(16), child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)))),
+      if (searching && _searching) Padding(padding: EdgeInsets.all(16), child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text)))),
       if (!_searching && list.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 14),
           child: Text(searching ? 'No hay jugadores con ese nombre.' : 'Aún no tienes amigos: búscalos arriba por su nombre.', style: PlobbyText.help)),
       ConstrainedBox(constraints: const BoxConstraints(maxHeight: 300), child: ListView(shrinkWrap: true, children: [
@@ -92,12 +92,12 @@ class _Slot extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedContainer(
         duration: Motion.fast, height: 56, padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(color: p == null ? AppColors.surfaceSunken : AppColors.brandSoft, borderRadius: AppRadius.rSm,
-            border: Border.all(color: p == null ? const Color(0x1A171C19) : AppColors.brand, width: 1.5)),
+            border: Border.all(color: p == null ? AppColors.inkA(0x1A) : AppColors.brand, width: 1.5)),
         child: p == null
             ? Center(child: Text(label, style: PlobbyText.help))
             : Row(children: [
                 TPlayerAvatar(p!, size: 30), const SizedBox(width: 8),
-                Expanded(child: Text(p!.short, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+                Expanded(child: Text(p!.short, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
                 Semantics(button: true, label: 'Quitar $label', excludeSemantics: true, child: InkResponse(onTap: onClear, radius: 18, child: const PlobbyIcon(PlobbyIcons.close, size: 16))),
               ]),
       );
@@ -111,11 +111,11 @@ class _Candidate extends StatelessWidget {
       label: '${p.name}${isMe ? ' (tú)' : ''}${used ? ', ya está inscrito' : ''}', excludeSemantics: true,
       child: InkWell(onTap: used ? null : onTap, child: Container(
         padding: const EdgeInsets.symmetric(vertical: 9),
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x14171C19)))),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x14)))),
         child: Row(children: [
           TPlayerAvatar(p, size: 38), const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(isMe ? '${p.name} (tú)' : p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text(isMe ? '${p.name} (tú)' : p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             Text(used ? 'Ya está en otra pareja' : (p.username.isEmpty ? '' : '@${p.username}'), style: PlobbyText.help.copyWith(fontSize: 12)),
           ])),
           AnimatedScale(scale: selected ? 1 : .85, duration: Motion.fast, child: Container(width: 24, height: 24,

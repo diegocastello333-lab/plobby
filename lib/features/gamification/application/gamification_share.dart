@@ -92,7 +92,9 @@ class H2HSharePainter extends CustomPainter {
   final ShareLayoutLog? log;
 
   @override
-  void paint(Canvas c, Size s) {
+  void paint(Canvas c, Size s) => AppColors.light(() => _paint(c, s));
+
+  void _paint(Canvas c, Size s) {
     final t = ShareText(c, log: log), story = s.height > 1500, W = s.width;
     _background(c, s);
     final headerBottom = _header(c, t, W, 'HEAD TO HEAD');
@@ -170,7 +172,9 @@ class WrappedSharePainter extends CustomPainter {
   final ShareLayoutLog? log;
 
   @override
-  void paint(Canvas c, Size s) {
+  void paint(Canvas c, Size s) => AppColors.light(() => _paint(c, s));
+
+  void _paint(Canvas c, Size s) {
     final t = ShareText(c, log: log), story = s.height > 1500, W = s.width;
     _background(c, s);
     final headerBottom = _header(c, t, W, 'PLOBBY WRAPPED');
@@ -231,7 +235,9 @@ class RankingSharePainter extends CustomPainter {
   String get _unit => switch (metric) { RankMetric.wins => 'VICTORIAS', RankMetric.rate => 'DE VICTORIAS', RankMetric.activity => 'PARTIDOS' };
 
   @override
-  void paint(Canvas c, Size s) {
+  void paint(Canvas c, Size s) => AppColors.light(() => _paint(c, s));
+
+  void _paint(Canvas c, Size s) {
     final t = ShareText(c, log: log), story = s.height > 1500, W = s.width;
     _background(c, s);
     final headerBottom = _header(c, t, W, 'RANKING ENTRE AMIGOS');
@@ -290,7 +296,9 @@ class PostMatchSharePainter extends CustomPainter {
   final ShareLayoutLog? log;
 
   @override
-  void paint(Canvas c, Size s) {
+  void paint(Canvas c, Size s) => AppColors.light(() => _paint(c, s));
+
+  void _paint(Canvas c, Size s) {
     final t = ShareText(c, log: log), story = s.height > 1500, W = s.width;
     _background(c, s);
     final headerBottom = _header(c, t, W, 'PARTIDO CONFIRMADO');

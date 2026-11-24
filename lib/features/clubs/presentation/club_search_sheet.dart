@@ -85,14 +85,14 @@ class _ClubSearchState extends ConsumerState<_ClubSearch> {
                 Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: TextField(
                   controller: _q, autofocus: true, onChanged: _onChanged, textInputAction: TextInputAction.search,
                   style: PlobbyText.input,
-                  decoration: InputDecoration(hintText: 'Buscar club', prefixIcon: const Padding(padding: EdgeInsets.all(12),
+                  decoration: InputDecoration(hintText: 'Buscar club', prefixIcon: Padding(padding: EdgeInsets.all(12),
                       child: PlobbyIcon(PlobbyIcons.search, size: 20, color: AppColors.textMuted))),
                 )),
                 if (suggest) Padding(padding: const EdgeInsets.fromLTRB(20, 4, 20, 8), child: Material(
                   color: AppColors.brandSoft, borderRadius: AppRadius.rMd,
                   child: InkWell(borderRadius: AppRadius.rMd, onTap: () => Navigator.of(context).pop(top),
                     child: Padding(padding: const EdgeInsets.all(12), child: Row(children: [
-                      const PlobbyIcon(PlobbyIcons.check, size: 18, color: AppColors.text), const SizedBox(width: 10),
+                      PlobbyIcon(PlobbyIcons.check, size: 18, color: AppColors.text), const SizedBox(width: 10),
                       Expanded(child: Text.rich(TextSpan(children: [
                         const TextSpan(text: '¿Te refieres a '),
                         TextSpan(text: top.name, style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -119,7 +119,7 @@ class _ClubSearchState extends ConsumerState<_ClubSearch> {
           child: Text('Escribe al menos 2 letras.', style: PlobbyText.help));
     }
     if (_loading && _hits.isEmpty) {
-      return const Padding(key: ValueKey('load'), padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator(color: AppColors.text)));
+      return Padding(key: ValueKey('load'), padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator(color: AppColors.text)));
     }
     return ListView(key: const ValueKey('list'), shrinkWrap: true, padding: const EdgeInsets.fromLTRB(12, 0, 12, 8), children: [
       for (final h in _hits) _ClubTile(hit: h, onTap: () => Navigator.of(context).pop(h)),
@@ -145,7 +145,7 @@ class _ClubTile extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(width: 36, height: 36, alignment: Alignment.center,
               decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(10)),
-              child: const PlobbyIcon(PlobbyIcons.building, size: 18, color: AppColors.text)),
+              child: PlobbyIcon(PlobbyIcons.building, size: 18, color: AppColors.text)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(hit.title, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w700)),

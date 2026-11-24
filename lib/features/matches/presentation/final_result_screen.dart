@@ -19,7 +19,7 @@ class FinalResultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final m = ref.watch(matchProvider(matchId)).valueOrNull, uid = ref.watch(currentUserIdProvider);
-    if (m == null) return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
+    if (m == null) return Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
     final w = m.winnerTeam, mine = m.player(uid)?.team;
     String hm(DateTime? d) => d == null ? '—' : '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
     final reduce = Motion.reduced(context);
@@ -29,7 +29,7 @@ class FinalResultScreen extends ConsumerWidget {
         // .fn-hero
         Container(
           padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
-          decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
+          decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
           child: Column(children: [
             Text('${mine == w ? 'VICTORIA' : 'DERROTA'} · CONFIRMADO', textAlign: TextAlign.center, style: PlobbyText.eb.copyWith(color: AppColors.brand)),
             const SizedBox(height: 14),
@@ -62,9 +62,9 @@ class FinalResultScreen extends ConsumerWidget {
           Widget info(String k, String v) => Container(width: cw, padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, border: Border.all(color: AppColors.border)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(k.toUpperCase(), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .55, color: AppColors.textMuted)),
+                Text(k.toUpperCase(), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .55, color: AppColors.textMuted)),
                 const SizedBox(height: 4),
-                Text(v, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w700, fontSize: 13.5, letterSpacing: 0, color: AppColors.text)),
+                Text(v, style: TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w700, fontSize: 13.5, letterSpacing: 0, color: AppColors.text)),
               ]));
           return Wrap(spacing: 10, runSpacing: 10, children: [
             info('Fecha', formatWhen(m.scheduledAt)), info('Club', '${m.club}${m.court != null && m.court!.isNotEmpty ? ' · ${m.court}' : ''}'),

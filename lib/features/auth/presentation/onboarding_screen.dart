@@ -20,7 +20,7 @@ class OnboardingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final st = ref.watch(onboardingProvider), c = ref.read(onboardingProvider.notifier);
-    if (!st.loaded) return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
+    if (!st.loaded) return Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.text)));
     final n = st.pending.length - 1;  // el paso 4 (bienvenida) no cuenta en el progreso
     final reduce = Motion.reduced(context);
     return Scaffold(
@@ -29,7 +29,7 @@ class OnboardingScreen extends ConsumerWidget {
         Padding(padding: const EdgeInsets.fromLTRB(12, 10, 20, 8), child: SizedBox(height: 40, child: Row(children: [
           SizedBox(width: 56, child: st.position > 1 ? Align(alignment: Alignment.centerLeft, child:  IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Atrás', onPressed: c.back)) : null),
           const Expanded(child: Center(child: PlobbyLogo(markHeight: 26, ink: true))),
-          SizedBox(width: 56, child: st.step != 4 ? Text('${st.position} / $n', textAlign: TextAlign.right, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted)) : null),
+          SizedBox(width: 56, child: st.step != 4 ? Text('${st.position} / $n', textAlign: TextAlign.right, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.textMuted)) : null),
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Semantics(label: 'Paso ${st.position} de ${st.pending.length}', excludeSemantics: true, child: Container(
           height: 4, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(2)), alignment: Alignment.centerLeft,
@@ -40,11 +40,11 @@ class OnboardingScreen extends ConsumerWidget {
         ])))),
         Container(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          decoration: const BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: Color(0x14171C19)))),
+          decoration: BoxDecoration(color: AppColors.bg, border: Border(top: BorderSide(color: AppColors.inkA(0x14)))),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             if (st.error != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-              const PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger), const SizedBox(width: 6),
-              Expanded(child: Text(st.error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.danger, fontWeight: FontWeight.w600, fontSize: 12.5, letterSpacing: 0))),
+              PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger), const SizedBox(width: 6),
+              Expanded(child: Text(st.error!, style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.danger, fontWeight: FontWeight.w600, fontSize: 12.5, letterSpacing: 0))),
             ])),
             PlobbyButton(label: st.step == 4 ? 'Entrar en Plobby' : 'Continuar', busy: st.busy, onPressed: () async { final ok = await c.next(); if (ok && st.step == 4) onDone(); }),
           ]),
@@ -56,7 +56,7 @@ class OnboardingScreen extends ConsumerWidget {
 
 /// `.ob-t` (Unbounded 23/600) + subtítulo.
 Widget _title(String t, String s) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Semantics(header: true, child: Text(t, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, height: 1.15, letterSpacing: -0.46, color: AppColors.text))),
+      Semantics(header: true, child: Text(t, style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, height: 1.15, letterSpacing: -0.46, color: AppColors.text))),
       const SizedBox(height: 8), Text(s, style: PlobbyText.sub.copyWith(height: 1.5)), const SizedBox(height: 22)]);
 
 /// `.ob-c`: opción en píldora de 42 px con borde 1.5; seleccionada en lima.
@@ -83,11 +83,11 @@ class _Step1 extends ConsumerWidget {
       Row(children: [Expanded(child: f('Nombre', 'firstName', d.firstName, (v) => c.update(d.copyWith(firstName: v)))), const SizedBox(width: 12), Expanded(child: f('Apellidos', 'lastName', d.lastName, (v) => c.update(d.copyWith(lastName: v))))]),
       f('Nombre de usuario', 'username', d.username, c.usernameChanged, hint: 'p. ej. diego.c'),
       if (status != null) Transform.translate(offset: const Offset(0, -10), child: Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-        if (st.usernameAvailable == true) const Padding(padding: EdgeInsets.only(right: 6), child: PlobbyIcon(PlobbyIcons.check, size: 13, strokeWidth: 2.6, color: AppColors.success)),
+        if (st.usernameAvailable == true) Padding(padding: EdgeInsets.only(right: 6), child: PlobbyIcon(PlobbyIcons.check, size: 13, strokeWidth: 2.6, color: AppColors.success)),
         Expanded(child: Text(status, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0, color: st.usernameAvailable == true ? AppColors.success : st.usernameAvailable == false ? AppColors.danger : AppColors.textMuted))),
       ]))),
       f('Ciudad', 'city', d.city, (v) => c.update(d.copyWith(city: v))),
-      const Text('Fecha de nacimiento', style: PlobbyText.label),
+      Text('Fecha de nacimiento', style: PlobbyText.label),
       const SizedBox(height: 8),
       Semantics(button: true, label: 'Fecha de nacimiento', value: d.birthDate == null ? 'sin elegir' : null, child: Material(
         color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: e['birthDate'] != null ? AppColors.danger : AppColors.borderStrong)),
@@ -98,13 +98,13 @@ class _Step1 extends ConsumerWidget {
         }, child: SizedBox(height: 48, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
           Expanded(child: Text(d.birthDate == null ? 'dd/mm/aaaa' : '${d.birthDate!.day.toString().padLeft(2, '0')}/${d.birthDate!.month.toString().padLeft(2, '0')}/${d.birthDate!.year}',
               style: PlobbyText.input.copyWith(color: d.birthDate == null ? AppColors.textMuted : AppColors.text))),
-          const PlobbyIcon(PlobbyIcons.cal, size: 18, color: AppColors.textMuted),
+          PlobbyIcon(PlobbyIcons.cal, size: 18, color: AppColors.textMuted),
         ])))),
       )),
       const SizedBox(height: 6),
       Text('Solo para comprobar la edad mínima (14 años). No se muestra en tu perfil.', style: PlobbyText.help.copyWith(fontSize: 12)),
       if (e['birthDate'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [
-        const PlobbyIcon(PlobbyIcons.alert, size: 13, color: AppColors.danger), const SizedBox(width: 6),
+        PlobbyIcon(PlobbyIcons.alert, size: 13, color: AppColors.danger), const SizedBox(width: 6),
         Expanded(child: Text(e['birthDate']!, style: PlobbyText.help.copyWith(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600))),
       ])),
     ]);
@@ -137,10 +137,10 @@ class _Step2 extends ConsumerWidget {
               : d.copyWith(habitualClub: hit.name, habitualClubId: hit.id));
         },
         child: Row(children: [
-          const PlobbyIcon(PlobbyIcons.building, size: 18, color: AppColors.text), const SizedBox(width: 10),
+          PlobbyIcon(PlobbyIcons.building, size: 18, color: AppColors.text), const SizedBox(width: 10),
           Expanded(child: Text(d.habitualClub ?? 'Busca tu club', style: PlobbyText.value.copyWith(
               color: d.habitualClub == null ? AppColors.textMuted : AppColors.text, fontWeight: d.habitualClub == null ? FontWeight.w400 : FontWeight.w700))),
-          const PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted),
+          PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted),
         ]),
       ),
       const SizedBox(height: 20),
@@ -178,7 +178,7 @@ class _Step4 extends StatelessWidget {
       Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.brand),
           child: d.avatarUrl != null && d.avatarUrl!.isNotEmpty ? ClipOval(child: NetImage(d.avatarUrl!, width: 112, height: 112, fit: BoxFit.cover, cacheWidth: 336, errorBuilder: (_, __, ___) => PlobbyAvatar(id: d.avatarId ?? 'a1', size: 112))) : PlobbyAvatar(id: d.avatarId ?? 'a1', size: 112)),
       const SizedBox(height: 22),
-      Text('¡Todo listo, ${d.firstName.trim().isEmpty ? 'jugador' : d.firstName.trim()}!', textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, letterSpacing: -0.46, color: AppColors.text)),
+      Text('¡Todo listo, ${d.firstName.trim().isEmpty ? 'jugador' : d.firstName.trim()}!', textAlign: TextAlign.center, style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, letterSpacing: -0.46, color: AppColors.text)),
       const SizedBox(height: 8),
       Text('Tu perfil está creado. Empieza organizando un partido o buscando tu liga.', textAlign: TextAlign.center, style: PlobbyText.sub.copyWith(height: 1.5)),
     ]);

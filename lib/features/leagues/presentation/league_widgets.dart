@@ -58,7 +58,7 @@ class LeagueChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
       ChipTone.lime => (AppColors.brand, AppColors.brandInk),
-      ChipTone.glass => (const Color(0x8C171C19), Colors.white),
+      ChipTone.glass => (AppColors.inkA(0x8C), Colors.white),
       ChipTone.dark => (AppColors.inverse, AppColors.onInverse),
       ChipTone.neutral => (AppColors.surfaceSunken, AppColors.text),
     };
@@ -100,7 +100,7 @@ class RoleBadge extends StatelessWidget {
 }
 
 /// Nombre de liga `.ln`: Inter 14.5/800 en mayúsculas con +.045em.
-const leagueNameStyle = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, height: 1.2, fontWeight: FontWeight.w800, letterSpacing: .65, color: AppColors.text);
+TextStyle get leagueNameStyle => TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, height: 1.2, fontWeight: FontWeight.w800, letterSpacing: .65, color: AppColors.text);
 
 /// Barra de progreso `.prog .tk`: 5 px, radio 3, tinta sobre tinta .12.
 class LeagueProgressBar extends StatelessWidget {
@@ -108,7 +108,7 @@ class LeagueProgressBar extends StatelessWidget {
   final double value; final String semanticsLabel;
   @override
   Widget build(BuildContext context) => Semantics(label: semanticsLabel, value: '${(value * 100).round()}%', excludeSemantics: true,
-      child: Container(height: 5, decoration: BoxDecoration(color: const Color(0x1F171C19), borderRadius: BorderRadius.circular(3)),
+      child: Container(height: 5, decoration: BoxDecoration(color: AppColors.inkA(0x1F), borderRadius: BorderRadius.circular(3)),
         alignment: Alignment.centerLeft,
         child: FractionallySizedBox(widthFactor: value.clamp(0, 1).toDouble(), child: Container(decoration: BoxDecoration(color: AppColors.text, borderRadius: BorderRadius.circular(3))))));
 }
@@ -166,13 +166,13 @@ class MyLeagueCard extends StatelessWidget {
                   Text(l.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis, style: leagueNameStyle),
                   const SizedBox(height: 5),
                   Text('${l.members} ${l.members == 1 ? 'jugador' : 'jugadores'} · Temporada ${l.season}', maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
+                      style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted)),
                   const SizedBox(height: 12),
                   LeagueProgressBar(value: l.progress, semanticsLabel: 'Progreso de la temporada'),
                   const SizedBox(height: 6),
                   Row(children: [
-                    Expanded(child: Text('${l.matchesDone} de ${l.matchesTotal} partidos', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted))),
-                    Text('$pct%', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted, fontFeatures: [FontFeature.tabularFigures()])),
+                    Expanded(child: Text('${l.matchesDone} de ${l.matchesTotal} partidos', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted))),
+                    Text('$pct%', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted, fontFeatures: [FontFeature.tabularFigures()])),
                   ]),
                 ])),
                 const SizedBox(width: 14),
@@ -202,7 +202,7 @@ class MyLeagueCard extends StatelessWidget {
 class DiscoverLeagueCard extends StatelessWidget {
   const DiscoverLeagueCard({super.key, required this.league, required this.onJoin, this.busy = false});
   final DiscoverLeague league; final VoidCallback onJoin; final bool busy;
-  static const _meta = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted);
+  static TextStyle get _meta => TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, letterSpacing: 0, color: AppColors.textMuted);
   @override
   Widget build(BuildContext context) {
     final d = league;
@@ -237,10 +237,10 @@ class DiscoverLeagueCard extends StatelessWidget {
             Row(children: [
               Expanded(child: LeagueProgressBar(value: d.maxPlayers == 0 ? 0 : d.members / d.maxPlayers, semanticsLabel: 'Plazas ocupadas')),
               const SizedBox(width: 10),
-              Flexible(child: Text('${d.members}/${d.maxPlayers} jugadores', textAlign: TextAlign.end, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+              Flexible(child: Text('${d.members}/${d.maxPlayers} jugadores', textAlign: TextAlign.end, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
             ]),
             if (d.friendsIn > 0) Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
-              const PlobbyIcon(PlobbyIcons.users, size: 16, color: AppColors.textMuted), const SizedBox(width: 8),
+              PlobbyIcon(PlobbyIcons.users, size: 16, color: AppColors.textMuted), const SizedBox(width: 8),
               Expanded(child: Text(d.friendsIn == 1 ? '1 amigo juega aquí' : '${d.friendsIn} amigos juegan aquí', style: _meta.copyWith(fontSize: 12))),
             ])),
             const SizedBox(height: 14),
@@ -272,9 +272,9 @@ class NumberStepper extends StatelessWidget {
       const SizedBox(height: 8),
       Container(
         height: 48, padding: const EdgeInsets.only(left: 14, right: 6),
-        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, border: Border.all(color: error != null ? AppColors.danger : const Color(0x1A171C19))),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, border: Border.all(color: error != null ? AppColors.danger : AppColors.inkA(0x1A))),
         child: Row(children: [
-          Expanded(child: Semantics(label: label, value: '$value$suffix', child: Text('$value$suffix', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)))),
+          Expanded(child: Semantics(label: label, value: '$value$suffix', child: Text('$value$suffix', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)))),
           btn(PlobbyIcons.dash, 'Menos', value > min ? () => onChanged(value - 1) : null),
           const SizedBox(width: 6),
           btn(PlobbyIcons.plus, 'Más', value < max ? () => onChanged(value + 1) : null),

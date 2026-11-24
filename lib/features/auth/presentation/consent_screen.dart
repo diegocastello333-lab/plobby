@@ -78,7 +78,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
         child: ListView(padding: const EdgeInsets.fromLTRB(20, 28, 20, 24), children: [
           Align(alignment: AlignmentDirectional.centerStart, child: Container(width: 48, height: 48, alignment: Alignment.center,
               decoration: BoxDecoration(color: AppColors.brandSoft, borderRadius: BorderRadius.circular(14)),
-              child: const PlobbyIcon(PlobbyIcons.shield, size: 24, color: AppColors.text))),
+              child: PlobbyIcon(PlobbyIcons.shield, size: 24, color: AppColors.text))),
           const SizedBox(height: 18),
           Semantics(header: true, child: Text(update ? 'Hemos actualizado nuestras condiciones' : 'Antes de empezar', style: PlobbyText.t1)),
           const SizedBox(height: 8),
@@ -150,7 +150,7 @@ class _CheckRow extends StatelessWidget {
                 ExcludeSemantics(child: Checkbox(
                   value: value, onChanged: (v) => onChanged(v ?? false),
                   activeColor: AppColors.inverse, checkColor: AppColors.brand,
-                  side: const BorderSide(color: AppColors.borderStrong, width: 1.5),
+                  side: BorderSide(color: AppColors.borderStrong, width: 1.5),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                 )),
                 const SizedBox(width: 4),

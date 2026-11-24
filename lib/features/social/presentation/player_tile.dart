@@ -4,7 +4,7 @@ import '../domain/social_models.dart';
 import '../../../core/widgets/net_image.dart';
 
 /// Colores de las iniciales (`.av` del prototipo): tinta con lima, tinta con marfil, lima con tinta o salvia con tinta.
-const _palette = [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
+List<(Color, Color)> get _palette => [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
 
 /// Avatar de jugador (`.av`): foto o iniciales con color estable por usuario y punto lima «en línea» con aro marfil.
 class PlayerAvatar extends StatelessWidget {
@@ -38,7 +38,7 @@ class PersonRow extends StatelessWidget {
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
         child: Row(children: [
           Expanded(child: Semantics(button: onTap != null, label: semanticsLabel, child: InkWell(onTap: onTap, child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -48,11 +48,11 @@ class PersonRow extends StatelessWidget {
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Flexible(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+                      style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
                   if (titleTrailing != null) ...[const SizedBox(width: 6), titleTrailing!],
                 ]),
                 if (subtitle != null) Padding(padding: const EdgeInsets.only(top: 2), child: Text(subtitle!, maxLines: 2, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.35, letterSpacing: 0, color: AppColors.textMuted))),
+                    style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.35, letterSpacing: 0, color: AppColors.textMuted))),
               ])),
             ]),
           )))),

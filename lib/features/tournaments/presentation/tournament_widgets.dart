@@ -164,7 +164,7 @@ class TournamentCard extends StatelessWidget {
                   Expanded(child: Text.rich(TextSpan(children: [
                     TextSpan(text: t.nextMatch!.live ? 'En juego · ' : 'Tu próximo partido · ', style: const TextStyle(fontWeight: FontWeight.w700)),
                     TextSpan(text: '${t.nextMatch!.label} vs ${t.nextMatch!.opponent}'),
-                  ]), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.3, letterSpacing: 0, color: AppColors.text))),
+                  ]), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, height: 1.3, letterSpacing: 0, color: AppColors.text))),
                 ]),
               ),
             ],
@@ -182,6 +182,6 @@ class _Fact extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
         PlobbyIcon(icon, size: 15, color: AppColors.textMuted), const SizedBox(width: 5),
-        Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
+        Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text))),
       ]);
 }

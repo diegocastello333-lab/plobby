@@ -21,9 +21,9 @@ class _Menu extends StatelessWidget {
         // .mmore: borde superior, «MÁS OPCIONES» y botones-pastilla de 36 px
         Container(
           margin: const EdgeInsets.only(top: 18), padding: const EdgeInsets.only(top: 14),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('MÁS OPCIONES', style: PlobbyText.eb),
+            Text('MÁS OPCIONES', style: PlobbyText.eb),
             const SizedBox(height: 10),
             Wrap(spacing: 8, runSpacing: 8, children: [
               _MoreButton(icon: PlobbyIcons.trophy, label: 'Crear una liga', onTap: () => _go(context, '/leagues/new')),
@@ -49,7 +49,7 @@ class _MoreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(button: true, label: label, excludeSemantics: true, child: Material(
         color: Colors.transparent,
-        shape: const StadiumBorder(side: BorderSide(color: AppColors.border, width: 1.5)),
+        shape: StadiumBorder(side: BorderSide(color: AppColors.border, width: 1.5)),
         child: InkWell(customBorder: const StadiumBorder(), onTap: onTap, child: SizedBox(height: 36, child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -91,7 +91,7 @@ class _OptionCardState extends State<_OptionCard> {
               _go(context, '/match/new?type=${widget.type}');
             },
             child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 96), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18), child: Row(children: [
-              Container(width: 52, height: 52, decoration: BoxDecoration(color: widget.dark ? AppColors.brand : const Color(0x1A171C19), borderRadius: BorderRadius.circular(16)),
+              Container(width: 52, height: 52, decoration: BoxDecoration(color: widget.dark ? AppColors.brand : AppColors.inkA(0x1A), borderRadius: BorderRadius.circular(16)),
                   child: Center(child: PlobbyIcon(widget.icon, size: 26, color: AppColors.brandInk))),
               const SizedBox(width: 14),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

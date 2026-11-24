@@ -48,15 +48,15 @@ class _LogoutButtonState extends ConsumerState<LogoutButton> {
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.fromLTRB(20, 28, 20, 0),
         padding: const EdgeInsets.only(top: 20),
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
         child: Semantics(container: true, button: true, enabled: !_busy, label: 'Cerrar sesión', excludeSemantics: true, child: Material(
           color: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.danger.withValues(alpha: .28))),
           child: InkWell(
             borderRadius: AppRadius.rMd, onTap: _busy ? null : _logout,
             child: SizedBox(height: 48, child: Center(child: _busy
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.danger))
-                : const Row(mainAxisSize: MainAxisSize.min, children: [
+                ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.danger))
+                : Row(mainAxisSize: MainAxisSize.min, children: [
                     PlobbyIcon(PlobbyIcons.logout, size: 18, color: AppColors.danger), SizedBox(width: 8),
                     Text('Cerrar sesión', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger)),
                   ]))),
@@ -67,17 +67,17 @@ class _LogoutButtonState extends ConsumerState<LogoutButton> {
 
 /// Diálogo de confirmación: «¿Estás seguro de que quieres cerrar sesión?» con «Cancelar» y «Cerrar sesión».
 Future<bool?> showLogoutDialog(BuildContext context) => showDialog<bool>(
-      context: context, useRootNavigator: true, barrierColor: const Color(0x80171C19),
+      context: context, useRootNavigator: true, barrierColor: AppColors.inkA(0x80),
       builder: (c) => Dialog(
         backgroundColor: AppColors.bg, insetPadding: const EdgeInsets.symmetric(horizontal: 24),
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.rLg),
         child: Padding(padding: const EdgeInsets.fromLTRB(20, 22, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(color: AppColors.dangerSoft, borderRadius: BorderRadius.circular(12)),
-              child: const PlobbyIcon(PlobbyIcons.logout, size: 20, color: AppColors.danger)),
+              child: PlobbyIcon(PlobbyIcons.logout, size: 20, color: AppColors.danger)),
           const SizedBox(height: 14),
-          Semantics(header: true, child: const Text('¿Estás seguro de que quieres cerrar sesión?', style: PlobbyText.t2)),
+          Semantics(header: true, child: Text('¿Estás seguro de que quieres cerrar sesión?', style: PlobbyText.t2)),
           const SizedBox(height: 6),
-          const Text('Tu cuenta, tus amigos y tus partidos se mantienen. Podrás volver a entrar cuando quieras.', style: PlobbyText.sub),
+          Text('Tu cuenta, tus amigos y tus partidos se mantienen. Podrás volver a entrar cuando quieras.', style: PlobbyText.sub),
           const SizedBox(height: 20),
           Row(children: [
             Expanded(child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: () => Navigator.pop(c, false))),

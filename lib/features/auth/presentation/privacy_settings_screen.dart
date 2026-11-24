@@ -85,7 +85,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    final ok = await showDialog<bool>(context: context, useRootNavigator: true, barrierColor: const Color(0x80171C19),
+    final ok = await showDialog<bool>(context: context, useRootNavigator: true, barrierColor: AppColors.inkA(0x80),
         builder: (_) => const _DeleteAccountDialog());
     if (ok != true || !mounted) return;
     final router = GoRouter.maybeOf(context);
@@ -104,7 +104,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<bool?> _confirm({required PlobbyIcons icon, required String title, required String text, required String action}) => showDialog<bool>(
-        context: context, useRootNavigator: true, barrierColor: const Color(0x80171C19),
+        context: context, useRootNavigator: true, barrierColor: AppColors.inkA(0x80),
         builder: (c) => _PlobbyDialog(icon: icon, title: title, text: text, actions: [
           Expanded(child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: () => Navigator.pop(c, false))),
           const SizedBox(width: 10),
@@ -127,7 +127,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
             Semantics(container: true, toggled: AppHaptics.enabled, label: 'Vibración', child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
               child: Row(children: [
-                const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Vibración', style: PlobbyText.value),
                   SizedBox(height: 2),
                   Text('Una vibración suave al confirmar acciones y celebrar logros.', style: PlobbyText.help),
@@ -166,7 +166,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
             Semantics(container: true, toggled: status.valueOrNull?.marketing ?? false, label: 'Comunicaciones comerciales', child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
               child: Row(children: [
-                const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Comunicaciones comerciales', style: PlobbyText.value),
                   SizedBox(height: 2),
                   Text('Novedades y ofertas de Plobby. Puedes retirarlo cuando quieras.', style: PlobbyText.help),
@@ -189,7 +189,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           const SizedBox(height: 28),
           PlobbyButton(label: 'Eliminar mi cuenta', kind: PlobbyButtonKind.danger, icon: PlobbyIcons.trash, onPressed: _deleteAccount),
           const SizedBox(height: 10),
-          const Text('Se borra tu perfil, tus fotos, mensajes, amistades, ELO y logros. En los partidos y torneos que jugaste con otras '
+          Text('Se borra tu perfil, tus fotos, mensajes, amistades, ELO y logros. En los partidos y torneos que jugaste con otras '
               'personas aparecerás como «Jugador eliminado», sin ningún dato tuyo. No se puede deshacer.', style: PlobbyText.help),
         ])),
       ]),
@@ -219,7 +219,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
         controller: _ctl, autofocus: true, textCapitalization: TextCapitalization.characters, onChanged: (_) => setState(() {}),
         style: PlobbyText.input,
         decoration: InputDecoration(hintText: 'ELIMINAR', filled: true, fillColor: AppColors.surface,
-            border: OutlineInputBorder(borderRadius: AppRadius.rMd, borderSide: const BorderSide(color: AppColors.border))),
+            border: OutlineInputBorder(borderRadius: AppRadius.rMd, borderSide: BorderSide(color: AppColors.border))),
       ),
       actions: [
         Expanded(child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: () => Navigator.pop(context, false))),
@@ -268,7 +268,7 @@ class _Group extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: AppColors.surface, borderRadius: AppRadius.rMd, clipBehavior: Clip.antiAlias,
-        child: Column(children: [for (var i = 0; i < children.length; i++) ...[if (i > 0) const Divider(height: 1, color: AppColors.border), children[i]]]),
+        child: Column(children: [for (var i = 0; i < children.length; i++) ...[if (i > 0) Divider(height: 1, color: AppColors.border), children[i]]]),
       );
 }
 
@@ -292,8 +292,8 @@ class _Row extends StatelessWidget {
               if (subtitle != null) ...[const SizedBox(height: 2), Text(subtitle!, style: PlobbyText.help)],
             ])),
             busy
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text))
-                : const PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
+                ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.text))
+                : PlobbyIcon(PlobbyIcons.chev, size: 16, color: AppColors.textMuted),
           ]),
         )),
       ));

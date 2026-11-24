@@ -24,7 +24,7 @@ class MatchCard extends StatelessWidget {
             child: Column(children: [
               Row(children: [
                 for (final p in [me, m.partner]) _Avatar(p),
-                const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('VS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: PlobbyColors.mute))),
+                Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('VS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: PlobbyColors.mute))),
                 for (final p in m.opponents) _Avatar(p),
                 // La etiqueta ocupa el hueco restante y se reduce si no cabe (texto muy grande en móvil estrecho).
                 Expanded(child: Align(alignment: Alignment.centerRight, child: FittedBox(fit: BoxFit.scaleDown, child: _Badge(pending ? 'PENDIENTE' : (m.won ? 'VICTORIA' : 'DERROTA'), pending || !m.won)))),
@@ -33,7 +33,7 @@ class MatchCard extends StatelessWidget {
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(m.scoreLabel, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: m.won || pending ? PlobbyColors.charcoal : PlobbyColors.mute)),
-                  Text('${m.playedAt.day}/${m.playedAt.month} · ${m.venue}', style: const TextStyle(fontSize: 12.5, color: PlobbyColors.mute)),
+                  Text('${m.playedAt.day}/${m.playedAt.month} · ${m.venue}', style: TextStyle(fontSize: 12.5, color: PlobbyColors.mute)),
                 ])),
                 if (!pending && onShare != null)
                   Padding(padding: const EdgeInsets.only(right: 4), child: Pressable(child: IconButton(
@@ -59,7 +59,7 @@ class _Avatar extends StatelessWidget {
       padding: const EdgeInsets.only(right: 3),
       child: CircleAvatar(radius: 14, backgroundColor: PlobbyColors.forest,
           backgroundImage: p.avatarUrl != null ? NetworkImage(p.avatarUrl!) : null,
-          child: p.avatarUrl == null ? Text(p.name.characters.first, style: const TextStyle(fontSize: 11, color: PlobbyColors.ivory, fontWeight: FontWeight.w700)) : null));
+          child: p.avatarUrl == null ? Text(p.name.characters.first, style: TextStyle(fontSize: 11, color: PlobbyColors.ivory, fontWeight: FontWeight.w700)) : null));
 }
 
 class _Badge extends StatelessWidget {

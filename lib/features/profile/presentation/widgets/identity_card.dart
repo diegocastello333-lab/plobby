@@ -82,10 +82,10 @@ class _Row extends StatelessWidget {
           ? ClipOval(child: SizedBox(width: 34, height: 34, child: avatarUrl != null && avatarUrl!.isNotEmpty
               ? NetImage(avatarUrl!, fit: BoxFit.cover, cacheWidth: 102, errorBuilder: (_, __, ___) => avatar!) : avatar))
           : Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.ink900))),
-      title: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
+      title: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: PlobbyColors.charcoal)),
-        if (sub != null) Text(sub!, style: const TextStyle(fontSize: 12.5, color: PlobbyColors.mute)),
+        Text(title, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: PlobbyColors.charcoal)),
+        if (sub != null) Text(sub!, style: TextStyle(fontSize: 12.5, color: PlobbyColors.mute)),
       ]),
       trailing: onEdit == null ? null : IconButton(onPressed: onEdit, icon: PlobbyIcon(editIcon, size: 16, color: AppColors.textMuted), tooltip: 'Editar'));
 }
@@ -94,7 +94,7 @@ class _Add extends StatelessWidget {
   const _Add(this.t, this.onTap);
   final String t; final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => ListTile(onTap: onTap, leading: const PlobbyIcon(PlobbyIcons.plus, color: AppColors.textMuted), title: Text(t, style: const TextStyle(color: PlobbyColors.mute, fontWeight: FontWeight.w600, fontSize: 13.5)));
+  Widget build(BuildContext context) => ListTile(onTap: onTap, leading: PlobbyIcon(PlobbyIcons.plus, color: AppColors.textMuted), title: Text(t, style: TextStyle(color: PlobbyColors.mute, fontWeight: FontWeight.w600, fontSize: 13.5)));
 }
 
 /// Elige la pareja habitual SOLO entre los amigos (pantalla de Amigos en modo elección única) y la guarda en Supabase

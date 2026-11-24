@@ -133,7 +133,7 @@ class _SkeletonBoxState extends State<SkeletonBox> with SingleTickerProviderStat
       builder: (_, __) => Container(width: widget.width, height: widget.height, decoration: BoxDecoration(
           borderRadius: widget.radius,
           gradient: LinearGradient(begin: Alignment(-1.5 + 3 * _c.value, 0), end: Alignment(-0.5 + 3 * _c.value, 0),
-              colors: const [AppColors.surfaceSunken, Color(0xFFF7F9F3), AppColors.surfaceSunken]))))));
+              colors: [AppColors.surfaceSunken, Color(0xFFF7F9F3), AppColors.surfaceSunken]))))));
 }
 
 /// Skeleton de «tarjeta de próximo partido» con la altura final (alineada con UpcomingMatchCard).
@@ -229,7 +229,7 @@ class _BellBadgeState extends State<BellBadge> with SingleTickerProviderStateMix
         if (widget.showCount) Positioned(right: -4, top: -4, child: AnimatedScale(
             scale: widget.count > 0 ? 1 : 0, duration: AppAnimations.badge, curve: AppAnimations.settle,
             child: Container(constraints: const BoxConstraints(minWidth: 16, minHeight: 16), padding: const EdgeInsets.symmetric(horizontal: 4), alignment: Alignment.center,
-                decoration: const BoxDecoration(color: AppColors.danger, borderRadius: AppRadius.rSm),
+                decoration: BoxDecoration(color: AppColors.danger, borderRadius: AppRadius.rSm),
                 child: Text(widget.count > 99 ? '99+' : '${widget.count}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white))))),
       ]);
   static double _wave(double t) => math.sin(t * 6 * math.pi);
@@ -286,7 +286,7 @@ class ScrollLinkedTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         height: height < AppLayout.minTap ? AppLayout.minTap : height, padding: const EdgeInsets.all(3),
-        decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rPill),
+        decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rPill),
         child: LayoutBuilder(builder: (_, c) {
           final w = c.maxWidth / labels.length;
           return AnimatedBuilder(animation: controller, builder: (_, __) {

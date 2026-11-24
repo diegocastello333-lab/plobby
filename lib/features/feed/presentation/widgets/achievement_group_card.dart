@@ -37,7 +37,7 @@ class _AchievementGroupCardState extends State<AchievementGroupCard> {
               Text(titles.take(3).join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.footnote),
             ])),
             AnimatedRotation(turns: _open ? .5 : 0, duration: Motion.normal, curve: Motion.move,
-                child: const Icon(Icons.expand_more, color: AppColors.textMuted)),
+                child: Icon(Icons.expand_more, color: AppColors.textMuted)),
           ]),
         ),
       ),

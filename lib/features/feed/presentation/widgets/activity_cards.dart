@@ -19,7 +19,7 @@ String timeAgo(DateTime d) {
 }
 
 /// Colores de las iniciales (`.av` del prototipo): tinta con lima, tinta con marfil, lima con tinta o salvia con tinta.
-const _avPalette = [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
+List<(Color, Color)> get _avPalette => [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
 
 /// Relleno del avatar (foto o iniciales con color estable por usuario), sin recorte: lo pone quien lo usa.
 Widget feedAvatarFill(FeedUser u, double size) {
@@ -33,8 +33,8 @@ Widget feedAvatarFill(FeedUser u, double size) {
 }
 
 /// Avatar redondo de radio [r] con aro blanco de 2 px (`.av`).
-Widget avatar(FeedUser u, double r, {double? radius, Color ring = AppColors.surface}) => Container(
-    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: ring, width: 2)),
+Widget avatar(FeedUser u, double r, {double? radius, Color? ring}) => Container(
+    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: ring ?? AppColors.surface, width: 2)),
     child: ClipOval(child: SizedBox(width: r * 2 - 4, height: r * 2 - 4, child: feedAvatarFill(u, r * 2 - 4))));
 
 /// Punto de entrada: elige la tarjeta según el tipo de actividad.
@@ -90,7 +90,7 @@ class _Match extends StatelessWidget {
       onTap: () => context.push('/match/${p.matchId}'),
       child: Padding(padding: const EdgeInsets.only(top: 12), child: Column(children: [
         _Team(users: p.teamA, scores: p.sets.map((s) => s.$1).toList(), win: p.won),
-        const Align(alignment: Alignment.centerLeft, child: Padding(padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: AppColors.textMuted)))),
+        Align(alignment: Alignment.centerLeft, child: Padding(padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: AppColors.textMuted)))),
         _Team(users: p.teamB, scores: p.sets.map((s) => s.$2).toList(), win: !p.won),
         const SizedBox(height: 10),
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -110,7 +110,7 @@ class _Team extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(color: win ? const Color(0x0F171C19) : null, borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: win ? AppColors.inkA(0x0F) : null, borderRadius: BorderRadius.circular(10)),
       child: Row(children: [
         // avatares de 26 px solapados (18 px de paso)
         SizedBox(width: 26 + 18.0 * (users.length.clamp(1, 2) - 1), height: 26, child: Stack(children: [
@@ -193,7 +193,7 @@ class _Streak extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
         WinStreakBadge(streak: p.count, size: 40, showNumber: false), const SizedBox(width: 12),
-        Text('${p.count}', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.8, color: AppColors.text, height: 1, fontFeatures: PlobbyText.tabular)),
+        Text('${p.count}', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.8, color: AppColors.text, height: 1, fontFeatures: PlobbyText.tabular)),
         const SizedBox(width: 12),
         Expanded(child: Text.rich(TextSpan(style: PlobbyText.subhead, children: [
           TextSpan(text: own ? 'Estás' : 'Está', style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -207,13 +207,13 @@ class _Elo extends StatelessWidget {
   final FeedPost post; final EloPayload p;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(top: 12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.text), children: [
+        Text.rich(TextSpan(style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.4, letterSpacing: 0, color: AppColors.text), children: [
           TextSpan(text: post.author.name.split(' ').first, style: const TextStyle(fontWeight: FontWeight.w700)), TextSpan(text: ' ${p.headline}')])),
         const SizedBox(height: 8),
         Row(children: [
-          Text('${p.from}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, letterSpacing: 0, color: AppColors.textMuted)),
-          const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: PlobbyIcon(PlobbyIcons.chev, size: 14, color: AppColors.textMuted)),
-          Text('${p.to}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.18, color: AppColors.text)),
+          Text('${p.from}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, letterSpacing: 0, color: AppColors.textMuted)),
+          Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: PlobbyIcon(PlobbyIcons.chev, size: 14, color: AppColors.textMuted)),
+          Text('${p.to}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.18, color: AppColors.text)),
           const Spacer(), Pill('+${p.delta} ELO', tone: PillTone.lime),
         ]),
         const SizedBox(height: 8),
@@ -232,9 +232,9 @@ class _League extends StatelessWidget {
         Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.inverse, borderRadius: BorderRadius.circular(9)), child: const Center(child: PlobbyIcon(PlobbyIcons.trophy, size: 18, color: AppColors.brand))),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('${post.author.name.split(' ').first} ${p.headline}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w700, fontSize: 13.5, letterSpacing: 0, color: AppColors.text)),
-          Text(p.leagueName.toUpperCase(), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w800, fontSize: 13.5, letterSpacing: .3, color: AppColors.text)),
-          Text(p.subtitle, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
+          Text('${post.author.name.split(' ').first} ${p.headline}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w700, fontSize: 13.5, letterSpacing: 0, color: AppColors.text)),
+          Text(p.leagueName.toUpperCase(), style: TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w800, fontSize: 13.5, letterSpacing: .3, color: AppColors.text)),
+          Text(p.subtitle, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
         ])),
       ]));
 }

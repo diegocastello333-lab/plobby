@@ -289,10 +289,10 @@ class _Counters extends ConsumerWidget {
           PopOnEvent(trigger: c.streak, glow: c.streak > 0, child: SizedBox(width: 25, height: 31, child: Stack(children: [
             SvgPicture.string('<svg viewBox="0 0 32 40"><path d="M16 2C17 9 27 13 27 24a11 11 0 0 1-22 0c0-4 1.6-6.8 3.8-9.2.4 3.2 2.2 5 4.2 5.6C11.4 12 12.6 6 16 2z" fill="${c.streak > 0 ? '#D2F548' : '#EEF1EA'}"/></svg>', width: 25, height: 31),
             Positioned(left: 0, right: 0, top: 14, child: Text('${c.streak}', textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
+                style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
           ]))),
           const SizedBox(height: 3),
-          const Text('Racha de victorias', textAlign: TextAlign.center, maxLines: 2,
+          Text('Racha de victorias', textAlign: TextAlign.center, maxLines: 2,
               style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.1, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.textMuted)),
         ]),
       )),
@@ -309,7 +309,7 @@ class _LiftedCard extends StatelessWidget {
         button: true, label: label, excludeSemantics: true,
         child: Pressable(child: Container(
           constraints: const BoxConstraints(minHeight: 68),
-          decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.all(Radius.circular(20)), boxShadow: AppShadows.lifted),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.all(Radius.circular(20)), boxShadow: AppShadows.lifted),
           child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: const BorderRadius.all(Radius.circular(20)), onTap: onTap,
               child: Padding(padding: padding, child: Align(alignment: Alignment.centerLeft, child: child)))),
         )),
@@ -331,7 +331,7 @@ class _StatText extends StatelessWidget {
             : LiveNumber(value: number!, memoryKey: memoryKey ?? label, style: PlobbyText.stat))),
         const SizedBox(height: 4),
         FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Text(label, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w500, letterSpacing: 0, color: AppColors.textMuted)),
+          Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w500, letterSpacing: 0, color: AppColors.textMuted)),
           if (trailing != null) ...[const SizedBox(width: 6), trailing!],
         ])),
       ]);
@@ -417,7 +417,7 @@ class _FriendMatchPanel extends StatelessWidget {
         ]);
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-      decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text([when, if (m.venue != null && m.venue!.isNotEmpty) m.venue!, if (m.leagueName != null) m.leagueName!].join(' · '),
             maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.sub.copyWith(fontSize: 13, height: 1.3)),
@@ -451,7 +451,7 @@ class _PlayedCard extends StatelessWidget {
     if (!win) avatar = Opacity(opacity: .7, child: ColorFiltered(colorFilter: const ColorFilter.matrix(_grayscale), child: avatar));
     return Semantics(button: true, label: '${win ? 'Victoria' : 'Derrota'} con ${m.partner.name}, ${m.sets.map((s) => '${s.$1}-${s.$2}').join(' ')}', excludeSemantics: true,
         child: Pressable(child: Container(
-          decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.all(Radius.circular(20)), boxShadow: AppShadows.card),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.all(Radius.circular(20)), boxShadow: AppShadows.card),
           child: Material(type: MaterialType.transparency, borderRadius: const BorderRadius.all(Radius.circular(20)), clipBehavior: Clip.antiAlias, child: InkWell(onTap: onTap,
             child: Stack(children: [
               Positioned(left: 0, top: 16, bottom: 16, child: Container(width: 4, decoration: BoxDecoration(color: win ? AppColors.ink900 : const Color(0x665C6660),
@@ -460,12 +460,12 @@ class _PlayedCard extends StatelessWidget {
                 SizedBox(width: 44, height: 44, child: ClipOval(child: avatar)),
                 const SizedBox(width: 12),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(playedEyebrow(m.playedAt, now), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.textMuted)),
+                  Text(playedEyebrow(m.playedAt, now), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.textMuted)),
                   const SizedBox(height: 3),
                   Text('Con ${shortName(m.partner.name)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, height: 1.25, fontWeight: FontWeight.w700, letterSpacing: 0, color: fg)),
                   const SizedBox(height: 2),
                   Text([if (m.venue.isNotEmpty) m.venue, _hhmm(m.playedAt)].join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.3, letterSpacing: 0, color: AppColors.textMuted)),
+                      style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.3, letterSpacing: 0, color: AppColors.textMuted)),
                 ])),
                 const SizedBox(width: 12),
                 Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -501,15 +501,15 @@ class _Achievements extends StatelessWidget {
         return Semantics(label: '${a.title}: ${a.unlocked ? 'conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}'}', excludeSemantics: true, child: SizedBox(width: 84, child: Column(children: [
           if (a.unlocked)
             Container(width: 76, height: 76, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.lime300), alignment: Alignment.center,
-                child: Container(width: 62, height: 62, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0x4D171C19), width: 1.5)),
+                child: Container(width: 62, height: 62, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.inkA(0x4D), width: 1.5)),
                     child: Center(child: PlobbyIcon(achievementIcon(a.icon), size: 30, color: AppColors.ink900))))
           else
-            SizedBox(width: 76, height: 76, child: CustomPaint(painter: _DashedCircle(), child: const Center(child: PlobbyIcon(PlobbyIcons.lock, size: 28, color: AppColors.textMuted)))),
+            SizedBox(width: 76, height: 76, child: CustomPaint(painter: _DashedCircle(), child: Center(child: PlobbyIcon(PlobbyIcons.lock, size: 28, color: AppColors.textMuted)))),
           const SizedBox(height: 10),
           Text(a.title, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,
               style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.25, fontWeight: FontWeight.w700, letterSpacing: 0, color: a.unlocked ? AppColors.text : AppColors.textMuted)),
           const SizedBox(height: 3),
-          Text(a.unlocked ? 'Conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
+          Text(a.unlocked ? 'Conseguido' : '${a.progress.clamp(0, a.goal)} de ${a.goal}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, letterSpacing: 0, color: AppColors.textMuted)),
         ])));
       }))]),
     ));

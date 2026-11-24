@@ -36,7 +36,7 @@ class _StreakSheet extends StatelessWidget {
         const SizedBox(height: 14),
         Chip(avatar: const Icon(Icons.emoji_events_outlined, size: 16), label: Text('Mejor racha: $best')),
         const SizedBox(height: 8),
-        const Text('Solo cuentan partidos confirmados. Una derrota confirmada reinicia la racha.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: PlobbyColors.mute)),
+        Text('Solo cuentan partidos confirmados. Una derrota confirmada reinicia la racha.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: PlobbyColors.mute)),
       ]),
     ));
   }

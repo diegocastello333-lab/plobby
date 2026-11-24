@@ -65,7 +65,7 @@ class PlobbyButton extends StatelessWidget {
       opacity: enabled ? 1 : .45,
       child: Material(
         color: bg,
-        shape: RoundedSuperellipseBorder(borderRadius: radius, side: _outline ? const BorderSide(color: AppColors.borderStrong, width: 1.5) : BorderSide.none),
+        shape: RoundedSuperellipseBorder(borderRadius: radius, side: _outline ? BorderSide(color: AppColors.borderStrong, width: 1.5) : BorderSide.none),
         child: InkWell(
           customBorder: RoundedSuperellipseBorder(borderRadius: radius),
           // Háptico solo en la acción principal (HIG: no abusar): el resto de botones responden con la animación.
@@ -96,7 +96,7 @@ class IconSquareButton extends StatelessWidget {
         message: tooltip,
         child: Semantics(button: true, label: tooltip, excludeSemantics: true, child: Pressable(child: Container(
           width: size, height: size,
-          decoration: BoxDecoration(color: glass ? const Color(0x73171C19) : AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: glass ? null : AppShadows.card),
+          decoration: BoxDecoration(color: glass ? AppColors.inkA(0x73) : AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: glass ? null : AppShadows.card),
           child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rMd, onTap: onPressed,
               child: Center(child: PlobbyIcon(icon, color: glass ? AppColors.surface : AppColors.text)))),
         ))),
@@ -166,7 +166,7 @@ class SearchField extends StatelessWidget {
         controller: controller, onChanged: onChanged, onSubmitted: onSubmitted, autofocus: autofocus, textInputAction: TextInputAction.search,
         style: PlobbyText.input, cursorColor: AppColors.text,
         decoration: plobbyInputDecoration(hint: hint, sunken: true,
-            prefix: const Padding(padding: EdgeInsets.only(left: 14, right: 10), child: PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted))),
+            prefix: Padding(padding: EdgeInsets.only(left: 14, right: 10), child: PlobbyIcon(PlobbyIcons.search, size: 18, color: AppColors.textMuted))),
       );
 }
 
@@ -185,7 +185,7 @@ class PlobbyFilterChip extends StatelessWidget {
         child: Pressable(child: AnimatedContainer(
           duration: AppAnimations.scaled(context, AppAnimations.press * 1.5), curve: AppAnimations.standard,
           decoration: BoxDecoration(color: selected ? AppColors.brand : AppColors.surface, borderRadius: AppRadius.rSm,
-              border: Border.all(color: selected ? AppColors.brand : const Color(0x1F171C19))),
+              border: Border.all(color: selected ? AppColors.brand : AppColors.inkA(0x1F))),
           child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rSm, onTap: () { if (!selected) AppHaptics.light(); onTap(); },
               child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 32), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),   // 32 + borde 1+1 = 34 (.fc)
                   child: Center(widthFactor: 1, heightFactor: 1, child: Text(label, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text))))))),
@@ -215,7 +215,7 @@ class Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
       PillTone.soft => (AppColors.brandSoft, AppColors.text),
-      PillTone.glass => (const Color(0x8C171C19), AppColors.surface),
+      PillTone.glass => (AppColors.inkA(0x8C), AppColors.surface),
       PillTone.lime => (AppColors.brand, AppColors.brandInk),
       PillTone.dark => (AppColors.inverse, AppColors.onInverse),
       PillTone.neutral => (AppColors.surfaceSunken, AppColors.text),
@@ -268,7 +268,7 @@ class OptionCard extends StatelessWidget {
         child: Semantics(button: true, selected: selected, label: '$title. $description', excludeSemantics: true, child: Pressable(child: Material(
           color: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: selected ? AppColors.text : const Color(0x1F171C19), width: selected ? 2 : 1)),
+              side: BorderSide(color: selected ? AppColors.text : AppColors.inkA(0x1F), width: selected ? 2 : 1)),
           child: InkWell(
             borderRadius: BorderRadius.circular(12), onTap: () { AppHaptics.light(); onTap(); },
             child: Padding(padding: const EdgeInsets.all(14), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -276,14 +276,14 @@ class OptionCard extends StatelessWidget {
                   child: Center(child: PlobbyIcon(icon, color: selected ? AppColors.brand : AppColors.text))),
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(title, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
+                Text(title, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
                 const SizedBox(height: 2),
                 Text(description, style: PlobbyText.help.copyWith(fontSize: 13)),
               ])),
               const SizedBox(width: 8),
               Container(width: 22, height: 22, decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? AppColors.inverse : null,
                   border: selected ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
-                  child: selected ? const Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3, color: AppColors.surface)) : null),
+                  child: selected ? Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3, color: AppColors.surface)) : null),
             ])),
           ),
         ))),
@@ -303,7 +303,7 @@ class StepBar extends StatelessWidget {
           for (var i = 1; i <= total; i++) ...[
             if (i > 1) const SizedBox(width: 5),
             Expanded(child: AnimatedContainer(duration: Motion.normal, height: 4,
-                decoration: BoxDecoration(color: i <= step ? AppColors.text : const Color(0x24171C19), borderRadius: BorderRadius.circular(2)))),
+                decoration: BoxDecoration(color: i <= step ? AppColors.text : AppColors.inkA(0x24), borderRadius: BorderRadius.circular(2)))),
           ],
         ]),
       );
@@ -323,7 +323,7 @@ class MiniAction extends StatelessWidget {
         child: Semantics(button: true, label: tooltip, excludeSemantics: true, child: Pressable(child: Material(
           color: approve ? AppColors.inverse : Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),
-              side: approve ? BorderSide.none : const BorderSide(color: AppColors.danger, width: 1.5)),
+              side: approve ? BorderSide.none : BorderSide(color: AppColors.danger, width: 1.5)),
           child: InkWell(borderRadius: BorderRadius.circular(10), onTap: onPressed, child: SizedBox(width: 38, height: 38,
               child: Center(child: PlobbyIcon(approve ? PlobbyIcons.check : PlobbyIcons.close, size: 18, strokeWidth: approve ? 2.6 : 2.4,
                   color: approve ? AppColors.brand : AppColors.danger)))),
@@ -341,7 +341,7 @@ class PlobbyHeaderBar extends StatelessWidget {
   final VoidCallback? onBack;
   /// Botón de la derecha (p. ej. «Más opciones»); si es null se deja un hueco de 40 px para centrar el título.
   final Widget? trailing;
-  static const titleStyle = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, height: 25 / 20, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: AppColors.text);
+  static TextStyle get titleStyle => TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, height: 25 / 20, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: AppColors.text);
   @override
   Widget build(BuildContext context) => Padding(
         padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 16, 20, 0),
@@ -390,7 +390,7 @@ class SheetListItem extends StatelessWidget {
     final fg = danger ? AppColors.danger : AppColors.text;
     return Semantics(button: true, label: label, excludeSemantics: true, child: InkWell(onTap: onTap, child: Container(
       height: 54,
-      decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
       child: Row(children: [
         Container(width: 34, height: 34, decoration: BoxDecoration(color: danger ? AppColors.dangerSoft : AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)),
             child: Center(child: PlobbyIcon(icon, size: 18, color: fg))),
@@ -412,7 +412,7 @@ Future<T?> showPlobbySheet<T>(BuildContext context, WidgetBuilder builder) => sh
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 36, height: 5, margin: const EdgeInsets.only(bottom: 14), decoration: const BoxDecoration(color: Color(0x33171C19), borderRadius: AppRadius.rPill))),
+          Center(child: Container(width: 36, height: 5, margin: const EdgeInsets.only(bottom: 14), decoration: BoxDecoration(color: AppColors.inkA(0x33), borderRadius: AppRadius.rPill))),
           builder(ctx),
         ]))),
       ),

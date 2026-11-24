@@ -52,11 +52,11 @@ class NotificationsScreen extends ConsumerWidget {
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Row(children: [
           IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: () => context.pop()),
           const SizedBox(width: 14),
-          Expanded(child: Semantics(header: true, child: const Text('Notificaciones', maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle))),
+          Expanded(child: Semantics(header: true, child: Text('Notificaciones', maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle))),
           if (unread > 0) PlobbyButton(label: 'Marcar leídas', kind: PlobbyButtonKind.smallOutline, onPressed: () => n.markRead()),
         ])),
         Expanded(child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.text)),
+          loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (e, __) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, onRetry: () => ref.invalidate(notificationsProvider))),
           data: (list) {
             if (list.isEmpty) {
@@ -102,28 +102,28 @@ class _Row extends StatelessWidget {
       color: n.isRead ? Colors.transparent : const Color(0x24D2F548),
       child: InkWell(onTap: onTap, child: Container(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(width: 44, height: 44, child: Stack(clipBehavior: Clip.none, children: [
             n.actors.isEmpty
-                ? Container(width: 40, height: 40, decoration: const BoxDecoration(color: AppColors.inverse, shape: BoxShape.circle), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.brand)))
+                ? Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.inverse, shape: BoxShape.circle), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.brand)))
                 : avatar(n.actors.first, 20),
             Positioned(left: 26, top: 26, child: Container(width: 18, height: 18, decoration: BoxDecoration(color: AppColors.inverse, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.bg, width: 1.5)),
                 child: Center(child: PlobbyIcon(icon, size: 10, strokeWidth: 2.2, color: AppColors.brand)))),
           ])),
           const SizedBox(width: 10),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text(title, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             const SizedBox(height: 2),
             Text(n.text, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, height: 1.4, letterSpacing: 0, color: AppColors.ink700)),
             const SizedBox(height: 3),
-            Text(timeAgo(n.createdAt), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
+            Text(timeAgo(n.createdAt), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
             if (n.actionable) Padding(padding: const EdgeInsets.only(top: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [
               PlobbyButton(label: yes, kind: PlobbyButtonKind.small, onPressed: () => onRespond(true)),
               PlobbyButton(label: no, kind: PlobbyButtonKind.smallOutline, onPressed: () => onRespond(false)),
             ])),
           ])),
-          if (!n.isRead) Padding(padding: const EdgeInsets.only(left: 8, top: 6), child: Semantics(label: 'Sin leer', child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.text, shape: BoxShape.circle)))),
+          if (!n.isRead) Padding(padding: const EdgeInsets.only(left: 8, top: 6), child: Semantics(label: 'Sin leer', child: Container(width: 8, height: 8, decoration: BoxDecoration(color: AppColors.text, shape: BoxShape.circle)))),
         ]),
       )),
     );

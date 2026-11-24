@@ -114,14 +114,14 @@ class _S extends ConsumerState<CreateMatchScreen> {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _TypeTag(friendly: _friendly),
             const SizedBox(height: 20),
-            Semantics(header: true, child: const Text('Crear partido', style: PlobbyText.t2)),
+            Semantics(header: true, child: Text('Crear partido', style: PlobbyText.t2)),
           ])),
           const SizedBox(width: 12),
           IconSquareButton(icon: PlobbyIcons.close, tooltip: 'Cerrar', onPressed: () => context.pop()),
         ]),
         const SizedBox(height: 16),
         if (!_friendly && widget.leagueId == null) leagues.when(
-          loading: () => const Padding(padding: EdgeInsets.only(bottom: 12), child: LinearProgressIndicator(color: AppColors.brand, backgroundColor: AppColors.surfaceSunken)),
+          loading: () => Padding(padding: EdgeInsets.only(bottom: 12), child: LinearProgressIndicator(color: AppColors.brand, backgroundColor: AppColors.surfaceSunken)),
           error: (_, __) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Text('No se pudieron cargar tus ligas.', style: PlobbyText.help.copyWith(color: AppColors.danger))),
           data: (l) => l.isEmpty
               ? Padding(padding: const EdgeInsets.only(bottom: 12), child: Text('Aún no estás en ninguna liga. Únete a una o crea la tuya para registrar partidos de liga.', style: PlobbyText.sub))
@@ -139,14 +139,14 @@ class _S extends ConsumerState<CreateMatchScreen> {
         ),
         _Team('Pareja 1', [
           Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [
-            Container(width: 30, height: 30, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.inverse),
+            Container(width: 30, height: 30, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.inverse),
                 child: const Center(child: PlobbyIcon(PlobbyIcons.user, size: 16, color: AppColors.brand))),
             const SizedBox(width: 10),
-            const Text('Tú', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text('Tú', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
           ])),
           _slot(0, 'Tu compañero'),
         ]),
-        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Center(child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.2, color: AppColors.textMuted)))),
+        Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Center(child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.2, color: AppColors.textMuted)))),
         _Team('Pareja 2', [_slot(1, 'Rival 1'), _slot(2, 'Rival 2')]),
         // Estado de la lista de jugadores (antes, un error o una lista vacía dejaba los desplegables vacíos sin explicación).
         if (_friendly || _league != null) pool.when(
@@ -192,16 +192,16 @@ class _S extends ConsumerState<CreateMatchScreen> {
         // .card2 con la rejilla de sets (casillas 60×42)
         Container(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 2),
-          decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
           child: Column(children: [
             Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
               const Spacer(),
               for (final t in ['Pareja 1', 'Pareja 2']) ...[const SizedBox(width: 8), SizedBox(width: 60, child: Text(t, textAlign: TextAlign.center, style: PlobbyText.help.copyWith(fontSize: 12)))],
             ])),
             for (var i = 0; i < 3; i++) Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-              Expanded(child: Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text), children: [
+              Expanded(child: Text.rich(TextSpan(style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text), children: [
                 TextSpan(text: 'Set ${i + 1}'),
-                if (i == 2) const TextSpan(text: ' (opcional)', style: TextStyle(fontWeight: FontWeight.w400, color: AppColors.textMuted)),
+                if (i == 2) TextSpan(text: ' (opcional)', style: TextStyle(fontWeight: FontWeight.w400, color: AppColors.textMuted)),
               ]))),
               for (var j = 0; j < 2; j++) ...[const SizedBox(width: 8), SizedBox(width: 60, height: 42, child: Semantics(label: 'Set ${i + 1} pareja ${j + 1}', textField: true, child: TextField(
                 controller: _sets[i][j], keyboardType: TextInputType.number, textAlign: TextAlign.center, textAlignVertical: TextAlignVertical.center, expands: true, maxLines: null, minLines: null, onChanged: (_) => setState(() {}),
@@ -216,12 +216,12 @@ class _S extends ConsumerState<CreateMatchScreen> {
       ])),
       // Acción principal fija abajo (siempre a mano, sobre material translúcido), con el error justo encima.
       bottomNavigationBar: ClipRect(child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur), child: Container(
-        decoration: const BoxDecoration(color: AppMaterials.bar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
+        decoration: BoxDecoration(color: AppMaterials.bar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
         padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.paddingOf(context).bottom),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Padding(padding: EdgeInsets.only(top: 1, right: 6), child: PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger)),
-            Expanded(child: Text(_error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
+            Padding(padding: EdgeInsets.only(top: 1, right: 6), child: PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger)),
+            Expanded(child: Text(_error!, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
           ])),
           PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(habitual)),
         ]),
@@ -260,8 +260,8 @@ class _S extends ConsumerState<CreateMatchScreen> {
     final enabled = _friendly || _league != null;
     return _Field(label: label, child: id == null
         ? Semantics(button: true, enabled: enabled, label: 'Añadir $label', excludeSemantics: true, child: Opacity(opacity: enabled ? 1 : .5, child: Material(
-            color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
-            child: InkWell(borderRadius: AppRadius.rMd, onTap: enabled ? () => _pickSlot(i, label) : null, child: const SizedBox(height: 48, child: Padding(padding: EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
+            color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
+            child: InkWell(borderRadius: AppRadius.rMd, onTap: enabled ? () => _pickSlot(i, label) : null, child: SizedBox(height: 48, child: Padding(padding: EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
               PlobbyIcon(PlobbyIcons.plus, size: 16, strokeWidth: 2.2, color: AppColors.textMuted), SizedBox(width: 8),
               Expanded(child: Text('Elegir un amigo', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, letterSpacing: 0, color: AppColors.textMuted))),
             ])))),
@@ -273,10 +273,10 @@ class _S extends ConsumerState<CreateMatchScreen> {
               ClipOval(child: Container(width: 32, height: 32, color: AppColors.inverse, alignment: Alignment.center,
                   child: Text(_initials(_names[id] ?? '?'), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brand)))),
               const SizedBox(width: 10),
-              Expanded(child: Text(_names[id] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
-              TextButton(onPressed: () => _pickSlot(i, label), child: const Text('Cambiar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+              Expanded(child: Text(_names[id] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+              TextButton(onPressed: () => _pickSlot(i, label), child: Text('Cambiar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
               Tooltip(message: 'Quitar a ${_names[id]}', child: Semantics(button: true, label: 'Quitar a ${_names[id]}', excludeSemantics: true, child: InkResponse(radius: 20,
-                  onTap: () => setState(() => _setSlot(i, null)), child: const SizedBox(width: 36, height: 44, child: Center(child: PlobbyIcon(PlobbyIcons.close, size: 16, color: AppColors.textMuted)))))),
+                  onTap: () => setState(() => _setSlot(i, null)), child: SizedBox(width: 36, height: 44, child: Center(child: PlobbyIcon(PlobbyIcons.close, size: 16, color: AppColors.textMuted)))))),
             ]),
           ));
   }
@@ -291,7 +291,7 @@ class _TypeTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         height: 26, padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: const BoxDecoration(color: AppColors.brandSoft, borderRadius: AppRadius.rPill),
+        decoration: BoxDecoration(color: AppColors.brandSoft, borderRadius: AppRadius.rPill),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           PlobbyIcon(friendly ? PlobbyIcons.racket : PlobbyIcons.trophy, size: 14, color: AppColors.text), const SizedBox(width: 6),
           Text(friendly ? 'Partido amistoso' : 'Partido de liga', style: PlobbyText.chip.copyWith(color: AppColors.text)),
@@ -317,7 +317,7 @@ class _Select<T> extends StatelessWidget {
   Widget build(BuildContext context) => DropdownButtonFormField<T>(
         value: value, isExpanded: true, style: PlobbyText.input, decoration: plobbyInputDecoration(),
         hint: hint == null ? null : Text(hint!, style: PlobbyText.input.copyWith(color: AppColors.textMuted)),
-        icon: const PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
+        icon: PlobbyIcon(PlobbyIcons.down, size: 18, color: AppColors.textMuted),
         items: items, onChanged: onChanged,
       );
 }
@@ -328,7 +328,7 @@ class _PickerBox extends StatelessWidget {
   final String value, label; final PlobbyIcons icon; final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Semantics(button: true, label: '$label: $value', excludeSemantics: true, child: Material(
-        color: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
+        color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong)),
         child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: SizedBox(height: 48, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
           Expanded(child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.input)), PlobbyIcon(icon, size: 18, color: AppColors.textMuted),
         ])))),
@@ -342,7 +342,7 @@ class _Team extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 2),
-        decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rMd),
+        decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rMd),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title.toUpperCase(), style: PlobbyText.eb), const SizedBox(height: 8), ...children,
         ]),
@@ -378,10 +378,10 @@ class _Suggestions extends StatelessWidget {
       const SizedBox(height: 8),
       Wrap(spacing: 8, runSpacing: 8, children: [
         for (final o in options) Semantics(button: true, label: 'Añadir a ${o.name}', excludeSemantics: true, child: Material(
-          color: AppColors.surface, shape: const StadiumBorder(side: BorderSide(color: AppColors.border)),
+          color: AppColors.surface, shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
           child: InkWell(customBorder: const StadiumBorder(), onTap: () => onPick(o), child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44),
             child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const PlobbyIcon(PlobbyIcons.plus, size: 14, color: AppColors.text), const SizedBox(width: 6),
+              PlobbyIcon(PlobbyIcons.plus, size: 14, color: AppColors.text), const SizedBox(width: 6),
               Text(o.name, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text)),
             ])))),
         )),

@@ -18,7 +18,7 @@ import 'league_widgets.dart';
 enum LeagueTab { rank, activity, matches, members }
 enum RankSort { points, elo, pct, played }
 
-const _muted = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.4, letterSpacing: 0, color: AppColors.textMuted);
+TextStyle get _muted => TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.4, letterSpacing: 0, color: AppColors.textMuted);
 
 /// Detalle de liga — `scLeague` del prototipo HTML: portada con título, ficha, «tu posición» y pestañas fijas
 /// Clasificación · Actividad · Partidos · Miembros. Mismos datos y acciones que antes (RPC/RLS de ligas).
@@ -96,7 +96,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
           final r = l.rules;
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             SingleChildScrollView(scrollDirection: Axis.horizontal, clipBehavior: Clip.none, child: Row(children: [
-              const Text('ORDENAR', style: PlobbyText.eb),
+              Text('ORDENAR', style: PlobbyText.eb),
               const SizedBox(width: 10),
               for (final x in const [(RankSort.points, 'Puntos'), (RankSort.elo, 'ELO'), (RankSort.pct, '% victorias'), (RankSort.played, 'Partidos')]) ...[
                 PlobbyFilterChip(label: x.$2, selected: _sort == x.$1, onTap: () => setState(() => _sort = x.$1)),
@@ -106,15 +106,15 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
             const SizedBox(height: 12),
             Container(
               clipBehavior: Clip.antiAlias,
-              decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
               child: Column(children: [
                 Padding(padding: const EdgeInsets.fromLTRB(12, 12, 12, 6), child: _TableRow(cells: [
-                  const Text('#', textAlign: TextAlign.center, style: _th), const SizedBox.shrink(), const Text('JUGADOR', style: _th),
-                  const Text('PJ', textAlign: TextAlign.center, style: _th), const Text('V', textAlign: TextAlign.center, style: _th), const Text('D', textAlign: TextAlign.center, style: _th),
+                  Text('#', textAlign: TextAlign.center, style: _th), const SizedBox.shrink(), Text('JUGADOR', style: _th),
+                  Text('PJ', textAlign: TextAlign.center, style: _th), Text('V', textAlign: TextAlign.center, style: _th), Text('D', textAlign: TextAlign.center, style: _th),
                   Text(metric, textAlign: TextAlign.center, style: _th.copyWith(color: AppColors.text)),
                 ])),
                 for (var k = 0; k < show.length; k++) ...[
-                  if (cut && k == 8) const Padding(padding: EdgeInsets.symmetric(vertical: 2), child: Text('···', style: _muted)),
+                  if (cut && k == 8) Padding(padding: EdgeInsets.symmetric(vertical: 2), child: Text('···', style: _muted)),
                   _RankRow(pos: show[k] + 1, row: sorted[show[k]], me: show[k] == meIdx, metric: switch (_sort) {
                     RankSort.elo => '${sorted[show[k]].elo}', RankSort.pct => '${sorted[show[k]].winPct}%', RankSort.played => '${sorted[show[k]].played}', RankSort.points => '${sorted[show[k]].points}' }),
                 ],
@@ -201,7 +201,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
               Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Ningún jugador coincide con «$_q».', textAlign: TextAlign.center, style: _muted))
             else Container(
               clipBehavior: Clip.antiAlias,
-              decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
               child: Column(children: [for (var i = 0; i < shown.length; i++) _MemberRow(row: shown[i], me: shown[i].userId == uid || shown[i].userId == 'me', first: i == 0)]),
             ),
           ]);
@@ -240,7 +240,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   void _rules(LeagueDetail l) {
     final r = l.rules;
     Widget row(String k, String v) => Container(
-          padding: const EdgeInsets.symmetric(vertical: 12), decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x1A171C19)))),
+          padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
           child: Row(children: [Expanded(child: Text(k, style: PlobbyText.value.copyWith(fontWeight: FontWeight.w400))), Text(v, style: PlobbyText.value)]));
     showPlobbySheet<void>(context, (_) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       SheetHeader(title: 'Reglas', subtitle: l.name.toUpperCase()),
@@ -250,14 +250,14 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
       row('Partidos por jugador', '${l.matchesPerPlayer}'),
       row('Plazas', '${l.minPlayers}–${l.maxPlayers} jugadores'),
       const SizedBox(height: 8),
-      const Text('Solo cuentan los partidos de liga confirmados por los dos capitanes.', style: _muted),
+      Text('Solo cuentan los partidos de liga confirmados por los dos capitanes.', style: _muted),
     ]));
   }
 
   Future<void> _leave(LeagueDetail l) async {
     final ok = await showPlobbySheet<bool>(context, (c) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SheetHeader(title: '¿Salir de la liga?'),
-      const Text('Tus partidos jugados se mantienen, pero dejarás de aparecer en la clasificación.', style: PlobbyText.sub),
+      Text('Tus partidos jugados se mantienen, pero dejarás de aparecer en la clasificación.', style: PlobbyText.sub),
       const SizedBox(height: 16),
       Row(children: [
         Expanded(child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: () => Navigator.pop(c, false))),
@@ -290,7 +290,7 @@ String agoLabel(DateTime d, DateTime now) {
   return 'hace ${x.inDays} d';
 }
 
-const _th = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.textMuted);
+TextStyle get _th => TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.textMuted);
 
 /// Rejilla de `.th`/`.tr`: 24 · 30 · 1fr · 22 · 22 · 22 · 42, separación 8.
 class _TableRow extends StatelessWidget {
@@ -362,7 +362,7 @@ class _InfoGrid extends StatelessWidget {
             Flexible(child: Text(k.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.key))]),
           const SizedBox(height: 4),
           Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            Text(v, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.3, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)),
+            Text(v, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.3, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.text)),
             if (extra != null) extra,
           ]),
         ]));
@@ -398,7 +398,7 @@ class _Performance extends StatelessWidget {
       label: r == null ? 'Aún no tienes posición en la liga' : 'Tu posición: ${r.rank} de $total. ${r.points} puntos, ${r.played} jugados, ${r.winPct}% victorias, ${r.wins} ganados, ${r.losses} perdidos, bonus ${r.bonus}.',
       excludeSemantics: true,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16), decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
         child: Row(children: [
           ConstrainedBox(constraints: const BoxConstraints(minWidth: 112), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('TU POSICIÓN', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: Color(0xA6F6F8F1))),
@@ -424,7 +424,7 @@ class _JoinCta extends StatelessWidget {
   final LeagueDetail league; final bool busy; final VoidCallback onJoin;
   @override
   Widget build(BuildContext context) => Container(
-      padding: const EdgeInsets.all(18), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
+      padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rMd),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(league.visibility == LeagueVisibility.club ? 'Liga de club' : '¿Te apuntas?', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontWeight: FontWeight.w600, letterSpacing: -0.17, color: Colors.white, fontSize: 17)),
         const SizedBox(height: 6),
@@ -466,17 +466,17 @@ class _RankRow extends StatelessWidget {
         child: Container(
           height: 52, padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: me ? const Color(0x17171C19) : null,
+            color: me ? AppColors.inkA(0x17) : null,
             gradient: !me && pos == 1 ? const LinearGradient(colors: [Color(0x29D2F548), Color(0x00D2F548)], stops: [0, .7]) : null,
-            border: me ? const Border(left: BorderSide(color: AppColors.text, width: 3)) : null,
+            border: me ? Border(left: BorderSide(color: AppColors.text, width: 3)) : null,
           ),
           child: _TableRow(cells: [
             Center(child: pn),
             LeagueAvatar(name: row.name, avatarUrl: row.avatarUrl, avatarId: row.avatarId, size: 30),
             Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(me ? '${row.name} (tú)' : row.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+              Text(me ? '${row.name} (tú)' : row.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
               const SizedBox(height: 1),
-              Text('ELO ${row.elo}', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
+              Text('ELO ${row.elo}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
             ]),
             Text('${row.played}', textAlign: TextAlign.center, style: _c),
             Text('${row.wins}', textAlign: TextAlign.center, style: _c),
@@ -499,14 +499,14 @@ class _MemberRow extends StatelessWidget {
     return Semantics(button: true, label: '${row.name}${me ? ' (tú)' : ''}, ELO ${row.elo}, puesto ${row.rank}${row.role == LeagueRole.player ? '' : ', ${row.role.label}'}', excludeSemantics: true,
       child: InkWell(onTap: () => context.push('/player/${row.userId}'), child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        decoration: BoxDecoration(border: first ? null : const Border(top: BorderSide(color: Color(0x1A171C19)))),
+        decoration: BoxDecoration(border: first ? null : Border(top: BorderSide(color: AppColors.inkA(0x1A)))),
         child: Row(children: [
           LeagueAvatar(name: row.name, avatarUrl: row.avatarUrl, avatarId: row.avatarId, size: 40),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(me ? '${row.name} (tú)' : row.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text(me ? '${row.name} (tú)' : row.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             Text([if (row.username.isNotEmpty) '@${row.username}', 'ELO ${row.elo}'].join(' · '), maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
+                style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, letterSpacing: 0, color: AppColors.textMuted)),
           ])),
           if (row.role != LeagueRole.player) ...[const SizedBox(width: 8), RoleBadge(row.role, compact: true)],
           const SizedBox(width: 8),
@@ -546,15 +546,15 @@ class _LeagueMatchTile extends StatelessWidget {
         onTap: () => context.push(m.status == MatchStatus.confirmed ? '/match/${m.id}/final' : '/match/${m.id}'),
         child: Padding(padding: const EdgeInsets.all(14), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
-            Expanded(child: Text(formatWhen(m.scheduledAt), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
+            Expanded(child: Text(formatWhen(m.scheduledAt), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
             StatusChip(status: m.status),
           ]),
           const SizedBox(height: 12),
           team(1),
-          const Padding(padding: EdgeInsets.fromLTRB(4, 10, 0, 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: AppColors.textMuted))),
+          Padding(padding: EdgeInsets.fromLTRB(4, 10, 0, 10), child: Text('VS', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.47, color: AppColors.textMuted))),
           team(2),
           if (m.club.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
-            const PlobbyIcon(PlobbyIcons.pin, size: 14, color: AppColors.textMuted), const SizedBox(width: 6),
+            PlobbyIcon(PlobbyIcons.pin, size: 14, color: AppColors.textMuted), const SizedBox(width: 6),
             Expanded(child: Text('${m.club}${m.court != null && m.court!.isNotEmpty ? ' · ${m.court}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: _muted.copyWith(fontSize: 12.5))),
           ])),
         ])),
@@ -571,7 +571,7 @@ class _ActivityItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final m = match, w = m.winnerTeam ?? 1, dis = m.status == MatchStatus.disputed;
     String names(int t) => m.team(t).map((p) => p.name).join(' y ');
-    const base = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.45, letterSpacing: 0, color: AppColors.text);
+    final base = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.45, letterSpacing: 0, color: AppColors.text);
     const b = TextStyle(fontWeight: FontWeight.w700);
     final lead = m.team(dis ? 1 : w).firstOrNull;
     return Container(
@@ -588,7 +588,7 @@ class _ActivityItem extends StatelessWidget {
                 : [TextSpan(text: names(w), style: b), const TextSpan(text: ' vencieron a '), TextSpan(text: names(w == 1 ? 2 : 1), style: b)])),
             if (m.sets.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(6)),
-              child: Text(m.sets.map((s) => '${s.a}-${s.b}').join(' '), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.text)))),
+              child: Text(m.sets.map((s) => '${s.a}-${s.b}').join(' '), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.3, color: AppColors.text)))),
             const SizedBox(height: 6),
             Text(agoLabel(m.endedAt ?? m.scheduledAt, DateTime.now()), style: _muted),
           ])),

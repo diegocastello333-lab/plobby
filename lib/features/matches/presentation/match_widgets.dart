@@ -59,7 +59,7 @@ class PlayerAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = player.avatarUrl != null && player.avatarUrl!.isNotEmpty
         ? ClipOval(child: NetImage(player.avatarUrl!, width: size, height: size, fit: BoxFit.cover, cacheWidth: (size * 3).round(),
-            errorBuilder: (_, __, ___) => SizedBox(width: size, height: size, child: const ColoredBox(color: AppColors.surfaceSunken))))
+            errorBuilder: (_, __, ___) => SizedBox(width: size, height: size, child: ColoredBox(color: AppColors.surfaceSunken))))
         : player.avatarId != null ? PlobbyAvatar(id: player.avatarId!, size: size)
         : CircleAvatar(radius: size / 2, backgroundColor: AppColors.surfaceSunken, child: Text(player.name.isEmpty ? '?' : player.name.split(' ').map((s) => s.isEmpty ? '' : s[0]).take(2).join(), style: TextStyle(fontSize: size * .34, fontWeight: FontWeight.w700)));
     return Container(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)), child: w);
@@ -77,7 +77,7 @@ class MatchStopwatch extends ConsumerWidget {
     final clock = ref.watch(serverClockProvider).valueOrNull ?? ServerClock();
     final t = formatElapsed(elapsedOf(match, clock));
     if (compact) return Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: AppColors.inverse, borderRadius: BorderRadius.circular(8)), child: Text(t, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.brand, fontFeatures: [FontFeature.tabularFigures()])));
-    return Semantics(label: 'Tiempo de partido $t', child: Text(t, style: const TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 44, height: 55 / 44, letterSpacing: -0.88, color: AppColors.text, fontFeatures: [FontFeature.tabularFigures()])));
+    return Semantics(label: 'Tiempo de partido $t', child: Text(t, style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 44, height: 55 / 44, letterSpacing: -0.88, color: AppColors.text, fontFeatures: [FontFeature.tabularFigures()])));
   }
 }
 
@@ -109,7 +109,7 @@ class ScoreBoard extends StatelessWidget {
     return Semantics(
       label: 'Marcador: ${name(1)} ${s.map((x) => x.a).join(', ')}; ${name(2)} ${s.map((x) => x.b).join(', ')}',
       excludeSemantics: true,
-      child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), decoration: const BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
+      child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), decoration: BoxDecoration(color: AppColors.inverse, borderRadius: AppRadius.rLg),
           child: Column(children: [row(1), const Divider(height: 1, thickness: 1, color: Color(0x1FFFFFFF)), row(2)])),
     );
   }
@@ -191,7 +191,7 @@ class TeamCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: winner ? null : AppColors.surface,
-        gradient: winner ? const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [AppColors.brandSoft, AppColors.surface], stops: [0, .7]) : null,
+        gradient: winner ? LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [AppColors.brandSoft, AppColors.surface], stops: [0, .7]) : null,
         borderRadius: AppRadius.rLg,
         border: Border.all(color: winner ? AppColors.brand : AppColors.border, width: winner ? 2 : 1),
       ),
@@ -200,13 +200,13 @@ class TeamCard extends StatelessWidget {
         for (final p in match.team(team)) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(children: [
           PlayerAvatar(player: p, size: avatarSize), const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(p.id == uid ? '${p.name} (tú)' : p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, height: 17 / 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text(p.id == uid ? '${p.name} (tú)' : p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14.5, height: 17 / 14.5, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             if (subtitle != null || p.level.isNotEmpty || p.elo > 0) Text(subtitle?.call(p) ?? [if (p.level.isNotEmpty) p.level, if (p.elo > 0) 'ELO ${p.elo}'].join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0, color: AppColors.textMuted)),
+                style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0, color: AppColors.textMuted)),
           ])),
           if (trailing != null) trailing!(p) ?? const SizedBox.shrink()
           else if (p.isCaptain) Semantics(label: 'Capitán', excludeSemantics: true, child: Container(width: 22, height: 22, alignment: Alignment.center,
-              decoration: const BoxDecoration(color: AppColors.inverse, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.inverse, shape: BoxShape.circle),
               child: const Text('C', style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0)))),
         ])),
       ]));

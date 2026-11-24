@@ -95,7 +95,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (own) _section(1, 'Próximos partidos', const UpcomingMatchesSection(max: null, showTitle: false)),
         _section(own ? null : 1, 'Últimos partidos', Column(children: [
           if (own) for (final m in v.pending) MatchCard(match: m, me: me, onTap: () => _matchDetail(m)),
-          if (recent.isEmpty) const Text('Aún no hay partidos confirmados.', style: TextStyle(color: PlobbyColors.mute)),
+          if (recent.isEmpty) Text('Aún no hay partidos confirmados.', style: TextStyle(color: PlobbyColors.mute)),
           for (final m in recent) MatchCard(match: m, me: me, onTap: () => _matchDetail(m), onShare: own && m.confirmed ? () => context.push('/match/${m.id}/share') : null),
           Align(alignment: Alignment.centerRight, child: SectionLink(label: 'Ver todos los partidos', onTap: () {})),
         ])),
@@ -109,7 +109,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: PlobbyIcons.shield, onPressed: () => context.push('/settings/privacy'))),
         if (own) const LogoutButton(),   // solo en el perfil propio, al final y separado
         // Versión instalada: así se sabe si un móvil sigue con un APK antiguo.
-        if (own) const Padding(padding: EdgeInsets.only(top: 14), child: Center(child: Text('Plobby · versión $plobbyBuild',
+        if (own) Padding(padding: EdgeInsets.only(top: 14), child: Center(child: Text('Plobby · versión $plobbyBuild',
             style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, letterSpacing: 0, color: AppColors.textMuted)))),
         // Perfil propio = pestaña con barra inferior; perfil de otro jugador = pantalla completa (sin barra).
         SizedBox(height: own ? AppInsets.tabBarClearance(context) : 40 + MediaQuery.paddingOf(context).bottom),
@@ -120,7 +120,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _matchDetail(MatchResult m) => showModalBottomSheet(context: context, showDragHandle: true, builder: (sheetCtx) => Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(m.confirmed ? (m.won ? 'VICTORIA' : 'DERROTA') : 'PENDIENTE DE CONFIRMACIÓN', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: PlobbyColors.mute)),
+        Text(m.confirmed ? (m.won ? 'VICTORIA' : 'DERROTA') : 'PENDIENTE DE CONFIRMACIÓN', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: PlobbyColors.mute)),
         Text(m.scoreLabel, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
         Text('${m.venue} · ${m.playedAt.day}/${m.playedAt.month}/${m.playedAt.year}'),

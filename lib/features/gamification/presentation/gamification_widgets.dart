@@ -10,7 +10,7 @@ import '../../../core/widgets/net_image.dart';
 /// Piezas visuales compartidas por Head to Head, Ranking, Wrapped y Logros (mismo lenguaje que el resto de Plobby:
 /// tinta, lima, marfil; Unbounded para cifras, Inter para el texto).
 
-const _palette = [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
+List<(Color, Color)> get _palette => [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
 
 /// Avatar circular: foto (decodificada al tamaño visible) o iniciales con color estable.
 class GAvatar extends StatelessWidget {
@@ -62,9 +62,9 @@ class VersusBar extends StatelessWidget {
         curve: Motion.enter,
         builder: (_, v, __) => ClipRRect(borderRadius: BorderRadius.circular(height), child: SizedBox(height: height, child: Row(children: [
           // SizedBox.expand: un ColoredBox sin hijo mide 0 de alto si la fila no le impone altura (las barras no se veían).
-          Expanded(flex: (v * 1000).round().clamp(1, 999), child: SizedBox.expand(child: ColoredBox(color: leader == H2HLeader.me ? AppColors.text : const Color(0x33171C19)))),
+          Expanded(flex: (v * 1000).round().clamp(1, 999), child: SizedBox.expand(child: ColoredBox(color: leader == H2HLeader.me ? AppColors.text : AppColors.inkA(0x33)))),
           const SizedBox(width: 3),
-          Expanded(flex: ((1 - v) * 1000).round().clamp(1, 999), child: SizedBox.expand(child: ColoredBox(color: leader == H2HLeader.other ? AppColors.brand : const Color(0x33171C19)))),
+          Expanded(flex: ((1 - v) * 1000).round().clamp(1, 999), child: SizedBox.expand(child: ColoredBox(color: leader == H2HLeader.other ? AppColors.brand : AppColors.inkA(0x33)))),
         ]))),
       );
 }
@@ -88,7 +88,7 @@ class AchievementBadge extends StatelessWidget {
       // anillo de progreso: se llena al aparecer (sin animación con «reducir movimiento»)
       if (!item.unlocked) SizedBox.expand(child: TweenAnimationBuilder<double>(
         tween: Tween(begin: reduce ? item.fraction : 0, end: item.fraction), duration: Motion.celebration, curve: Motion.enter,
-        builder: (_, v, __) => CircularProgressIndicator(value: v, strokeWidth: 3, color: AppColors.text, backgroundColor: const Color(0x14171C19)),
+        builder: (_, v, __) => CircularProgressIndicator(value: v, strokeWidth: 3, color: AppColors.text, backgroundColor: AppColors.inkA(0x14)),
       )),
       Container(
         width: size - (item.unlocked ? 0 : 10), height: size - (item.unlocked ? 0 : 10),

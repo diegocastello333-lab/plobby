@@ -224,7 +224,7 @@ class _RankTile extends StatelessWidget {
           ])),
           const SizedBox(width: 8),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(_main(row, metric), style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
+            Text(_main(row, metric), style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text)),
             _Move(move),
           ]),
         ]),

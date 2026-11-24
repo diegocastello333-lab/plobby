@@ -45,7 +45,7 @@ class AppErrors {
 class _SectionError extends StatelessWidget {
   const _SectionError();
   @override
-  Widget build(BuildContext context) => const Directionality(
+  Widget build(BuildContext context) => Directionality(
         textDirection: TextDirection.ltr,
         child: Padding(
           padding: EdgeInsets.all(12),

@@ -84,7 +84,7 @@ class AppShell extends ConsumerWidget {
         height: AppInsets.tabBarHeight(context),
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
         // Material translúcido: el contenido pasa por debajo (extendBody) y se intuye desenfocado, como en iOS.
-        decoration: const BoxDecoration(color: AppMaterials.tabBar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
+        decoration: BoxDecoration(color: AppMaterials.tabBar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           tab(0), tab(1),
           // «+» (nuevo partido) como pestaña central, dentro de la barra: ya no flota ni tapa contenido.
@@ -133,10 +133,10 @@ class _SideRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         width: WideLayout.railWidth,
-        decoration: const BoxDecoration(color: AppColors.surface, border: Border(right: BorderSide(color: AppColors.border))),
+        decoration: BoxDecoration(color: AppColors.surface, border: Border(right: BorderSide(color: AppColors.border))),
         child: SafeArea(right: false, child: Column(children: [
           const SizedBox(height: 20),
-          Semantics(label: 'Plobby', image: true, child: const Text('plobby', style: TextStyle(fontFamily: AppTypography.displayFamily,
+          Semantics(label: 'Plobby', image: true, child: Text('plobby', style: TextStyle(fontFamily: AppTypography.displayFamily,
               fontWeight: FontWeight.w700, fontSize: 18, height: 1, letterSpacing: -0.54, color: AppColors.text))),
           const SizedBox(height: 24),
           const PlusSquare(),

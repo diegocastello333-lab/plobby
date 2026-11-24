@@ -57,7 +57,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,   // fondo vivo de la barra inferior
       body: SafeArea(bottom: false, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Padding(padding: const EdgeInsets.fromLTRB(20, 26, 20, 0), child: Semantics(header: true, child: const Text('Competiciones', style: PlobbyText.t1))),
+        Padding(padding: const EdgeInsets.fromLTRB(20, 26, 20, 0), child: Semantics(header: true, child: Text('Competiciones', style: PlobbyText.t1))),
         Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: ScrollLinkedTabs(labels: const ['Ligas', 'Torneos'], controller: _pc, onTap: (i) {
               AppHaptics.light();
@@ -113,11 +113,11 @@ class TournamentsTab extends ConsumerWidget {
       onRefresh: () async { ref.invalidate(myTournamentsProvider); await ref.read(myTournamentsProvider.future).catchError((_) => <TournamentSummary>[]); },
       child: ListView(padding: EdgeInsets.fromLTRB(20, 18, 20, AppInsets.tabBarClearance(context)), children: [
         Row(children: [
-          const Expanded(child: Text('Organiza cuadros y fases de grupos.', style: PlobbyText.sub)),
+          Expanded(child: Text('Organiza cuadros y fases de grupos.', style: PlobbyText.sub)),
           PlobbyButton(label: 'Crear torneo', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/tournaments/new')),
         ]),
         const SizedBox(height: 22),
-        Semantics(header: true, child: const Text('Mis torneos', style: PlobbyText.t2)),
+        Semantics(header: true, child: Text('Mis torneos', style: PlobbyText.t2)),
         const SizedBox(height: 12),
         mine.when(
           loading: () => const Column(children: [LoadingBlock(height: 250, radius: AppRadius.md), SizedBox(height: 14), LoadingBlock(height: 250, radius: AppRadius.md)]),
