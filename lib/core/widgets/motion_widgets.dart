@@ -54,7 +54,7 @@ class SectionLink extends StatelessWidget {
   final String label; final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => Pressable(
-      child: Semantics(button: true, label: label, child: InkWell(
+      child: Semantics(button: true, label: label, excludeSemantics: true, child: InkWell(
         onTap: onTap, borderRadius: AppRadius.rSm,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: AppLayout.minTap, minWidth: AppLayout.minTap),
