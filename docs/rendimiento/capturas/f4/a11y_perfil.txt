@@ -1,0 +1,30 @@
+- group:
+  - text: MI PERFIL
+  - button "Compartir perfil"
+  - button "Ajustes del perfil"
+  - heading "Diego Castello" [level=2]
+  - img "Perfil verificado"
+  - text: "@diego.c"
+  - button "2 amigos"
+  - text: Madrid, España Jugando al pádel desde 2019. Drive firme, bandeja en construcción. Nivel 4,2 · Avanzado Posición Derecha Mano Derecha
+  - button "Editar perfil"
+  - button "Compartir mis stats"
+  - group "CLUB HABITUAL Club La Moraleja Alcobendas, Madrid":
+    - button "Editar"
+  - button "PAREJA HABITUAL Marcos Ruiz @marcos.r · Pareja mutua · Toca para cambiarla":
+    - button "Editar"
+  - group "LADO DE JUEGO Derecha":
+    - button "Editar"
+  - text: Nivel de juego RATING ELO 1.482 +60 este mes Nivel 4,2 · Avanzado
+  - button "30 días"
+  - button "3 meses"
+  - button "12 meses"
+- button "Resumen"
+- button "Partidos"
+- button "Estadísticas"
+- button "Actividad"
+- button "Inicio"
+- button "Feed"
+- button "Competiciones"
+- button "Nuevo partido"
+- button "Perfil"

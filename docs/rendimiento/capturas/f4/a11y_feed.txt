@@ -1,0 +1,48 @@
+- group:
+  - button "Todo"
+  - button "Amigos"
+  - button "Partidos"
+  - button "Logros"
+  - button "Competiciones"
+- group:
+  - heading "Feed" [level=2]
+  - text: "4"
+  - button "Notificaciones, 4 sin leer"
+  - button "Mi perfil"
+  - text: Tu comunidad de pádel está jugando.
+  - group:
+    - button "Laura G., actividad reciente"
+    - button "Sofía G., actividad reciente"
+    - button "Marcos R., actividad reciente"
+    - button "Pablo S., actividad reciente"
+    - button "Carla N., actividad reciente"
+  - button "LG Laura G. @laura.g · hace 55 min · Padel Chamberí"
+  - group "Laura G. + Carlos M. 6 6 VS Pablo S. + Sofía G. 1 1 VICTORIA +15 ELO":
+    - button "LG"
+    - button "CM"
+    - button "PS"
+    - button "SG"
+  - button "Reaccionar con 🔥 🔥 3"
+  - button "Reaccionar con ❤️ ❤️ 1"
+  - button "Reaccionar. Mantén pulsado para elegir la reacción"
+  - button "PS CM Pablo, Carlos y 2 más"
+  - button "Comentar"
+  - button "SG Sofía G. @sof.a.g · hace 1 h"
+  - button "Sofía, campeón del torneo Open de Otoño con Irene. Abrir torneo"
+  - button "Reaccionar con 🔥 🔥 2"
+  - button "Reaccionar con 👏 👏 6"
+  - button "Reaccionar. Mantén pulsado para elegir la reacción"
+  - button "LG MR Laura, Marcos y 6 más"
+  - button "Comentar"
+  - group "Álvaro La próxima revancha.":
+    - button "MR Marcos R. @marcos.r · hace 2 h · Club La Moraleja"
+    - group "Marcos R. + Diego Castello 6 6 VS Álvaro P. + Lucía M. 3 4 VICTORIA BÜNKER PADEL LEAGUE +18 ELO":
+      - button "MR"
+      - button "DC"
+      - button "ÁP"
+      - button "LM"
+- button "Inicio"
+- button "Feed"
+- button "Competiciones"
+- button "Nuevo partido"
+- button "Perfil"

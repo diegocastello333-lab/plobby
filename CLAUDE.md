@@ -400,3 +400,10 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   Pintores de imágenes para compartir dentro de `AppColors.light(...)`. `AppColors.inkA(alpha)` = tinta/blanco con alfa.
 - `CollapsingTitleScaffold` (título grande que se encoge) en Competiciones.
 - Herramienta: `scratchpad/tools/fix_const.py <salida de dart analyze --format=machine>` quita `const` inválidos.
+
+## Verificación final (24 nov 2026, rama `verificacion`, informe `docs/rendimiento/fase4_verificacion.md`)
+- Capturas claro/oscuro × móvil/tableta/escritorio en `docs/rendimiento/capturas/f4/`; scripts en scratchpad/perf
+  (`shots_f4.js`, `a11y_f4.js` = árbol de accesibilidad con `ariaSnapshot`).
+- REGLAS a11y: un Tooltip junto a una etiqueta semántica igual lleva `excludeFromSemantics: true`; los encabezados van con
+  `Semantics(header: true, container: true, …)` (sin container se fusionan con sus vecinos).
+- APK 1.9.0+17: `dist/plobby-1.9.0-arm64.apk` (25,3 MB) y `-armv7` (23,4 MB), ofuscados, firma debug.

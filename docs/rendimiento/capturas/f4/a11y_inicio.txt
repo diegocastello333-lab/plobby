@@ -1,0 +1,29 @@
+- group:
+  - img "Plobby plobby Buenos días, Diego"
+  - img "Banner Seaside"
+  - button "Añadir amigos"
+  - button "Notificaciones, 4 sin leer"
+  - button "Mensajes, 1 sin leer"
+  - button "Ver mi perfil"
+  - button "Personalizar banner"
+  - group "Todavía no tienes partidos programados. ¡Es hora de organizar uno! Hoy · Padel Chamberí Laura G. · Carlos M. 6 6 Pablo S. · Sofía G. 1 1":
+    - 'button "Amigos: 2. Ver todos"'
+    - button "ELO 1482, +24 puntos en 30 días. Ver detalle"
+    - 'button "Racha actual: 5 partidos ganados seguidos"'
+    - heading "Próximos partidos" [level=2]
+    - button "Crear partido"
+    - heading "De tus amigos" [level=2]
+    - button "Ver todas Ver todas"
+    - group:
+      - button "Ver el partido de Laura"
+      - button "Ver el partido de Pablo"
+      - button "Ver el partido de Marcos"
+      - button "Ver el partido de Álvaro"
+    - button "Ver partido"
+    - heading "Tus partidos" [level=2]
+    - button "Ver todos Ver todos"
+- button "Inicio"
+- button "Feed"
+- button "Competiciones"
+- button "Nuevo partido"
+- button "Perfil"

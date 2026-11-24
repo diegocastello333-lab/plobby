@@ -1,0 +1,29 @@
+- group:
+  - button "Partido amistoso Cerrar":
+    - heading "Crear partido" [level=2]
+  - group "Sugeridos":
+    - button "Añadir a Marcos R."
+    - button "Añadir a Laura G."
+  - button "PAREJA 1 Tú Tu compañero Añadir Tu compañero"
+  - text: VS
+  - group "PAREJA 2 Rival 1 Rival 2":
+    - button "Añadir Rival 1"
+    - button "Añadir Rival 2"
+  - group "Para un amistoso necesitas tres amigos que hayan aceptado tu solicitud (tienes 2).":
+    - button "Añadir amigos"
+  - group "Fecha Hora":
+    - 'button "Fecha: 25/11/2026"'
+    - 'button "Hora: 09:00"'
+  - 'button "Club Club: Club La Moraleja"'
+  - 'button "No está en la lista: escribir el nombre"'
+  - text: Resultado (sets) · opcional si aún no se ha jugado
+  - group "Pareja 1 Pareja 2 Set 1 Set 2 Set 3 (opcional)":
+    - textbox "Set 1 pareja 1" [disabled]
+    - textbox "–"
+    - textbox "Set 1 pareja 2" [disabled]
+    - textbox "–"
+    - textbox "Set 2 pareja 1" [disabled]
+    - textbox "–"
+    - textbox "Set 2 pareja 2" [disabled]
+    - textbox "–"
+- button "Crear partido"

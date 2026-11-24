@@ -1,0 +1,16 @@
+- heading "Competiciones" [level=2]
+- button "Ligas"
+- button "Torneos"
+- group:
+  - button "Compite con tu comunidad. Unirme con código"
+  - heading "Mis ligas" [level=2]
+  - button "Crear liga"
+  - button "BÜNKER PADEL LEAGUE. Tu posición 1 de 8. 5 de 20 partidos"
+  - button "LIGA MADRID CENTRO. Tu posición 1 de 6. 2 de 15 partidos"
+  - button "CLUB LA MORALEJA · OTOÑO. Tu posición 2 de 3. 0 de 8 partidos"
+  - text: "Activas: 3 ligas Jugados: 5 partidos de liga Títulos: 0 ligas ganadas"
+- button "Inicio"
+- button "Feed"
+- button "Competiciones"
+- button "Nuevo partido"
+- button "Perfil"

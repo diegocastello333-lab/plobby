@@ -1,0 +1,25 @@
+- group:
+  - button "Volver"
+  - button "Opciones de la liga"
+  - text: Privada Temporada 01
+  - heading "BÜNKER PADEL LEAGUE" [level=2]
+  - text: "UBICACIÓN Madrid · Centro ORGANIZA Tú ORGANIZADOR JUGADORES 8 jugadores TEMPORADA 15 oct 2026 – 13 ene 2027 Liga entre amigos del Bünker. Partidos entre semana y los domingos por la mañana. Tu posición: 1 de 8. 9 puntos, 3 jugados, 67% victorias, 2 ganados, 1 perdidos, bonus 2."
+  - group:
+    - text: ORDENAR
+    - button "Puntos"
+    - button "ELO"
+    - button "% victorias"
+    - button "Partidos"
+  - text: "# JUGADOR PJ V D PTS"
+  - button "Puesto 1, Diego Castello (tú), 3 jugados, 2 ganados, 1 perdidos, 9"
+  - button "Puesto 2, Marcos Ruiz, 3 jugados, 2 ganados, 1 perdidos, 8"
+  - button "Puesto 3, Sofía García, 2 jugados, 2 ganados, 0 perdidos, 7"
+  - button "Puesto 4, Lucía Martín, 3 jugados, 1 ganados, 2 perdidos, 6"
+  - button "Puesto 5, Javi Ortega, 2 jugados, 1 ganados, 1 perdidos, 5"
+  - button "Puesto 6, Laura Gómez, 2 jugados, 1 ganados, 1 perdidos, 4"
+  - button "Puesto 7, Pablo Sanz, 2 jugados, 1 ganados, 1 perdidos, 4"
+  - button "Puesto 8, Álvaro Pérez, 3 jugados, 0 ganados, 3 perdidos, 3"
+- button "Clasificación"
+- button "Actividad"
+- button "Partidos"
+- button "Miembros"

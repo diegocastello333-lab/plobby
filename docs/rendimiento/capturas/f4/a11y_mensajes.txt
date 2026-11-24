@@ -1,0 +1,7 @@
+- button "Volver"
+- heading "Mensajes" [level=2]
+- button "Nuevo grupo"
+- button "Nuevo mensaje"
+- textbox "Buscar conversaciones"
+- group:
+  - button "Marcos R.. ¿Jugamos el jueves a las 19:00?. 1 sin leer"

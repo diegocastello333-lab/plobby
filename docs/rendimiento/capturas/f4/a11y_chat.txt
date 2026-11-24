@@ -1,0 +1,7 @@
+- button "Volver"
+- button "Perfil de Marcos R."
+- group: CONVERSACIÓN PRIVADA ¿Jugamos el jueves a las 19:00? 09:30
+- button "Acciones rápidas"
+- button "Compartir resultado de partido"
+- textbox "Escribe un mensaje"
+- button "Enviar"
