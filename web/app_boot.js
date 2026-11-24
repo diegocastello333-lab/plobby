@@ -1,4 +1,17 @@
 // Plobby · arranque de la página (antes en línea en index.html; fuera de línea para que la CSP prohíba scripts en línea).
+
+// Apariencia: oscuro por defecto; claro si el usuario lo eligió en la app (shared_preferences guarda «flutter.plobby.theme»
+// como texto JSON) o si eligió «Como el sistema» y el sistema está en claro.
+(function () {
+  var pref = 'dark';
+  try { pref = JSON.parse(localStorage.getItem('flutter.plobby.theme') || '"dark"'); } catch (e) {}
+  var light = pref === 'light' || (pref === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+  if (light) {
+    document.documentElement.classList.add('light');
+    var m = document.getElementById('plobby-theme-color');
+    if (m) m.setAttribute('content', '#F6F8F1');
+  }
+})();
 // Quita la pantalla de carga cuando Flutter pinta su primer fotograma (la app muestra entonces su propio splash).
 window.addEventListener('flutter-first-frame', function () {
   var s = document.getElementById('plobby-splash');

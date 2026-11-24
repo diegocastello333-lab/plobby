@@ -10,8 +10,8 @@
   <!-- Fase de pruebas privada: que no aparezca en buscadores (también se envía como cabecera X-Robots-Tag). -->
   <meta name="robots" content="noindex, nofollow">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#F6F8F1" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0D110F" media="(prefers-color-scheme: dark)">
+  <!-- Oscuro por defecto (preferencia «Apariencia» de la app); app_boot.js lo cambia si el usuario eligió claro. -->
+  <meta name="theme-color" content="#0D110F" id="plobby-theme-color">
   <meta name="format-detection" content="telephone=no">
 
   <!-- iPhone: «Añadir a pantalla de inicio» → app a pantalla completa, con nombre e icono de Plobby. -->
@@ -64,7 +64,8 @@
     }
     #plobby-noscript { font: 16px -apple-system, system-ui, sans-serif; padding: 24px; color: #171C19; }
     /* Modo oscuro del sistema: fondo oscuro desde el primer instante (sin destello blanco antes de que cargue Flutter). */
-    @media (prefers-color-scheme: dark) { html, body { background: #0D110F; } #plobby-noscript { color: #F2F5EF; } }
+    html, body { background: #0D110F; } #plobby-noscript { color: #F2F5EF; }
+    html.light, html.light body { background: #F6F8F1; } html.light #plobby-noscript { color: #171C19; }
   </style>
 </head>
 <body>

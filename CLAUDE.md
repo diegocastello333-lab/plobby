@@ -435,3 +435,10 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - Fotos: `NetImage.missing` recuerda miniaturas inexistentes (los registros mostraban 400 en bucle de `_t96/_t256` de otros
   jugadores). «Compartir mis stats» ahora descarga y dibuja la foto (antes nunca se pasaba) y, sin foto, avatar de Plobby o
   iniciales. Share Match / Head to Head / ranking / stats esperan a las fotos antes de generar el PNG.
+
+## Oscuro por defecto para todos (24 nov 2026, rama `oscuro-por-defecto`, APK 1.9.4)
+- `core/theme/theme_pref.dart`: `ThemePrefs` (dark | light | system; por defecto DARK, en SharedPreferences `plobby.theme`).
+  Las cuentas existentes no tienen preferencia guardada → arrancan en oscuro. `PlobbyApp._sync` usa `ThemePrefs.isDark(...)`
+  y escucha `ThemePrefs.notifier`. Selector «Apariencia» en Perfil → Ajustes y privacidad (también en la web).
+- Web: `index.html` oscuro por defecto (#0D110F, un solo theme-color); `app_boot.js` lee `flutter.plobby.theme` y pone
+  `html.light` + theme-color claro si toca. Tests: `flutter_test_config` fija `ThemePref.system`; `test/theme_pref_test.dart`.

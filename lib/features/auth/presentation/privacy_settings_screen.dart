@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../core/theme/theme_pref.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,6 +121,21 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
       body: Column(children: [
         const PlobbyHeaderBar(title: 'Ajustes y privacidad'),
         Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 40), children: [
+          // Apariencia: oscuro por defecto para todos; claro o como el sistema si el usuario lo prefiere.
+          const _SectionTitle('Apariencia'),
+          _Group(children: [
+            Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Tema', style: PlobbyText.value),
+              const SizedBox(height: 2),
+              Text('Oscuro por defecto. «Como el sistema» sigue el modo de tu móvil.', style: PlobbyText.help),
+              const SizedBox(height: 12),
+              ValueListenableBuilder<ThemePref>(valueListenable: ThemePrefs.notifier, builder: (_, cur, __) => Wrap(spacing: 8, runSpacing: 8, children: [
+                for (final (p, l) in const [(ThemePref.dark, 'Oscuro'), (ThemePref.light, 'Claro'), (ThemePref.system, 'Como el sistema')])
+                  PlobbyFilterChip(label: l, selected: cur == p, onTap: () { AppHaptics.light(); unawaited(ThemePrefs.set(p)); }),
+              ])),
+            ])),
+          ]),
+          const SizedBox(height: 24),
           // en la web no hay vibración (los navegadores no la ofrecen a Flutter): el interruptor solo sale en el móvil
           if (!kIsWeb) ...[
           const _SectionTitle('Experiencia'),

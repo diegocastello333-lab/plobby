@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'core/a11y/web_a11y.dart';
+import 'core/theme/theme_pref.dart';
 import 'core/widgets/loading_bar.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   AppErrors.install();
   await Future.wait([
     AppHaptics.load(),   // preferencia «Vibración» de Ajustes, antes del primer toque
+    ThemePrefs.load(),   // apariencia (oscuro por defecto) antes del primer fotograma: sin destello claro
     GateCache.load(),
     HomeSnapshotStore.load(),   // cabecera del Inicio al instante (stale-while-revalidate)
     ThumbsHealed.load(),
@@ -55,7 +57,8 @@ class PlobbyApp extends ConsumerStatefulWidget {
   ConsumerState<PlobbyApp> createState() => _PlobbyAppState();
 }
 
-/// Sigue el modo claro/oscuro del sistema. Los colores de Plobby son getters que leen [AppColors.isDark], así que al
+/// Modo claro/oscuro según la preferencia del usuario ([ThemePrefs]: oscuro por defecto; «Como el sistema» sigue al
+/// sistema). Los colores de Plobby son getters que leen [AppColors.isDark], así que al
 /// cambiar de modo se fija el valor y se reconstruye TODA la app (clave distinta): ningún widget se queda con el color
 /// anterior. La ruta actual no se pierde (el router vive en Riverpod).
 class _PlobbyAppState extends ConsumerState<PlobbyApp> with WidgetsBindingObserver {
@@ -63,18 +66,21 @@ class _PlobbyAppState extends ConsumerState<PlobbyApp> with WidgetsBindingObserv
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ThemePrefs.notifier.addListener(_onPref);
     _sync();
   }
 
+  void _onPref() { if (_sync()) setState(() {}); }
+
   @override
-  void dispose() { WidgetsBinding.instance.removeObserver(this); super.dispose(); }
+  void dispose() { ThemePrefs.notifier.removeListener(_onPref); WidgetsBinding.instance.removeObserver(this); super.dispose(); }
 
   @override
   void didChangePlatformBrightness() { if (_sync()) setState(() {}); }
 
   /// Devuelve true si el modo ha cambiado.
   bool _sync() {
-    final dark = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+    final dark = ThemePrefs.isDark(WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
     if (dark == AppColors.isDark) return false;
     AppColors.isDark = dark;
     return true;
