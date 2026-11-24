@@ -51,7 +51,7 @@ class AppShell extends ConsumerWidget {
               key: ValueKey(on), tween: Tween(begin: on && !AppAnimations.reduceMotion(context) ? .82 : 1, end: 1),
               duration: Motion.emphasis, curve: AppAnimations.settle,
               builder: (_, sc, child) => Transform.scale(scale: sc, child: child),
-              child: PlobbyIcon(icon, size: 24, color: col ?? color, filled: on)),
+              child: PlobbyIcon(icon, size: 24, color: col ?? color, filled: on, holeColor: AppMaterials.tabBar)),
             const SizedBox(height: 4),
             // «Competiciones» es más largo que el resto: se reduce lo justo para caber en su columna (sin cortarse).
             FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 15 / 12, letterSpacing: 0,
@@ -161,14 +161,19 @@ class _SideRail extends StatelessWidget {
 class _PlusTab extends StatelessWidget {
   const _PlusTab();
   @override
-  Widget build(BuildContext context) => const SizedBox(height: 56, child: Center(child: PlusSquare()));
+  // Centrado con el bloque icono + etiqueta de las otras pestañas (2 + 24 + 4 + 15 px ≈ 45 px desde arriba), no con los
+  // 56 px de la pestaña: así queda a la misma altura visual que el resto y no baja por debajo de las etiquetas.
+  Widget build(BuildContext context) => const SizedBox(height: 56, child: Align(alignment: Alignment.topCenter,
+      child: Padding(padding: EdgeInsets.only(top: 1.5), child: PlusSquare(size: PlusSquare.tabSize))));
 }
 
 /// Botón «Nuevo partido»: cuadrado lima de 44 px, esquinas continuas de 12 (radio pequeño del sistema), «+» en tinta.
 /// Mismo botón en la barra inferior y en la barra lateral de escritorio.
 class PlusSquare extends StatelessWidget {
-  const PlusSquare({super.key});
-  static const size = 44.0;
+  const PlusSquare({super.key, this.size = 44});
+  /// En la barra inferior: alto del bloque icono + etiqueta de las otras pestañas.
+  static const tabSize = 42.0;
+  final double size;
   @override
   Widget build(BuildContext context) => Semantics(button: true, label: 'Nuevo partido', excludeSemantics: true, child: Pressable(scale: .92, child: Material(
         color: AppColors.brand,
@@ -176,6 +181,6 @@ class PlusSquare extends StatelessWidget {
         child: InkWell(
           customBorder: const ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(AppRadius.squircleSm))),
           onTap: () { AppHaptics.light(); HomeNav.newMatch(context); },
-          child: const SizedBox.square(dimension: size, child: Center(child: PlobbyIcon(PlobbyIcons.plus, size: 22, strokeWidth: 2.4, color: AppColors.brandInk)))),
+          child: SizedBox.square(dimension: size, child: Center(child: PlobbyIcon(PlobbyIcons.plus, size: size * .5, strokeWidth: 2.4, color: AppColors.brandInk)))),
       )));
 }

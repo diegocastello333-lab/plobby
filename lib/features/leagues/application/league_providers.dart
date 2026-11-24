@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/cache_for.dart';
 import '../../matches/domain/match_lifecycle.dart';
 import '../data/league_repository.dart';
 import '../data/mock_league_repository.dart';
@@ -38,9 +39,11 @@ final discoverProvider = Provider<AsyncValue<List<DiscoverLeague>>>((ref) {
 /// Para la pantalla «Ligas» (teasers sin filtros).
 final discoverTeasersProvider = FutureProvider<List<DiscoverLeague>>((ref) => ref.watch(leagueRepositoryProvider).discover(''));
 
-final leagueDetailProvider = FutureProvider.autoDispose.family<LeagueDetail, String>((ref, id) { ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).league(id); });
-final standingsProvider = FutureProvider.autoDispose.family<List<StandingRow>, String>((ref, id) { ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).standings(id); });
-final leagueMatchesProvider = FutureProvider.autoDispose.family<List<LifecycleMatch>, String>((ref, id) { ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).matches(id); });
+final leagueDetailProvider = FutureProvider.autoDispose.family<LeagueDetail, String>((ref, id) { ref.cacheFor(_keep); ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).league(id); });
+final standingsProvider = FutureProvider.autoDispose.family<List<StandingRow>, String>((ref, id) { ref.cacheFor(_keep); ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).standings(id); });
+final leagueMatchesProvider = FutureProvider.autoDispose.family<List<LifecycleMatch>, String>((ref, id) { ref.cacheFor(_keep); ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).matches(id); });
+/// Volver a una liga poco después la muestra al instante (sigue al día por Realtime mientras está en caché).
+const _keep = Duration(minutes: 2);   // timing
 final joinRequestsProvider = FutureProvider.autoDispose.family<List<JoinRequest>, String>((ref, id) { ref.watch(leagueLiveProvider(id)); return ref.watch(leagueRepositoryProvider).joinRequests(id); });
 final inviteCodeProvider = FutureProvider.autoDispose.family<String?, String>((ref, id) => ref.watch(leagueRepositoryProvider).inviteCode(id));
 

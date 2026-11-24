@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/cache_for.dart';
 import '../data/gamification_repository.dart';
 import '../data/mock_gamification_repository.dart';
 import '../domain/gamification_models.dart';
@@ -6,7 +7,8 @@ import '../domain/gamification_models.dart';
 final gamificationRepositoryProvider = Provider<GamificationRepository>((ref) => MockGamificationRepository());
 
 /// Head to Head con un amigo (se reutiliza mientras la pantalla esté abierta).
-final headToHeadProvider = FutureProvider.autoDispose.family<H2HData, String>((ref, other) => ref.watch(gamificationRepositoryProvider).headToHead(other));
+final headToHeadProvider = FutureProvider.autoDispose.family<H2HData, String>((ref, other) { ref.cacheFor(_keep); return ref.watch(gamificationRepositoryProvider).headToHead(other); });
+const _keep = Duration(minutes: 2);   // timing
 
 /// Ranking por (periodo, desplazamiento): cambiar de pestaña no vuelve a pedir lo ya cargado.
 final rankingProvider = FutureProvider.autoDispose.family<RankingData, (RankPeriod, int)>((ref, k) {
@@ -14,8 +16,8 @@ final rankingProvider = FutureProvider.autoDispose.family<RankingData, (RankPeri
   return ref.watch(gamificationRepositoryProvider).ranking(k.$1, offset: k.$2);
 });
 
-final wrappedPeriodsProvider = FutureProvider.autoDispose<List<WrappedPeriod>>((ref) => ref.watch(gamificationRepositoryProvider).wrappedPeriods());
-final wrappedProvider = FutureProvider.autoDispose.family<WrappedData, (WrappedKind, DateTime)>((ref, k) => ref.watch(gamificationRepositoryProvider).wrapped(k.$1, k.$2));
+final wrappedPeriodsProvider = FutureProvider.autoDispose<List<WrappedPeriod>>((ref) { ref.cacheFor(_keep); return ref.watch(gamificationRepositoryProvider).wrappedPeriods(); });
+final wrappedProvider = FutureProvider.autoDispose.family<WrappedData, (WrappedKind, DateTime)>((ref, k) { ref.cacheFor(_keep); return ref.watch(gamificationRepositoryProvider).wrapped(k.$1, k.$2); });
 final achievementsProvider = FutureProvider<AchievementsData>((ref) => ref.watch(gamificationRepositoryProvider).achievements());
 final notificationPrefsProvider = FutureProvider<NotificationPrefs>((ref) => ref.watch(gamificationRepositoryProvider).prefs());
 

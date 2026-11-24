@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'core/a11y/web_a11y.dart';
+import 'core/widgets/loading_bar.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/errors/app_errors.dart';
@@ -83,5 +84,5 @@ class _PlobbyAppState extends ConsumerState<PlobbyApp> with WidgetsBindingObserv
   Widget build(BuildContext context) => KeyedSubtree(key: ValueKey(AppColors.isDark), child: MaterialApp.router(
       title: 'Plobby', theme: buildPlobbyTheme(), routerConfig: ref.watch(routerProvider), debugShowCheckedModeBanner: false,
       // Sincronización en vivo y avisos emergentes en cualquier pantalla (no solo en las pestañas).
-      builder: (_, child) => WideFrame(child: LiveSync(child: child ?? const SizedBox.shrink()))));
+      builder: (_, child) => LoadingBar(child: WideFrame(child: LiveSync(child: child ?? const SizedBox.shrink())))));
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../net/net_activity.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/state_views.dart';
 
@@ -38,7 +39,7 @@ class _DeferredScreenState extends State<DeferredScreen> {
   late Future<void> _future = _start();
 
   Future<void> _start() async {
-    await widget.load();
+    await NetActivity.track(widget.load());   // barra de carga si la descarga tarda
     DeferredScreen._loaded.add(widget.load);
   }
 

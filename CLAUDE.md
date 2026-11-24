@@ -415,3 +415,12 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   `BackdropFilter` directo (usar `FrostedBar`; `AppMaterials.blur` = false → barras opacas); cabeceras de
   `SliverPersistentHeader` devuelven una instancia guardada; bucles decorativos con `IdleMotion.loop` (limitados en todas
   partes); `vercel.json` con COOP same-origin + COEP credentialless (motor en hilo aparte). Vigilado por test/fluidity_test.dart.
+
+## Pulido (24 nov 2026, rama `pulido`, APK 1.9.2)
+- Icono relleno de pestaña activa: `holeColor: AppMaterials.tabBar` (antes blanco fijo → bloque blanco en oscuro).
+- «+» de la barra: `PlusSquare(size: PlusSquare.tabSize)` = 42 px alineado arriba con el bloque icono + etiqueta.
+- Racha del Inicio: número en `brandInk` sobre la llama lima (y llama apagada oscura en modo oscuro).
+- Reacciones: las cinco siempre visibles (sin pulsación larga); etiqueta «Reaccionar con 🔥, 3».
+- `LoadingBar` (MaterialApp.builder) + `NetActivity`: barra lima de 2,5 px si una petición a Supabase (TimeoutHttpClient)
+  o la descarga de una pantalla diferida tarda >400 ms.
+- `ref.cacheFor(2 min)` (core/state/cache_for.dart) en detalle de liga/clasificación/partidos, Head to Head, Wrapped y club.

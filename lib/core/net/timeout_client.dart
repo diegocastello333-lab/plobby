@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'net_activity.dart';
 
 /// Cliente HTTP de Supabase con límite de tiempo: una consulta que no responde (cobertura mala, red que «se queda
 /// colgada») termina en [TimeoutException] en vez de dejar la pantalla cargando para siempre. Cada repositorio ya
@@ -19,7 +20,23 @@ class TimeoutHttpClient extends http.BaseClient {
       r.url.path.contains('/storage/v1/object') && (r.method == 'POST' || r.method == 'PUT') ? uploadTimeout : requestTimeout;
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) => _inner.send(request).timeout(limitFor(request));
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    // Cuenta la petición hasta que llega el cuerpo completo (o falla): alimenta la barra de carga global.
+    NetActivity.begin();
+    var ended = false;
+    void end() { if (!ended) { ended = true; NetActivity.end(); } }
+    try {
+      final r = await _inner.send(request).timeout(limitFor(request));
+      final body = r.stream.transform(StreamTransformer<List<int>, List<int>>.fromHandlers(
+          handleDone: (sink) { end(); sink.close(); },
+          handleError: (e, st, sink) { end(); sink.addError(e, st); }));
+      return http.StreamedResponse(body, r.statusCode, contentLength: r.contentLength, request: r.request, headers: r.headers,
+          isRedirect: r.isRedirect, persistentConnection: r.persistentConnection, reasonPhrase: r.reasonPhrase);
+    } catch (_) {
+      end();
+      rethrow;
+    }
+  }
 
   @override
   void close() => _inner.close();

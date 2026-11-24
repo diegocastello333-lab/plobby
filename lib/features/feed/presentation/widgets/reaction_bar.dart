@@ -10,8 +10,8 @@ import '../../application/feed_providers.dart';
 import '../../domain/feed_models.dart';
 import 'comments_sheet.dart';
 
-/// Reacciones discretas: plegadas solo se ven las que ya tiene la publicación y un botón «reaccionar»; un toque en él
-/// pone 🔥 (la reacción rápida, igual que el doble toque) y una pulsación larga despliega las cinco.
+/// Reacciones siempre desplegadas: las cinco a la vista con su recuento; un toque reacciona (o cambia/quita la tuya).
+/// El doble toque en la tarjeta sigue poniendo 🔥.
 class ReactionBar extends ConsumerStatefulWidget {
   const ReactionBar({super.key, required this.post, this.onDark = false});
   final FeedPost post;
@@ -21,28 +21,24 @@ class ReactionBar extends ConsumerStatefulWidget {
 }
 
 class _ReactionBarState extends ConsumerState<ReactionBar> {
-  bool _open = false;
   FeedPost get post => widget.post;
   bool get onDark => widget.onDark;
 
   void _react(ReactionType t) {
     AppHaptics.medium();
     ref.read(feedControllerProvider.notifier).react(post.id, t);
-    if (_open) setState(() => _open = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final r = post.reactions;
-    final shown = _open ? ReactionType.values : [for (final t in ReactionType.values) if ((r.counts[t] ?? 0) > 0 || r.mine == t) t];
     final fg = onDark ? AppColors.ink50.withValues(alpha: .7) : AppColors.textMuted;
     final names = r.recent.take(2).map((u) => u.name.split(' ').first).join(', ');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const SizedBox(height: 12),
-      AnimatedSize(duration: Motion.normal, curve: Motion.move, alignment: Alignment.centerLeft, child: Wrap(spacing: 6, runSpacing: 6, children: [
-        for (final t in shown) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () => _react(t)),
-        if (!_open) _AddReaction(onDark: onDark, onTap: () => _react(ReactionType.fire), onLongPress: () { AppHaptics.light(); setState(() => _open = true); }),
-      ])),
+      Wrap(spacing: 6, runSpacing: 6, children: [
+        for (final t in ReactionType.values) _Pill(t: t, count: r.counts[t] ?? 0, selected: r.mine == t, onDark: onDark, onTap: () => _react(t)),
+      ]),
       const SizedBox(height: 10),
       Row(children: [
         if (r.total > 0) ...[
@@ -92,7 +88,7 @@ class _PillState extends State<_Pill> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final sel = widget.selected;
-    return Semantics(button: true, selected: sel, label: 'Reaccionar con ${widget.t.emoji}', child: GestureDetector(
+    return Semantics(button: true, selected: sel, label: 'Reaccionar con ${widget.t.emoji}${widget.count > 0 ? ', ${widget.count}' : ''}', excludeSemantics: true, child: GestureDetector(
       onTap: widget.onTap,
       child: AnimatedBuilder(animation: c, builder: (_, child) {
         final s = 1 + .3 * Motion.spring.transform(c.value) * (1 - c.value);
@@ -199,21 +195,3 @@ class _DoubleTapFireState extends ConsumerState<DoubleTapFire> with SingleTicker
       );
 }
 
-/// Botón discreto para reaccionar: toque = 🔥; pulsación larga = elegir entre las cinco.
-class _AddReaction extends StatelessWidget {
-  const _AddReaction({required this.onDark, required this.onTap, required this.onLongPress});
-  final bool onDark;
-  final VoidCallback onTap, onLongPress;
-  @override
-  Widget build(BuildContext context) {
-    final fg = onDark ? AppColors.ink50.withValues(alpha: .7) : AppColors.textMuted;
-    final shape = AppShapes.of(AppRadius.pill, side: BorderSide(color: onDark ? const Color(0x33F6F8F1) : AppColors.border));
-    return Semantics(button: true, label: 'Reaccionar. Mantén pulsado para elegir la reacción', excludeSemantics: true, child: Material(
-      color: Colors.transparent, shape: shape,
-      child: InkWell(customBorder: shape, onTap: onTap, onLongPress: onLongPress, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 36, minWidth: 44),
-        child: Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.add_reaction_outlined, size: 18, color: fg),
-        ])))),
-    ));
-  }
-}

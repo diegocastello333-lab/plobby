@@ -288,9 +288,11 @@ class _Counters extends ConsumerWidget {
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           // La llama «salta» con un destello cuando la racha cambia (victoria confirmada).
           PopOnEvent(trigger: c.streak, glow: c.streak > 0, child: SizedBox(width: 25, height: 31, child: Stack(children: [
-            SvgPicture.string('<svg viewBox="0 0 32 40"><path d="M16 2C17 9 27 13 27 24a11 11 0 0 1-22 0c0-4 1.6-6.8 3.8-9.2.4 3.2 2.2 5 4.2 5.6C11.4 12 12.6 6 16 2z" fill="${c.streak > 0 ? '#D2F548' : '#EEF1EA'}"/></svg>', width: 25, height: 31),
+            SvgPicture.string('<svg viewBox="0 0 32 40"><path d="M16 2C17 9 27 13 27 24a11 11 0 0 1-22 0c0-4 1.6-6.8 3.8-9.2.4 3.2 2.2 5 4.2 5.6C11.4 12 12.6 6 16 2z" fill="${c.streak > 0 ? '#D2F548' : (AppColors.isDark ? '#2A322D' : '#EEF1EA')}"/></svg>', width: 25, height: 31),
             Positioned(left: 0, right: 0, top: 14, child: Text('${c.streak}', textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.text))),
+                style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w800, letterSpacing: 0,
+                    // Sobre la llama lima, siempre tinta (en oscuro el color de texto es claro y no se veía).
+                    color: c.streak > 0 ? AppColors.brandInk : AppColors.textMuted))),
           ]))),
           const SizedBox(height: 3),
           Text('Racha de victorias', textAlign: TextAlign.center, maxLines: 2,
