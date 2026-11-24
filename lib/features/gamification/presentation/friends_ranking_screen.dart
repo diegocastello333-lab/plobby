@@ -220,7 +220,7 @@ class _RankTile extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(me ? '${row.player.name} (tú)' : row.player.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.cardTitle.copyWith(fontSize: 14)),
-            Text('${row.wins} V · ${row.losses} D · ${row.played == 0 ? '—' : '${row.winRate}%'} · Nv. ${row.level}', maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.help),
+            Text('${row.wins} V · ${row.losses} D · ${row.played == 0 ? '—' : '${row.winRate}%'} · Nv. ${row.level}', maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyText.help.copyWith(color: AppColors.textBody)),
           ])),
           const SizedBox(width: 8),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [

@@ -74,7 +74,7 @@ class _OptionCardState extends State<_OptionCard> {
   @override
   Widget build(BuildContext context) {
     final bg = widget.dark ? AppColors.inverse : AppColors.brand;
-    final fg = widget.dark ? AppColors.bg : AppColors.brandInk;
+    final fg = widget.dark ? AppColors.onInverseText : AppColors.brandInk;
     final reduce = Motion.reduced(context);
     return Semantics(button: true, label: '${widget.title}. ${widget.text}', excludeSemantics: true, child: AnimatedScale(
       scale: _down ? .97 : 1, duration: reduce ? Duration.zero : Motion.fast, curve: Motion.enter,
@@ -91,7 +91,7 @@ class _OptionCardState extends State<_OptionCard> {
               _go(context, '/match/new?type=${widget.type}');
             },
             child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 96), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18), child: Row(children: [
-              Container(width: 52, height: 52, decoration: BoxDecoration(color: widget.dark ? AppColors.brand : AppColors.inkA(0x1A), borderRadius: BorderRadius.circular(16)),
+              Container(width: 52, height: 52, decoration: BoxDecoration(color: widget.dark ? AppColors.brand : AppColors.scrim(0x1A), borderRadius: BorderRadius.circular(16)),
                   child: Center(child: PlobbyIcon(widget.icon, size: 26, color: AppColors.brandInk))),
               const SizedBox(width: 14),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -67,7 +67,7 @@ class _LogoutButtonState extends ConsumerState<LogoutButton> {
 
 /// Diálogo de confirmación: «¿Estás seguro de que quieres cerrar sesión?» con «Cancelar» y «Cerrar sesión».
 Future<bool?> showLogoutDialog(BuildContext context) => showDialog<bool>(
-      context: context, useRootNavigator: true, barrierColor: AppColors.inkA(0x80),
+      context: context, useRootNavigator: true, barrierColor: AppColors.scrim(0x80),
       builder: (c) => Dialog(
         backgroundColor: AppColors.bg, insetPadding: const EdgeInsets.symmetric(horizontal: 24),
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.rLg),

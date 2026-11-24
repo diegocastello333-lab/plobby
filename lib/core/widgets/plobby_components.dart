@@ -103,9 +103,9 @@ class IconSquareButton extends StatelessWidget {
         message: tooltip, excludeFromSemantics: true,
         child: Semantics(button: true, label: tooltip, excludeSemantics: true, child: Pressable(child: Container(
           width: size, height: size,
-          decoration: BoxDecoration(color: glass ? AppColors.inkA(0x73) : AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: glass ? null : AppShadows.card),
+          decoration: BoxDecoration(color: glass ? AppColors.scrim(0x73) : AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: glass ? null : AppShadows.card),
           child: Material(type: MaterialType.transparency, child: InkWell(borderRadius: AppRadius.rMd, onTap: onPressed,
-              child: Center(child: PlobbyIcon(icon, color: glass ? AppColors.surface : AppColors.text)))),
+              child: Center(child: PlobbyIcon(icon, color: glass ? AppColors.ink50 : AppColors.text)))),
         ))),
       );
 }
@@ -222,7 +222,7 @@ class Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
       PillTone.soft => (AppColors.brandSoft, AppColors.text),
-      PillTone.glass => (AppColors.inkA(0x8C), AppColors.surface),
+      PillTone.glass => (AppColors.scrim(0x8C), AppColors.ink50),
       PillTone.lime => (AppColors.brand, AppColors.brandInk),
       PillTone.dark => (AppColors.inverse, AppColors.onInverse),
       PillTone.neutral => (AppColors.surfaceSunken, AppColors.text),
@@ -290,7 +290,7 @@ class OptionCard extends StatelessWidget {
               const SizedBox(width: 8),
               Container(width: 22, height: 22, decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? AppColors.inverse : null,
                   border: selected ? null : Border.all(color: AppColors.borderStrong, width: 1.5)),
-                  child: selected ? Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3, color: AppColors.surface)) : null),
+                  child: selected ? Center(child: PlobbyIcon(PlobbyIcons.check, size: 12, strokeWidth: 3, color: AppColors.onInverseText)) : null),
             ])),
           ),
         ))),

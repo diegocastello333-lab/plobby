@@ -28,7 +28,7 @@ class _ActivityFeedState extends State<ActivityFeed> {
       decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14)),
       child: Column(children: [for (final it in items) ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: CircleAvatar(radius: 18, backgroundColor: const Color(0xFFEEF1EA), child: it.$3),
+        leading: CircleAvatar(radius: 18, backgroundColor: AppColors.surfaceSunken, child: it.$3),
         title: Text(it.$2, style: const TextStyle(fontSize: 13.5)),
         trailing: IconButton(
           tooltip: 'Me gusta', onPressed: () => setState(() => liked.contains(it.$1) ? liked.remove(it.$1) : liked.add(it.$1)),

@@ -424,3 +424,14 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
 - `LoadingBar` (MaterialApp.builder) + `NetActivity`: barra lima de 2,5 px si una petición a Supabase (TimeoutHttpClient)
   o la descarga de una pantalla diferida tarda >400 ms.
 - `ref.cacheFor(2 min)` (core/state/cache_for.dart) en detalle de liga/clasificación/partidos, Head to Head, Wrapped y club.
+
+## Oscuro legible + fotos en las imágenes (24 nov 2026, rama `compartir-oscuro`, APK 1.9.3)
+- `test/dark_contrast_audit_test.dart`: renderiza 33 pantallas + hoja «+» en oscuro y mide el contraste REAL de cada texto con
+  el fondo compuesto de sus ancestros (AA 4,5/3). Excluye `brandInk` (solo va sobre lima, capa hermana no detectable).
+- Tokens nuevos: `AppColors.onInverseText` (texto sobre bloque de tinta) y `AppColors.scrim(alpha)` (velo SIEMPRE oscuro;
+  `inkA` se aclara en oscuro → no usarlo para barreras de diálogo, cristal ni velos sobre fotos).
+- Arreglados: hoja «+» (texto = color de fondo), flecha del ELO del Inicio (SVG con tinta fija), «% de victorias» de Mi
+  rating, velos/cristal/diálogos, círculos `#EEF1EA` fijos, avatar gris de la paleta (ink400), subtítulo del ranking.
+- Fotos: `NetImage.missing` recuerda miniaturas inexistentes (los registros mostraban 400 en bucle de `_t96/_t256` de otros
+  jugadores). «Compartir mis stats» ahora descarga y dibuja la foto (antes nunca se pasaba) y, sin foto, avatar de Plobby o
+  iniciales. Share Match / Head to Head / ranking / stats esperan a las fotos antes de generar el PNG.

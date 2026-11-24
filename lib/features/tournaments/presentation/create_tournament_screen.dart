@@ -144,12 +144,12 @@ class _CreateTournamentScreenState extends ConsumerState<CreateTournamentScreen>
           child: Stack(children: [
             TournamentCover(bytes: _d.coverBytes == null ? null : Uint8List.fromList(_d.coverBytes!), seed: _name.text, height: 150),
             Positioned.fill(child: Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(color: AppColors.inkA(0x99), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(color: AppColors.scrim(0x99), borderRadius: BorderRadius.circular(20)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   _coverBusy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.lime300))
-                      : PlobbyIcon(PlobbyIcons.image, size: 16, color: AppColors.surface),
+                      : PlobbyIcon(PlobbyIcons.image, size: 16, color: AppColors.ink50),
                   const SizedBox(width: 8),
-                  Text(_d.coverBytes == null ? 'Añadir portada' : 'Cambiar portada', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.surface)),
+                  Text(_d.coverBytes == null ? 'Añadir portada' : 'Cambiar portada', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.ink50)),
                 ])))),
           ]),
         )),

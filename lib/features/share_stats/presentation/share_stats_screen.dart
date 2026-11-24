@@ -1,6 +1,8 @@
 import '../../../core/share/image_actions.dart';
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+import '../../../core/net/image_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +31,16 @@ class _State extends ConsumerState<ShareStatsScreen> {
   StatsPeriod period = StatsPeriod.d30;
   bool showClub = true, showPartner = true, busy = false;
   final _service = ShareService();
+  /// Foto de perfil descargada para dibujarla en la imagen (una vez por URL).
+  ui.Image? _photo;
+  String? _photoUrl;
+  Future<void> _photoLoad = Future.value();
+
+  void _ensurePhoto(String? url) {
+    if (url == null || url.isEmpty || url == _photoUrl) return;
+    _photoUrl = url;
+    _photoLoad = fetchUiImage(url, targetWidth: 420).then((img) { if (mounted && img != null && _photoUrl == url) setState(() => _photo = img); });
+  }
 
   static const _labels = {StatsPeriod.all: 'Todo el tiempo', StatsPeriod.d30: 'Últimos 30 días', StatsPeriod.d90: 'Últimos 3 meses'};
 
@@ -43,6 +55,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
       last: calc.confirmed(d.matches).take(10).map((m) => m.won).toList(),
       club: showClub ? p.club?.name : null,
       partner: showPartner && p.partner?.status == PartnerStatus.accepted ? p.partner!.name : null,
+      avatar: _photo, avatarId: p.avatarId,
     );
   }
 
@@ -52,6 +65,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
   Future<void> _run(ProfileData d, Future<String?> Function(Uint8List) action, {required String label}) async {
     setState(() => busy = true);
     try {
+      await _photoLoad;   // la foto de perfil tiene que estar en la imagen aunque se pulse enseguida
       final png = await _png(d);
       if (!mounted) return;
       String? ok;
@@ -78,6 +92,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
           loading: () => Center(child: CircularProgressIndicator(color: AppColors.text)),
           error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: ErrorStateCard(error: e, title: 'No se pudieron cargar tus datos', onRetry: () => ref.invalidate(profileProvider('me')))),
           data: (d) {
+            _ensurePhoto(d.profile.avatarUrl);
             final size = fmt.size;
             final hasClub = d.profile.club != null, hasPartner = d.profile.partner?.status == PartnerStatus.accepted;
             return ListView(padding: EdgeInsets.fromLTRB(20, 16, 20, 40 + MediaQuery.paddingOf(context).bottom), children: [

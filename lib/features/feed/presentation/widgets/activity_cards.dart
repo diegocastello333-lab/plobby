@@ -19,7 +19,7 @@ String timeAgo(DateTime d) {
 }
 
 /// Colores de las iniciales (`.av` del prototipo): tinta con lima, tinta con marfil, lima con tinta o salvia con tinta.
-List<(Color, Color)> get _avPalette => [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.borderStrong, AppColors.brandInk)];
+List<(Color, Color)> get _avPalette => [(AppColors.inverse, AppColors.brand), (AppColors.inverse, AppColors.ink50), (AppColors.brand, AppColors.brandInk), (AppColors.ink400, AppColors.brandInk)];
 
 /// Relleno del avatar (foto o iniciales con color estable por usuario), sin recorte: lo pone quien lo usa.
 Widget feedAvatarFill(FeedUser u, double size) {

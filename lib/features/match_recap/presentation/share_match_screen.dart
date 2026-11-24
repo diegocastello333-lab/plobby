@@ -36,11 +36,11 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
   @override
   void dispose() { _pc.dispose(); super.dispose(); }
 
-  Future<void> _ensureImages(RecapData d) async {
+  Future<void> _imagesLoad = Future.value();
+  void _ensureImages(RecapData d) {
     if (loadedImages) return;
     loadedImages = true;
-    final im = await RecapImageLoader.load(d);
-    if (mounted) setState(() => images = im);
+    _imagesLoad = RecapImageLoader.load(d).then((im) { if (mounted) setState(() => images = im); });
   }
 
   Future<void> _run(RecapData d, RecapFormat f, Future<RecapAction> Function(RecapService, Uint8List, String) act) async {
@@ -49,6 +49,7 @@ class _ShareMatchState extends ConsumerState<ShareMatchScreen> {
     setState(() { busy = true; done = null; });
     final svc = ref.read(recapServiceProvider);
     try {
+      await _imagesLoad;   // las fotos de los jugadores tienen que estar en la imagen aunque se pulse enseguida
       final png = await svc.render(d, tpl, f, opts, images);
       if (!mounted) return;
       RecapAction? r;

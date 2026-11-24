@@ -85,7 +85,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    final ok = await showDialog<bool>(context: context, useRootNavigator: true, barrierColor: AppColors.inkA(0x80),
+    final ok = await showDialog<bool>(context: context, useRootNavigator: true, barrierColor: AppColors.scrim(0x80),
         builder: (_) => const _DeleteAccountDialog());
     if (ok != true || !mounted) return;
     final router = GoRouter.maybeOf(context);
@@ -104,7 +104,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<bool?> _confirm({required PlobbyIcons icon, required String title, required String text, required String action}) => showDialog<bool>(
-        context: context, useRootNavigator: true, barrierColor: AppColors.inkA(0x80),
+        context: context, useRootNavigator: true, barrierColor: AppColors.scrim(0x80),
         builder: (c) => _PlobbyDialog(icon: icon, title: title, text: text, actions: [
           Expanded(child: PlobbyButton(label: 'Cancelar', kind: PlobbyButtonKind.outline, onPressed: () => Navigator.pop(c, false))),
           const SizedBox(width: 10),

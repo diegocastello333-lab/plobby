@@ -35,12 +35,16 @@ class NetImage extends StatelessWidget {
   final ImageErrorWidgetBuilder? errorBuilder;
   final Color? color;
 
+  /// Miniaturas que no existen (fotos de otros jugadores subidas con versiones anteriores). Flutter no guarda en caché
+  /// los fallos: sin esto, cada repintado volvía a pedir la miniatura (400 en bucle en los registros de Supabase).
+  static final missing = <String>{};
+
   @override
   Widget build(BuildContext context) {
     final thumb = AvatarThumbs.pick(src, cacheWidth);
     Widget original() => Image.network(src, fit: fit, width: width, height: height, cacheWidth: cacheWidth, color: color, errorBuilder: errorBuilder);
-    if (thumb == src) return original();
+    if (thumb == src || missing.contains(thumb)) return original();
     return Image.network(thumb, fit: fit, width: width, height: height, cacheWidth: cacheWidth, color: color,
-        errorBuilder: (_, __, ___) => original());
+        errorBuilder: (_, __, ___) { missing.add(thumb); return original(); });
   }
 }

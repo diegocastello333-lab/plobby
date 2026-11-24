@@ -28,6 +28,10 @@ class AppColors {
   /// para que su texto marfil y sus cifras lima se lean siempre.
   static Color get inverse => _m(ink900, AppColorsDark.inverse);
   static Color get onInverse => lime300;
+  /// Texto e iconos sobre un bloque de tinta ([inverse]): marfil en claro, blanco roto en oscuro.
+  static Color get onInverseText => _m(ink50, AppColorsDark.text);
+  /// Velo de tinta sobre fotos/pantallas (diálogos, cristal): SIEMPRE oscuro, también en modo oscuro (inkA se aclara).
+  static Color scrim(int alpha) => Color.fromARGB(alpha, 0x17, 0x1C, 0x19);
   static Color get text => _m(ink900, AppColorsDark.text);
   static Color get textMuted => _m(ink500, AppColorsDark.textMuted);
   /// Texto de cuerpo (descripciones, explicaciones): un punto menos que [text], más legible que [textMuted].

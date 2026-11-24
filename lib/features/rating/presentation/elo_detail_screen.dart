@@ -201,7 +201,7 @@ class _Kpi extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, sub) = switch (tone) {
       _Tone.light => (AppColors.surface, AppColors.text, AppColors.textMuted),
-      _Tone.lime => (AppColors.brand, AppColors.brandInk, AppColors.inkA(0xB3)),
+      _Tone.lime => (AppColors.brand, AppColors.brandInk, AppColors.scrim(0xB3)),
       _Tone.dark => (AppColors.inverse, AppColors.brand, const Color(0xA6F6F8F1)),
     };
     return Semantics(label: '$l: $v', excludeSemantics: true, child: Container(

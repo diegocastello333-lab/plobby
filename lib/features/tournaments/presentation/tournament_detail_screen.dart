@@ -76,7 +76,7 @@ class _TournamentDetailScreenState extends ConsumerState<TournamentDetailScreen>
               Positioned(left: 20, right: 20, bottom: 14, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Wrap(spacing: 6, children: [TournamentStatusPill(phase, onCover: true), if (d.isAdmin) const Pill('Organizas', tone: PillTone.lime, icon: PlobbyIcons.shield)]),
                 const SizedBox(height: 8),
-                Text(t.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 22, height: 1.15, fontWeight: FontWeight.w700, letterSpacing: -0.44, color: AppColors.surface)),
+                Text(t.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 22, height: 1.15, fontWeight: FontWeight.w700, letterSpacing: -0.44, color: AppColors.ink50)),
                 const SizedBox(height: 4),
                 Text(where, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: Color(0xDDF6F8F1))),
               ])),

@@ -1,5 +1,6 @@
 import '../../../core/motion/app_motion.dart';
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../domain/auth_models.dart';
 import '../../../core/widgets/net_image.dart';
 
@@ -88,7 +89,7 @@ class AvatarPicker extends StatelessWidget {
       Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFD2F548), width: 2)),
           child: hasPhoto ? ClipOval(child: NetImage(data.avatarUrl!, width: 104, height: 104, fit: BoxFit.cover, cacheWidth: 312, errorBuilder: (_, __, ___) => const SizedBox(width: 104, height: 104)))
               : data.avatarId != null ? PlobbyAvatar(id: data.avatarId!, size: 104)
-              : const CircleAvatar(radius: 52, backgroundColor: Color(0xFFEEF1EA), child: Icon(Icons.person_outline, size: 44))),
+              : CircleAvatar(radius: 52, backgroundColor: AppColors.surfaceSunken, child: Icon(Icons.person_outline, size: 44, color: AppColors.textMuted))),
       const SizedBox(height: 16),
       OutlinedButton.icon(onPressed: busy ? null : onPickPhoto, icon: busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.image_outlined), label: const Text('Subir foto de la galería'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48))),

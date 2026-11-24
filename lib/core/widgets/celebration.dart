@@ -78,7 +78,7 @@ Future<void> showCelebration(BuildContext context, Celebration c) async {
   if (!context.mounted) return;
   AppHaptics.success();
   await Navigator.of(context, rootNavigator: true).push(PageRouteBuilder<void>(
-    opaque: false, barrierDismissible: true, barrierColor: AppColors.inkA(0x99), barrierLabel: 'Cerrar',
+    opaque: false, barrierDismissible: true, barrierColor: AppColors.scrim(0x99), barrierLabel: 'Cerrar',
     transitionDuration: Motion.of(context, Motion.normal), reverseTransitionDuration: Motion.of(context, Motion.normal),
     pageBuilder: (_, __, ___) => _CelebrationView(c: c),
     transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),

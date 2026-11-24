@@ -78,14 +78,16 @@ class _ShareSheetState extends State<_ShareSheet> {
   @override
   void initState() {
     super.initState();
-    loadShareImages(widget.target.players).then((i) { if (mounted && i.isNotEmpty) setState(() => _images = i); });
+    _imagesLoad = loadShareImages(widget.target.players).then((i) { if (mounted && i.isNotEmpty) setState(() => _images = i); });
   }
+  Future<void> _imagesLoad = Future.value();
 
   /// [job] devuelve el texto de confirmación (null: la hoja del sistema ya es la confirmación).
   Future<void> _run(Future<String?> Function(Uint8List) job, {required String label}) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
+      await _imagesLoad;   // fotos de perfil dentro de la imagen aunque se pulse enseguida
       final png = await widget.target.png(_fmt, _images);
       if (!mounted) return;
       String? ok;

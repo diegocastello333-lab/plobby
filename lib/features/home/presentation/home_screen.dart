@@ -275,7 +275,7 @@ class _Counters extends ConsumerWidget {
         onTap: () => HomeNav.elo(context),
         child: _StatText(value: c.elo == null ? '—' : '${c.elo}', number: c.elo, memoryKey: 'home:elo', label: 'ELO', heroTag: 'elo-me', trailing: delta == 0 ? null : Row(mainAxisSize: MainAxisSize.min, children: [
           Transform.rotate(angle: delta > 0 ? 0 : 1.5708, child: SvgPicture.string(
-              '<svg viewBox="0 0 24 24" fill="none" stroke="${delta > 0 ? '#171C19' : '#C4282E'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+              '<svg viewBox="0 0 24 24" fill="none" stroke="#${((delta > 0 ? AppColors.text : AppColors.danger).toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
               width: 9, height: 9)),
           const SizedBox(width: 1),
           Text('${delta.abs()}', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w700, letterSpacing: 0, color: delta > 0 ? AppColors.text : AppColors.danger)),

@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import '../../../core/share/canvas_text.dart';
 import '../../../core/theme/plobby_theme.dart';
 import '../../../core/widgets/flame_paths.dart';
+import '../../auth/presentation/avatar_catalog.dart' show paintPlobbyAvatar;
 
 enum ShareTemplate { performance, streak }
 enum ShareFormat { story, post }
@@ -17,12 +18,18 @@ extension ShareFormatX on ShareFormat {
 class ShareCardData {
   const ShareCardData({required this.name, required this.username, required this.elo, required this.eloDelta, required this.category,
     required this.played, required this.winRate, required this.wins, required this.losses, required this.streak, required this.bestStreak,
-    required this.periodLabel, required this.last, this.club, this.partner, this.avatar});
+    required this.periodLabel, required this.last, this.club, this.partner, this.avatar, this.avatarId});
   final String name, username, category, periodLabel;
   final int elo, eloDelta, played, winRate, wins, losses, streak, bestStreak;
   final List<bool> last; // últimos resultados, más reciente primero
   final String? club, partner;
   final ui.Image? avatar;
+  /// Avatar de Plobby (`a1`…`a12`) si no hay foto descargada; si tampoco, iniciales.
+  final String? avatarId;
+  String get initials {
+    final w = name.trim().split(RegExp(r'\s+')).where((x) => x.isNotEmpty).toList();
+    return w.isEmpty ? '?' : w.take(2).map((x) => x[0]).join().toUpperCase();
+  }
 }
 
 String _fmt(int n) => n.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
@@ -84,7 +91,14 @@ class ShareCardPainter extends CustomPainter {
     if (d.avatar != null) {
       paintImage(canvas: c, rect: Rect.fromLTWH(_m, ay, r * 2, r * 2), image: d.avatar!, fit: BoxFit.cover);
     } else {
-      c.drawRect(Rect.fromLTWH(_m, ay, r * 2, r * 2), Paint()..color = PlobbyColors.sage);
+      // Sin foto: el avatar de Plobby que eligió o sus iniciales (antes un círculo gris vacío).
+      c.save();
+      c.translate(_m, ay);
+      if (d.avatarId == null || !paintPlobbyAvatar(c, r * 2, d.avatarId!)) {
+        c.drawRect(Rect.fromLTWH(0, 0, r * 2, r * 2), Paint()..color = const Color(0xFF232A26));
+        ShareText(c).draw(d.initials, r, r, r * .76, _ivory, v: VAnchor.capCenter, ax: .5, weight: FontWeight.w800);
+      }
+      c.restore();
     }
     c.restore();
     t.obstacle(Rect.fromCircle(center: Offset(acx, acy), radius: r + 8), 'avatar');
