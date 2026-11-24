@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +57,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                     ? RepaintBoundary(child: ActivityCard(key: ValueKey(s.posts[i].id), post: s.posts[i]))
                     : (s.loadingMore ? const _Skeleton() : Padding(padding: const EdgeInsets.symmetric(vertical: 24), child: Center(child: Text(s.hasMore ? '' : 'Estás al día ✓', style: PlobbyText.sub)))),
               )),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              SliverToBoxAdapter(child: SizedBox(height: AppInsets.tabBarClearance(context))),
             ],
           ),
         ]),
@@ -130,9 +131,20 @@ class _Chips extends SliverPersistentHeaderDelegate {
   @override double get minExtent => 58;
   @override double get maxExtent => 58;
   @override
-  // Sin contenido debajo: transparente (se ve el fondo vivo). Fija sobre publicaciones: marfil casi opaco, con fundido.
-  Widget build(BuildContext c, double s, bool o) => AnimatedContainer(duration: AppAnimations.scaled(c, AppAnimations.tab), curve: AppAnimations.standard,
-      color: o ? const Color(0xF5F6F8F1) : const Color(0x00F6F8F1), child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 14, 20, 10), children: [
+  // Sin contenido debajo: transparente (se ve el fondo vivo). En cuanto hay publicaciones pasando por debajo (s > 0; el
+  // indicador `overlapsContent` no se activa de forma fiable en una cabecera fija): material translúcido con desenfoque
+  // y una línea fina inferior.
+  Widget build(BuildContext c, double s, bool o) {
+    final under = s > 0 || o;
+    return ClipRect(child: BackdropFilter(
+      filter: under ? ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur) : ui.ImageFilter.blur(),
+      child: AnimatedContainer(duration: AppAnimations.scaled(c, AppAnimations.tab), curve: AppAnimations.standard,
+      decoration: BoxDecoration(color: under ? AppMaterials.bar : AppMaterials.bar.withValues(alpha: 0),
+          border: Border(bottom: BorderSide(width: .5, color: under ? AppMaterials.hairline : const Color(0x00000000)))),
+      child: _chips())));
+  }
+
+  Widget _chips() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.fromLTRB(20, 14, 20, 10), children: [
         for (final e in _filters.entries) Padding(padding: const EdgeInsets.only(right: 8), child: Semantics(button: true, selected: sel == e.key, label: e.value, excludeSemantics: true, child: Material(
           color: sel == e.key ? AppColors.brand : Colors.transparent,
           shape: sel == e.key ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(9), side: const BorderSide(color: Color(0x1A171C19))),
@@ -140,7 +152,7 @@ class _Chips extends SliverPersistentHeaderDelegate {
             child: Container(height: 34, padding: const EdgeInsets.symmetric(horizontal: 14), alignment: Alignment.center,
               child: Text(e.value, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: sel == e.key ? AppColors.brandInk : AppColors.textMuted)))),
         ))),
-      ]));
+      ]);
   @override
   bool shouldRebuild(_Chips o) => o.sel != sel;
 }
@@ -164,7 +176,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ach = filter == FeedFilter.achievements;
-    return Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 120), child: Align(alignment: Alignment.topCenter, child: EmptyStateCard(
+    return Padding(padding: EdgeInsets.fromLTRB(20, 8, 20, AppInsets.tabBarClearance(context)), child: Align(alignment: Alignment.topCenter, child: EmptyStateCard(
       icon: ach ? Icons.emoji_events_outlined : Icons.groups_2_outlined,
       title: ach ? 'Tus amigos todavía no han desbloqueado ningún logro.' : 'Tu comunidad de pádel acaba de empezar.',
       text: ach ? 'Cuando alguien consiga un logro aparecerá aquí.' : 'Añade amigos para ver sus partidos, logros y rachas.',
@@ -178,6 +190,6 @@ class _ErrorView extends StatelessWidget {
   final Object error;
   final VoidCallback onRetry;
   @override
-  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 120), child: Align(alignment: Alignment.topCenter,
+  Widget build(BuildContext context) => Padding(padding: EdgeInsets.fromLTRB(20, 8, 20, AppInsets.tabBarClearance(context)), child: Align(alignment: Alignment.topCenter,
       child: ErrorStateCard(error: error, title: 'No se pudo cargar el feed', onRetry: onRetry)));
 }

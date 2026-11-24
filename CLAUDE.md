@@ -379,3 +379,8 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   de get_my_profile, `HomeSnapshot` (cabecera al instante), `NetImage`/`AvatarThumbs` (_t96/_t256), banners WebP,
   caché `plobby-engine-<motor>` en sw.js, presencia con dispose. NO precargar main.dart.wasm desde HTML (doble descarga).
 - Medición: `tool/perf/*.js` (Playwright, 4G lento + CPU 4×) y `test/home_requests_test.dart` (peticiones del Inicio).
+- F2 (rama `fixes`, informe `docs/rendimiento/fase2.md`): `AppMaterials` (barra translúcida), `AppInsets.tabBarClearance`
+  (margen inferior de pestañas), `WideLayout`/`WideFrame` (≥840 px: columna 736 = barra lateral 96 + contenido 640),
+  nivel único `StatsCalculator.levelLabel` («Nivel con el que empezaste» secundario), `leagueCoverSvg(aspect:)`,
+  `match_defaults.dart` (hora por defecto, hora habitual, sugeridos), `shortName`, semántica web por defecto, tema de tooltips.
+  NO poner LayoutBuilder dentro de IntrinsicHeight (Inicio). `find.byTooltip` necesita la semántica del tooltip.

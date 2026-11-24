@@ -82,7 +82,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final me = PlayerRef(p.id, p.fullName, p.avatarUrl);
     final recent = v.confirmed.take(3).toList();
     return CustomScrollView(slivers: [
-      SliverToBoxAdapter(child: ProfileHeader(profile: p, isOwner: own)),
+      SliverToBoxAdapter(child: ProfileHeader(profile: p, isOwner: own, level: p.limited ? null : v.calc.levelLabel(v.data.currentElo))),
       SliverPersistentHeader(pinned: true, delegate: _TabsDelegate(_names, _tab, _goTo)),
       SliverToBoxAdapter(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const SizedBox(height: 16),
@@ -111,7 +111,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         // Versión instalada: así se sabe si un móvil sigue con un APK antiguo.
         if (own) const Padding(padding: EdgeInsets.only(top: 14), child: Center(child: Text('Plobby · versión $plobbyBuild',
             style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5, letterSpacing: 0, color: AppColors.textMuted)))),
-        const SizedBox(height: 120),
+        // Perfil propio = pestaña con barra inferior; perfil de otro jugador = pantalla completa (sin barra).
+        SizedBox(height: own ? AppInsets.tabBarClearance(context) : 40 + MediaQuery.paddingOf(context).bottom),
       ])),
     ]);
   }

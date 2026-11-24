@@ -111,7 +111,7 @@ class TournamentsTab extends ConsumerWidget {
     return RefreshIndicator(
       color: AppColors.text,
       onRefresh: () async { ref.invalidate(myTournamentsProvider); await ref.read(myTournamentsProvider.future).catchError((_) => <TournamentSummary>[]); },
-      child: ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 130), children: [
+      child: ListView(padding: EdgeInsets.fromLTRB(20, 18, 20, AppInsets.tabBarClearance(context)), children: [
         Row(children: [
           const Expanded(child: Text('Organiza cuadros y fases de grupos.', style: PlobbyText.sub)),
           PlobbyButton(label: 'Crear torneo', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/tournaments/new')),

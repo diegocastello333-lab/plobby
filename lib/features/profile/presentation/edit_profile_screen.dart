@@ -197,7 +197,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     LabeledField(label: 'Ubicación', controller: _city, maxLength: 60),
                     ValueListenableBuilder(valueListenable: _bio, builder: (_, v, __) => LabeledField(label: 'Bio', controller: _bio, maxLength: 160, maxLines: 4,
                         error: _errors['bio'], helper: '${v.text.length}/160')),
-                    const Text('Nivel declarado', style: PlobbyText.label),
+                    const Text('Nivel con el que empezaste', style: PlobbyText.label),
+                    const SizedBox(height: 4),
+                    Text('Tu nivel en Plobby lo calcula tu ELO; este solo sirve de punto de partida.', style: PlobbyText.help),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<SelfLevel>(
                       value: _level, isExpanded: true, style: PlobbyText.input, decoration: plobbyInputDecoration(),

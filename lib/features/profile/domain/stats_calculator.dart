@@ -91,6 +91,10 @@ class StatsCalculator {
   /// Nivel calculado a partir del ELO (1.0 – 7.0). Distinto del nivel declarado.
   double estimatedLevel(int elo) => ((elo - 900) / 140).clamp(1.0, 7.0).toDouble();
 
+  /// EL nivel de un jugador en toda la app: el que sale de su ELO, «2,3 · Intermedio». El nivel que eligió al
+  /// registrarse es solo un dato secundario («Nivel con el que empezaste»).
+  String levelLabel(int elo) => '${estimatedLevel(elo).toStringAsFixed(1).replaceAll('.', ',')} · ${category(elo)}';
+
   String category(int elo) =>
       elo < 1200 ? 'Principiante' : elo < 1400 ? 'Intermedio' : elo < 1600 ? 'Avanzado' : 'Experto';
 

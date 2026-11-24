@@ -23,8 +23,11 @@ import '../../../../core/widgets/net_image.dart';
 /// nombre Inter 24/800; usuario y ubicación marfil .72; bio 14/1.5; chips 26 px radio 7; dos botones 44 px radio 11
 /// en proporción 1 : 1.25. Mismas acciones que antes (compartir perfil, editar, añadir amigo, compartir stats).
 class ProfileHeader extends ConsumerWidget {
-  const ProfileHeader({super.key, required this.profile, required this.isOwner});
+  const ProfileHeader({super.key, required this.profile, required this.isOwner, this.level});
   final PlayerProfile profile; final bool isOwner;
+  /// Nivel según el ELO («2,3 · Intermedio»). Null si no se conoce (perfil limitado de alguien que no es amigo): entonces
+  /// se muestra el nivel con el que empezó, rotulado como tal.
+  final String? level;
 
   static const _soft = Color(0xB8F6F8F1);   // rgba(246,248,241,.72)
 
@@ -87,7 +90,7 @@ class ProfileHeader extends ConsumerWidget {
             style: const TextStyle(fontFamily: AppTypography.sansFamily, color: Color(0xEBF6F8F1), fontSize: 14, height: 1.5, letterSpacing: 0))),
         const SizedBox(height: 12),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          _Chip('Nivel declarado', p.declaredLevel), _Chip('Posición', p.limited ? '—' : (p.side == PlaySide.right ? 'Derecha' : 'Izquierda')), _Chip('Mano', p.limited ? '—' : p.dominantHand),
+          level != null ? _Chip('Nivel', level!) : _Chip('Nivel inicial', p.declaredLevel), _Chip('Posición', p.limited ? '—' : (p.side == PlaySide.right ? 'Derecha' : 'Izquierda')), _Chip('Mano', p.limited ? '—' : p.dominantHand),
         ]),
         const SizedBox(height: 18),
         // Con texto grande (≥130 %) los dos botones se apilan a lo ancho en vez de recortar su etiqueta

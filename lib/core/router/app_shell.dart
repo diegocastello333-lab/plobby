@@ -58,17 +58,29 @@ class AppShell extends ConsumerWidget {
         ))),
       )));
     }
-    return Scaffold(
-      body: AmbientBackground(
+    final body = AmbientBackground(
         palettes: _palettes, position: _palettePos[shell.currentIndex],
         offset: shell.currentIndex == 2 ? CompetitionsScreen.page : null,
         child: AchievementCelebration(child: _BranchFade(index: shell.currentIndex, child: shell)),
-      ),
+      );
+    // Escritorio/tablet: barra lateral (logo, «+» y las cuatro pestañas) en vez de la barra inferior.
+    if (WideLayout.isWide(context)) {
+      return Scaffold(body: Row(children: [
+        _SideRail(tabs: _tabs, current: shell.currentIndex, onTap: (i) { AppHaptics.light(); _go(i); }),
+        // Las pestañas se maquetan para el ancho real de su columna (640 px), no el del marco con la barra lateral.
+        Expanded(child: Builder(builder: (c) {
+          final mq = MediaQuery.of(c);
+          return MediaQuery(data: mq.copyWith(size: Size(mq.size.width - WideLayout.railWidth, mq.size.height)), child: body);
+        })),
+      ]));
+    }
+    return Scaffold(
+      body: body,
       extendBody: true,
       // Como en iOS, las etiquetas de la barra de pestañas no crecen con el tamaño de texto del sistema (cada pestaña ya
       // tiene su etiqueta para VoiceOver/TalkBack); el resto de la app sí escala.
       bottomNavigationBar: MediaQuery.withNoTextScaling(child: Container(
-        height: 66 + (bottom > 26 ? bottom : 26),
+        height: AppInsets.tabBarHeight(context),
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
         decoration: const BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: Color(0x14171C19)))),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -132,4 +144,36 @@ class _BranchFadeState extends State<_BranchFade> with SingleTickerProviderState
         final t = _a.value;
         return Opacity(opacity: .15 + .85 * t, child: Transform.translate(offset: Offset(0, (1 - t) * 6), child: child));
       });
+}
+
+/// Barra lateral para pantallas anchas: logotipo, botón «+» (nuevo partido) y las pestañas con icono y etiqueta.
+class _SideRail extends StatelessWidget {
+  const _SideRail({required this.tabs, required this.current, required this.onTap});
+  final List<(PlobbyIcons, String)> tabs;
+  final int current;
+  final ValueChanged<int> onTap;
+  @override
+  Widget build(BuildContext context) => Container(
+        width: WideLayout.railWidth,
+        decoration: const BoxDecoration(color: AppColors.surface, border: Border(right: BorderSide(color: AppColors.border))),
+        child: SafeArea(right: false, child: Column(children: [
+          const SizedBox(height: 20),
+          Semantics(label: 'Plobby', image: true, child: const Text('plobby', style: TextStyle(fontFamily: AppTypography.displayFamily,
+              fontWeight: FontWeight.w700, fontSize: 18, height: 1, letterSpacing: -0.54, color: AppColors.text))),
+          const SizedBox(height: 24),
+          Transform.scale(scale: .8, child: const _PlusButton()),
+          const SizedBox(height: 20),
+          for (var i = 0; i < tabs.length; i++) Semantics(button: true, selected: i == current, label: tabs[i].$2, excludeSemantics: true, child: InkWell(
+            onTap: () => onTap(i),
+            child: SizedBox(height: 72, width: double.infinity, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              AnimatedContainer(duration: AppAnimations.scaled(context, AppAnimations.tab), curve: AppAnimations.standard,
+                  width: 56, height: 32, decoration: BoxDecoration(color: i == current ? AppColors.brandSoft : const Color(0x00000000), borderRadius: AppRadius.rPill),
+                  child: Center(child: PlobbyIcon(tabs[i].$1, size: 22, color: i == current ? AppColors.text : AppColors.textMuted))),
+              const SizedBox(height: 4),
+              Text(tabs[i].$2, maxLines: 1, overflow: TextOverflow.fade, softWrap: false, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11.5,
+                  height: 1.2, letterSpacing: 0, fontWeight: i == current ? FontWeight.w700 : FontWeight.w500, color: i == current ? AppColors.text : AppColors.textMuted)),
+            ])),
+          )),
+        ])),
+      );
 }

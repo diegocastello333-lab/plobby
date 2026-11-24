@@ -24,6 +24,7 @@ import '../../profile/application/profile_providers.dart';
 import '../../profile/domain/models.dart';
 import '../../social/application/social_providers.dart';
 import 'home_wiring.dart';
+import '../../../core/format/names.dart';
 import '../application/home_snapshot.dart';
 import '../../../core/widgets/net_image.dart';
 
@@ -71,18 +72,18 @@ class HomeScreen extends ConsumerWidget {
           _Banner(counters: c, profile: view.valueOrNull?.data.profile, snapshot: ref.watch(homeSnapshotProvider)),
           // margin-top: −34px del HTML: TODO el bloque sube 34 px (las tarjetas solapan el banner y las secciones las
           // siguen sin hueco). Padding lateral 20 y 150 abajo (espacio para la barra inferior).
-          Transform.translate(offset: const Offset(0, -34), child: Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 150), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Transform.translate(offset: const Offset(0, -34), child: Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, AppInsets.tabBarClearance(context) + 34), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _Counters(counters: c),
             const SizedBox(height: 30),
             const _SecHead('Próximos partidos'),
             const SizedBox(height: 12),
             const UpcomingMatchesSection(max: 3, showTitle: false),
             const SizedBox(height: 30 - 12),
-            _SecHead('Últimas partidas de amigos', action: 'Ver todas', onAction: () => HomeNav.seeAllFriendMatches(context)),
+            _SecHead('De tus amigos', action: 'Ver todas', onAction: () => HomeNav.seeAllFriendMatches(context)),
             const SizedBox(height: 12),
             const _FriendMatches(),
             const SizedBox(height: 30),
-            _SecHead('Últimos partidos jugados', action: 'Ver todos', onAction: () => HomeNav.seeAllMyMatches(context)),
+            _SecHead('Tus partidos', action: 'Ver todos', onAction: () => HomeNav.seeAllMyMatches(context)),
             const SizedBox(height: 14),
             view.when(
               loading: () => const Column(children: [LoadingBlock(height: 82, radius: 20), SizedBox(height: 10), LoadingBlock(height: 82, radius: 20)]),
@@ -244,24 +245,31 @@ class _Counters extends ConsumerWidget {
     final friends = (ref.watch(friendsProvider).valueOrNull ?? const []).take(3).toList();
     final delta = c.delta30 ?? 0;
     return IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Expanded(flex: 135, child: _LiftedCard(
+      // Las tres tarjetas con el mismo ancho (antes 135 : 100 : 68 px y la racha quedaba apretada).
+      Expanded(child: _LiftedCard(
         label: 'Amigos: ${c.friends}. Ver todos', onTap: () => HomeNav.friends(context),
-        child: Row(children: [
-          if (friends.isNotEmpty) ...[
-            SizedBox(width: 26 + 17.0 * (friends.length - 1), height: 26, child: Stack(children: [
-              for (var i = friends.length - 1; i >= 0; i--)
+        child: Builder(builder: (context) {
+          // Solo las caras que caben junto a la cifra (en móviles estrechos, 1 o ninguna). Ancho de la tarjeta = (pantalla −
+          // márgenes 40 − huecos 20) / 3 − relleno 28. (Sin LayoutBuilder: está dentro de un IntrinsicHeight.)
+          final inner = (MediaQuery.sizeOf(context).width - 60) / 3 - 28;
+          final shown = friends.take(((inner - 66) / 17).floor().clamp(0, 3)).toList();
+          return Row(children: [
+          if (shown.isNotEmpty) ...[
+            SizedBox(width: 26 + 17.0 * (shown.length - 1), height: 26, child: Stack(children: [
+              for (var i = shown.length - 1; i >= 0; i--)
                 Positioned(left: 17.0 * i, child: Container(width: 26, height: 26, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
-                    child: ClipOval(child: friends[i].player.avatarUrl != null
-                        ? NetImage(friends[i].player.avatarUrl!, fit: BoxFit.cover, cacheWidth: 66, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: friends[i].player.id, size: 22))
-                        : SilhouetteAvatar(seed: friends[i].player.id, size: 22)))),
+                    child: ClipOval(child: shown[i].player.avatarUrl != null
+                        ? NetImage(shown[i].player.avatarUrl!, fit: BoxFit.cover, cacheWidth: 66, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: shown[i].player.id, size: 22))
+                        : SilhouetteAvatar(seed: shown[i].player.id, size: 22)))),
             ])),
             const SizedBox(width: 10),
           ],
           Flexible(child: _StatText(value: '${c.friends}', label: 'Amigos', number: c.friends, memoryKey: 'home:friends')),
-        ]),
+        ]);
+        }),
       )),
       const SizedBox(width: 10),
-      Expanded(flex: 100, child: _LiftedCard(
+      Expanded(child: _LiftedCard(
         label: c.elo == null ? 'ELO' : 'ELO ${c.elo}${delta == 0 ? '' : ', ${delta > 0 ? '+' : '−'}${delta.abs()} puntos en 30 días'}. Ver detalle',
         onTap: () => HomeNav.elo(context),
         child: _StatText(value: c.elo == null ? '—' : '${c.elo}', number: c.elo, memoryKey: 'home:elo', label: 'ELO', trailing: delta == 0 ? null : Row(mainAxisSize: MainAxisSize.min, children: [
@@ -273,7 +281,7 @@ class _Counters extends ConsumerWidget {
         ])),
       )),
       const SizedBox(width: 10),
-      SizedBox(width: 68, child: _LiftedCard(
+      Expanded(child: _LiftedCard(
         label: 'Racha actual: ${c.streak} ${c.streak == 1 ? 'partido ganado' : 'partidos ganados'} seguidos', onTap: () => HomeNav.streak(context, c),
         padding: const EdgeInsets.all(6),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -393,7 +401,7 @@ class _FriendMatchPanel extends StatelessWidget {
     final day = DateTime(d.year, d.month, d.day), today = DateTime(now.year, now.month, now.day);
     final diff = today.difference(day).inDays;
     final when = diff == 0 ? 'Hoy' : diff == 1 ? 'Ayer' : '${d.day} ${_months[d.month - 1]}';
-    String names(List<FeedUser> t) => t.map((u) => u.name).join(' · ');
+    String names(List<FeedUser> t) => t.map((u) => shortName(u.name)).join(' · ');   // «Ana R. · Bea S.»: cabe sin cortarse
     Widget row(List<FeedUser> team, bool won, bool teamA) => Row(children: [
           Expanded(child: Text(names(team), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, height: 1.3, letterSpacing: 0,
               fontWeight: won ? FontWeight.w700 : FontWeight.w400, color: won ? AppColors.text : AppColors.textMuted))),
@@ -450,7 +458,7 @@ class _PlayedCard extends StatelessWidget {
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(playedEyebrow(m.playedAt, now), style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppColors.textMuted)),
                   const SizedBox(height: 3),
-                  Text('Con ${m.partner.name}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, height: 1.25, fontWeight: FontWeight.w700, letterSpacing: 0, color: fg)),
+                  Text('Con ${shortName(m.partner.name)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, height: 1.25, fontWeight: FontWeight.w700, letterSpacing: 0, color: fg)),
                   const SizedBox(height: 2),
                   Text([if (m.venue.isNotEmpty) m.venue, _hhmm(m.playedAt)].join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, height: 1.3, letterSpacing: 0, color: AppColors.textMuted)),

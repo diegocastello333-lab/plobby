@@ -32,6 +32,16 @@
 ² No hay móvil ni emulador con aceleración en este entorno. Cómo medirlo: `adb shell am start -W -n io.plobby.plobby/.MainActivity`
 (campo `TotalTime`, 3 veces en frío tras `adb shell am force-stop io.plobby.plobby`).
 
+### Medido en producción tras publicar (24 nov 2026, mismas condiciones)
+| | Antes (producción) | Después (producción) |
+|---|---|---|
+| 1.ª visita, contenido útil | 24,7 s | **20,8 s** (−16 %) |
+| 2.ª visita sin sesión | 4,6 s | **2,8 s** (−39 %) |
+
+La mejora en producción es menor que en local porque Vercel comprime los `.wasm` con menos nivel de Brotli que el
+servidor de pruebas (1,61 + 1,57 MB frente a 1,40 + 1,35 MB) y la descarga domina en 4G lento. Vercel no permite subir
+ficheros precomprimidos para servirlos tal cual.
+
 ### Objetivos que NO se cumplen (y por qué)
 - **Primera visita < 3 s en 4G lento**: imposible para cualquier app Flutter web en esa red. Solo el motor gráfico (skwasm)
   pesa 1,35 MB comprimido; a 1,6 Mbps, transferir los 2,9 MB mínimos lleva ~15 s antes de ejecutar nada. Se ha reducido a

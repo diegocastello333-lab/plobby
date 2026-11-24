@@ -26,7 +26,7 @@ void main() {
   testWidgets('se dibuja sin errores con todas las secciones', (t) async {
     await pumpHome(t);
     expect(t.takeException(), isNull);
-    for (final s in ['Próximos partidos', 'Últimas partidas de amigos', 'Últimos partidos jugados', 'Logros', 'Racha de victorias', 'Amigos', 'ELO']) {
+    for (final s in ['Próximos partidos', 'De tus amigos', 'Tus partidos', 'Logros', 'Racha de victorias', 'Amigos', 'ELO']) {
       expect(find.text(s, skipOffstage: false), findsWidgets, reason: s);
     }
   });

@@ -13,18 +13,25 @@ import '../../../core/widgets/net_image.dart';
 /// SVG de portada (`cover(kind)` del prototipo HTML, viewBox 390×120, recorte «slice»). Los ids que guarda la base de
 /// datos ([leagueCovers]) se asignan a los diseños del HTML: waves → arcs, diagonal → diag. Los patrones SVG
 /// (`<pattern>`) se expanden a elementos porque flutter_svg no los admite.
-String leagueCoverSvg(String id) {
+/// Portada de liga como SVG con la proporción REAL del hueco ([aspect] = ancho/alto). El arte se diseñó para 390×120; antes se
+/// recortaba con `cover` y, en tarjetas más bajas (≈335×88), la pista dibujada perdía sus bordes. Ahora el lienzo mide
+/// 390×(390/aspect): los dibujos centrados se desplazan al centro y la pista y la red se dibujan relativas al alto.
+String leagueCoverSvg(String id, {double aspect = 390 / 120}) {
   const lime = '#D2F548', ink = '#171C19';
+  final h = 390 / aspect, dy = (h - 120) / 2;
+  String f(double v) => v.toStringAsFixed(1);
+  String centered(String body) => '<g transform="translate(0 ${f(dy)})">$body</g>';
   final (bg, body) = switch (id) {
-    'waves' => (lime, '<g fill="none" stroke="$ink" stroke-opacity=".7" stroke-width="1.6"><circle cx="330" cy="120" r="50"/><circle cx="330" cy="120" r="82"/><circle cx="330" cy="120" r="114"/><circle cx="330" cy="120" r="146"/></g>'),
-    'diagonal' => (ink, '<g transform="rotate(35)" stroke="#F6F8F1" stroke-opacity=".16" stroke-width="2">${[for (var x = -560; x <= 700; x += 14) '<path d="M$x -600v1400"/>'].join()}</g><circle cx="70" cy="60" r="26" fill="none" stroke="$lime" stroke-width="2"/>'),
-    'grid' => ('#8A938D', '<g stroke="$ink" stroke-opacity=".35" stroke-width="1"><path d="M0 30h390M0 60h390M0 90h390M65 0v120M130 0v120M195 0v120M260 0v120M325 0v120"/></g><rect x="195" y="30" width="65" height="60" fill="$ink" fill-opacity=".85"/>'),
-    'dots' => (ink, '${[for (var y = 3; y < 120; y += 16) for (var x = 3; x < 390; x += 16) '<circle cx="$x" cy="$y" r="1.6" fill="#8A938D" fill-opacity=".55"/>'].join()}<circle cx="300" cy="60" r="30" fill="$lime"/>'),
-    'court' => ('#D5DAD6', '<g fill="none" stroke="$ink" stroke-opacity=".5" stroke-width="1.4"><rect x="60" y="14" width="270" height="92"/><path d="M195 14v92M60 60h270"/></g><rect x="60" y="14" width="135" height="92" fill="$ink" fill-opacity=".1"/>'),
-    'rings' => (ink, '<g fill="none" stroke="#F6F8F1" stroke-opacity=".28" stroke-width="1.4"><circle cx="90" cy="60" r="20"/><circle cx="90" cy="60" r="40"/><circle cx="90" cy="60" r="60"/><circle cx="90" cy="60" r="80"/></g><circle cx="90" cy="60" r="7" fill="$lime"/>'),
-    _ => (ink, '<g fill="none" stroke="$lime" stroke-opacity=".55" stroke-width="1.4"><rect x="40" y="18" width="310" height="84"/><path d="M195 18v84M40 60h310M105 18v84M285 18v84"/></g><circle cx="318" cy="38" r="7" fill="$lime"/>'),
+    'waves' => (lime, centered('<g fill="none" stroke="$ink" stroke-opacity=".7" stroke-width="1.6"><circle cx="330" cy="120" r="50"/><circle cx="330" cy="120" r="82"/><circle cx="330" cy="120" r="114"/><circle cx="330" cy="120" r="146"/></g>')),
+    'diagonal' => (ink, '<g transform="rotate(35)" stroke="#F6F8F1" stroke-opacity=".16" stroke-width="2">${[for (var x = -560; x <= 700; x += 14) '<path d="M$x -600v1400"/>'].join()}</g>${centered('<circle cx="70" cy="60" r="26" fill="none" stroke="$lime" stroke-width="2"/>')}'),
+    'grid' => ('#8A938D', '<g stroke="$ink" stroke-opacity=".35" stroke-width="1"><path d="M0 ${f(h * .25)}h390M0 ${f(h * .5)}h390M0 ${f(h * .75)}h390M65 0v${f(h)}M130 0v${f(h)}M195 0v${f(h)}M260 0v${f(h)}M325 0v${f(h)}"/></g><rect x="195" y="${f(h * .25)}" width="65" height="${f(h * .5)}" fill="$ink" fill-opacity=".85"/>'),
+    'dots' => (ink, '${[for (var y = 3; y < h; y += 16) for (var x = 3; x < 390; x += 16) '<circle cx="$x" cy="$y" r="1.6" fill="#8A938D" fill-opacity=".55"/>'].join()}<circle cx="300" cy="${f(h / 2)}" r="${f(h * .25 < 30 ? h * .25 : 30)}" fill="$lime"/>'),
+    // Pista: márgenes del 12 % arriba y abajo, red en el centro exacto (antes 14/106 sobre 120, recortado en tarjetas bajas).
+    'court' => ('#D5DAD6', '<g fill="none" stroke="$ink" stroke-opacity=".5" stroke-width="1.4"><rect x="60" y="${f(h * .12)}" width="270" height="${f(h * .76)}"/><path d="M195 ${f(h * .12)}v${f(h * .76)}M60 ${f(h / 2)}h270"/></g><rect x="60" y="${f(h * .12)}" width="135" height="${f(h * .76)}" fill="$ink" fill-opacity=".1"/>'),
+    'rings' => (ink, centered('<g fill="none" stroke="#F6F8F1" stroke-opacity=".28" stroke-width="1.4"><circle cx="90" cy="60" r="20"/><circle cx="90" cy="60" r="40"/><circle cx="90" cy="60" r="60"/><circle cx="90" cy="60" r="80"/></g><circle cx="90" cy="60" r="7" fill="$lime"/>')),
+    _ => (ink, '<g fill="none" stroke="$lime" stroke-opacity=".55" stroke-width="1.4"><rect x="40" y="${f(h * .15)}" width="310" height="${f(h * .7)}"/><path d="M195 ${f(h * .15)}v${f(h * .7)}M40 ${f(h / 2)}h310M105 ${f(h * .15)}v${f(h * .7)}M285 ${f(h * .15)}v${f(h * .7)}"/></g><circle cx="318" cy="${f(h * .32)}" r="7" fill="$lime"/>'),
   };
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 120"><rect width="390" height="120" fill="$bg"/>$body</svg>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 ${f(h)}"><rect width="390" height="${f(h)}" fill="$bg"/>$body</svg>';
 }
 
 /// Portada de liga (`.cov`): SVG del prototipo a todo el ancho, recortado como `preserveAspectRatio="xMidYMid slice"`.
@@ -36,7 +43,8 @@ class LeagueCover extends StatelessWidget {
   Widget build(BuildContext context) => ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(height: height, width: double.infinity, child: Stack(fit: StackFit.expand, children: [
-        ExcludeSemantics(child: SvgPicture.string(leagueCoverSvg(cover), fit: BoxFit.cover)),
+        ExcludeSemantics(child: LayoutBuilder(builder: (_, k) => SvgPicture.string(
+            leagueCoverSvg(cover, aspect: k.maxWidth.isFinite && k.maxHeight > 0 ? k.maxWidth / k.maxHeight : 390 / 120), fit: BoxFit.cover))),
         if (shade) const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Color(0x80171C19), Color(0x00171C19), Color(0xD1171C19)], stops: [0, .38, 1]))),
       ])));

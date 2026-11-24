@@ -121,7 +121,7 @@ class _Step2 extends ConsumerWidget {
     Widget sec(String t, Widget w) => Padding(padding: const EdgeInsets.only(bottom: 20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(t, style: PlobbyText.label), const SizedBox(height: 8), w]));
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _title('Tu forma de jugar', 'Este nivel es el que tú declaras. Tu ELO se calcula solo con partidos confirmados, nunca se asigna a mano.'),
-      sec('Nivel declarado', chips(SelfLevel.values, d.selfLevel, (v) => v.label, (v) => c.update(d.copyWith(selfLevel: v)))),
+      sec('¿Con qué nivel empiezas?', chips(SelfLevel.values, d.selfLevel, (v) => v.label, (v) => c.update(d.copyWith(selfLevel: v)))),
       sec('Posición en pista', chips(CourtSide.values, d.side, (v) => v == CourtSide.right ? 'Derecha' : 'Revés', (v) => c.update(d.copyWith(side: v)))),
       sec('Mano dominante', chips(Hand.values, d.hand, (v) => v == Hand.right ? 'Derecha' : 'Izquierda', (v) => c.update(d.copyWith(hand: v)))),
       if (st.errors['level'] != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(st.errors['level']!, style: PlobbyText.help.copyWith(color: AppColors.danger, fontWeight: FontWeight.w600, fontSize: 12))),

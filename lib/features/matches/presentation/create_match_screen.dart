@@ -11,6 +11,7 @@ import '../application/match_providers.dart';
 import '../../social/application/social_providers.dart' show friendsProvider;
 import '../../social/presentation/friends_screen.dart' show FriendPick, pickFriends;
 import '../domain/match_models.dart';
+import '../domain/match_defaults.dart';
 import '../../../core/errors/failure.dart';
 import '../../clubs/presentation/club_search_sheet.dart' show pickClub, clubRemoved;
 import '../../profile/application/profile_providers.dart' show profileProvider;
@@ -37,7 +38,9 @@ class _S extends ConsumerState<CreateMatchScreen> {
   final _names = <String, String>{};
   /// Club escrito a mano (opción «Escribir el nombre»).
   final _clubText = TextEditingController();
-  late DateTime _when = DateTime.now().add(const Duration(hours: 2));  // timing
+  late DateTime _when = defaultMatchTime(DateTime.now());
+  /// La hora la ha elegido la persona: ya no se ajusta sola a su hora habitual.
+  bool _whenTouched = false;
   final _sets = List.generate(3, (_) => [TextEditingController(), TextEditingController()]);
   String? _error;
   bool _busy = false;
@@ -89,7 +92,15 @@ class _S extends ConsumerState<CreateMatchScreen> {
     // Misma fuente que el selector: amigos (amistoso) o miembros de la liga.
     final pool = _friendly ? ref.watch(friendsProvider).whenData((l) => [for (final f in l) PlayerOption(f.player.id, f.player.name)])
         : (_league == null ? const AsyncData<List<PlayerOption>>([]) : ref.watch(leagueMembersProvider(_league!)));
-    final habitual = ref.watch(profileProvider('me')).valueOrNull?.profile.club?.name;
+    final me = ref.watch(profileProvider('me')).valueOrNull;
+    final habitual = me?.profile.club?.name;
+    // Hora habitual: en cuanto se conoce el historial, la hora por defecto pasa a la que sueles jugar (si no la has tocado).
+    final usual = me == null ? null : usualPlayHour(me.matches);
+    if (!_whenTouched && usual != null && _when.hour != usual) _when = defaultMatchTime(DateTime.now(), usualHour: usual);
+    final poolList = pool.valueOrNull ?? const <PlayerOption>[];
+    final names = {for (final o in poolList) o.id: o.name};
+    final suggested = me == null ? const <String>[] : suggestedPlayers(habitualPartnerId: me.profile.partner?.userId, matches: me.matches,
+        allowed: names.keys.toSet(), meId: me.profile.id);
     final shownClub = _clubTouched ? _club : habitual;
     final hasSets = _scores.isNotEmpty;
     String p2(int n) => n.toString().padLeft(2, '0');
@@ -117,11 +128,12 @@ class _S extends ConsumerState<CreateMatchScreen> {
                   onChanged: (v) => setState(() { _league = v; _partner = _r1 = _r2 = null; }),   // otra liga → otros miembros
                 )),
         ),
-        // «Añadir jugadores»: abre Amigos (o los miembros de la liga) en modo selección; hasta 3, en orden:
-        // compañero, rival 1, rival 2. Cada hueco se puede cambiar o vaciar después.
-        PlobbyButton(label: _slots.every((x) => x == null) ? 'Añadir jugadores' : 'Cambiar jugadores', icon: PlobbyIcons.userplus, kind: PlobbyButtonKind.outline,
-            onPressed: _friendly || _league != null ? _pickAll : null),
-        const SizedBox(height: 12),
+        // Un único flujo: cada hueco abre el selector. Encima, los sugeridos (pareja habitual y con quién juegas más):
+        // un toque los coloca en el primer hueco libre (la pareja, de compañero).
+        if (_friendly || _league != null) _Suggestions(
+          options: [for (final id in suggested) if (!_slots.contains(id)) PlayerOption(id, names[id] ?? '')],
+          onPick: _placeSuggested,
+        ),
         _Team('Pareja 1', [
           Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [
             Container(width: 30, height: 30, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.inverse),
@@ -152,12 +164,12 @@ class _S extends ConsumerState<CreateMatchScreen> {
         Row(children: [
           Expanded(child: _Field(label: 'Fecha', child: _PickerBox(value: '${p2(_when.day)}/${p2(_when.month)}/${_when.year}', icon: PlobbyIcons.cal, label: 'Fecha', onTap: () async {
             final d = await showDatePicker(context: context, initialDate: _when, firstDate: DateTime(2020), lastDate: DateTime.now().add(const Duration(days: 365)));
-            if (d != null) setState(() => _when = DateTime(d.year, d.month, d.day, _when.hour, _when.minute));
+            if (d != null) setState(() { _whenTouched = true; _when = DateTime(d.year, d.month, d.day, _when.hour, _when.minute); });
           }))),
           const SizedBox(width: 10),
           Expanded(child: _Field(label: 'Hora', child: _PickerBox(value: '${p2(_when.hour)}:${p2(_when.minute)}', icon: PlobbyIcons.clock, label: 'Hora', onTap: () async {
             final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(_when));
-            if (t != null) setState(() => _when = DateTime(_when.year, _when.month, _when.day, t.hour, t.minute));
+            if (t != null) setState(() { _whenTouched = true; _when = DateTime(_when.year, _when.month, _when.day, t.hour, t.minute); });
           }))),
         ]),
         // Club: buscador del catálogo (reconoce nombres aproximados y alias); por defecto el club habitual. Si el club no
@@ -215,14 +227,11 @@ class _S extends ConsumerState<CreateMatchScreen> {
   }
   PlayerOption? _opt(String? id) => id == null ? null : PlayerOption(id, _names[id] ?? '');
 
-  /// Selección múltiple (hasta 3) desde Amigos; el orden marcado reparte los huecos.
-  Future<void> _pickAll() async {
-    final r = await pickFriends(context, FriendPick(
-      title: _friendly ? 'Elige jugadores' : 'Jugadores de la liga', max: 3, confirmLabel: 'Añadir al partido', leagueId: _friendly ? null : _league,
-      selected: [for (final id in _slots) if (id != null) _opt(id)!],
-    ));
-    if (r == null || !mounted) return;
-    setState(() { for (var i = 0; i < 3; i++) { _setSlot(i, i < r.length ? r[i] : null); } _error = null; });
+  /// Sugerido tocado → primer hueco libre (compañero, rival 1, rival 2).
+  void _placeSuggested(PlayerOption p) {
+    final i = _slots.indexOf(null);
+    if (i < 0) return;
+    setState(() { _setSlot(i, p); _error = null; });
   }
 
   /// Elegir un solo jugador para un hueco; los que ya están en otros huecos no se pueden repetir.
@@ -345,4 +354,29 @@ class _ClubModeLink extends StatelessWidget {
           child: Text(label, style: PlobbyText.help.copyWith(fontWeight: FontWeight.w700, decoration: TextDecoration.underline)),
         )),
       );
+}
+
+/// Fila «Sugeridos»: pareja habitual y jugadores con los que más juegas. Desaparece cuando no hay nada que sugerir.
+class _Suggestions extends StatelessWidget {
+  const _Suggestions({required this.options, required this.onPick});
+  final List<PlayerOption> options;
+  final ValueChanged<PlayerOption> onPick;
+  @override
+  Widget build(BuildContext context) {
+    if (options.isEmpty) return const SizedBox(height: 4);
+    return Padding(padding: const EdgeInsets.only(bottom: 12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Sugeridos', style: PlobbyText.label),
+      const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        for (final o in options) Semantics(button: true, label: 'Añadir a ${o.name}', excludeSemantics: true, child: Material(
+          color: AppColors.surface, shape: const StadiumBorder(side: BorderSide(color: AppColors.border)),
+          child: InkWell(customBorder: const StadiumBorder(), onTap: () => onPick(o), child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44),
+            child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const PlobbyIcon(PlobbyIcons.plus, size: 14, color: AppColors.text), const SizedBox(width: 6),
+              Text(o.name, style: PlobbyText.buttonSmall.copyWith(color: AppColors.text)),
+            ])))),
+        )),
+      ]),
+    ]));
+  }
 }

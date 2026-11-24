@@ -39,6 +39,44 @@ class AppColorsDark {
   static const danger = Color(0xFFFF6B6F), dangerSoft = Color(0xFF33161A);
 }
 
+/// Materiales (barras y cabeceras sobre contenido que se desplaza): fondo translúcido + desenfoque + línea fina.
+class AppMaterials {
+  AppMaterials._();
+  /// Fondo de barra fija sobre contenido (marfil al 85 %): se intuye lo de debajo, el texto sigue legible.
+  static const bar = Color(0xD9F6F8F1);
+  /// Desenfoque de las barras translúcidas (sigma).
+  static const barBlur = 20.0;
+  /// Línea divisoria de 0,5 px bajo una barra cuando hay contenido debajo.
+  static const hairline = Color(0x1F171C19);
+}
+
+/// Espacios que dependen de la pantalla (zona segura, barra de pestañas).
+class AppInsets {
+  AppInsets._();
+  /// Alto de la barra de pestañas sin la zona segura, cuánto sobresale el «+» por encima y aire extra.
+  static const tabBarBase = 66.0, tabBarMinSafe = 26.0, plusOverhang = 30.0, breathing = 20.0;
+  /// Alto total de la barra de pestañas (incluida la zona segura inferior).
+  static double tabBarHeight(BuildContext c) {
+    final b = MediaQuery.paddingOf(c).bottom;
+    return tabBarBase + (b > tabBarMinSafe ? b : tabBarMinSafe);
+  }
+  /// Margen inferior que necesita el contenido de una pestaña para que su último elemento (título, tarjeta, botón) no
+  /// quede debajo de la barra ni del «+» central.
+  static double tabBarClearance(BuildContext c) =>
+      WideLayout.isWide(c) ? breathing * 2 + MediaQuery.paddingOf(c).bottom : tabBarHeight(c) + plusOverhang + breathing;
+}
+
+/// Pantallas anchas (escritorio, tablet en horizontal): a partir de [breakpoint] px la app se muestra en una columna
+/// centrada de [frameWidth] px (barra lateral [railWidth] + contenido [contentWidth]) en vez de estirarse a todo el ancho.
+class WideLayout extends InheritedWidget {
+  const WideLayout({super.key, required this.wide, required super.child});
+  final bool wide;
+  static const breakpoint = 840.0, railWidth = 96.0, contentWidth = 640.0, frameWidth = railWidth + contentWidth;
+  static bool isWide(BuildContext c) => c.dependOnInheritedWidgetOfExactType<WideLayout>()?.wide ?? false;
+  @override
+  bool updateShouldNotify(WideLayout old) => old.wide != wide;
+}
+
 class AppSpacing {
   AppSpacing._();
   static const s1 = 4.0, s2 = 8.0, s3 = 12.0, s4 = 16.0, s6 = 24.0, s8 = 32.0;

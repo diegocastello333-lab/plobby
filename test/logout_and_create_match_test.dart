@@ -20,7 +20,7 @@ import 'package:plobby/features/social/application/social_providers.dart';
 import 'package:plobby/features/social/data/mock_social_repository.dart';
 import 'package:plobby/features/social/domain/social_models.dart';
 
-/// Amigos del selector («Añadir jugadores» abre Amigos en modo selección).
+/// Amigos del selector (cada hueco de jugador abre Amigos en modo selección).
 class _Social extends MockSocialRepository {
   _Social({this.count = 3});
   final int count;
@@ -91,16 +91,18 @@ Future<void> _openFriendlyForm(WidgetTester t) async {
 }
 
 Future<void> _pickPlayers(WidgetTester t) async {
-  // «Añadir jugadores» → Amigos en modo selección: el orden marcado es compañero, rival 1, rival 2.
-  await t.ensureVisible(find.text('Añadir jugadores'));
-  await t.tap(find.text('Añadir jugadores'));
-  await _settle(t);
+  // Un único flujo: cada hueco (compañero, rival 1, rival 2) abre Amigos en modo selección de uno.
   for (final name in ['Ana R.', 'Bea S.', 'Carla N.']) {
+    // El primer hueco vacío (compañero, luego rival 1, luego rival 2). La lista es perezosa: se desplaza hasta él.
+    final f = find.text('Elegir un amigo');
+    await t.scrollUntilVisible(f.first, 150, scrollable: find.byType(Scrollable).first);
+    await t.tap(f.first);
+    await _settle(t);
     await t.tap(find.text(name).last);
     await _settle(t, 2);
+    await t.tap(find.text('Elegir'));
+    await _settle(t);
   }
-  await t.tap(find.text('Añadir al partido (3)'));
-  await _settle(t);
 }
 
 Future<void> _tapCreate(WidgetTester t) async {

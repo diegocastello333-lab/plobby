@@ -95,6 +95,16 @@ ThemeData buildPlobbyTheme() {
     pageTransitionsTheme: AppTransitions.theme, // solo la animación; GoRouter y rutas intactos
     textTheme: _textTheme(base.textTheme),
     dividerTheme: const DividerThemeData(color: AppColors.border, space: 1, thickness: 1),
+    // Tooltips: ayuda visual secundaria (cada botón ya tiene su etiqueta para el lector de pantalla). Antes, con ratón,
+    // salían al instante al pasar por encima y tapaban contenido (p. ej. «Nuevo mensaje»). Ahora: tras 0,8 s quieto
+    // sobre el botón, debajo y pegados a él; en táctil, solo con pulsación larga.
+    tooltipTheme: TooltipThemeData(
+      waitDuration: const Duration(milliseconds: 800),   // timing
+      showDuration: const Duration(milliseconds: 1500),  // timing
+      preferBelow: true, verticalOffset: 22, triggerMode: TooltipTriggerMode.longPress,
+      textStyle: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.ink50),
+      decoration: const BoxDecoration(color: AppColors.ink900, borderRadius: AppRadius.rSm),
+    ),
     focusColor: AppColors.focus,
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.bg, foregroundColor: AppColors.text, elevation: 0, scrolledUnderElevation: 0, centerTitle: true,

@@ -25,7 +25,7 @@ class LeaguesScreen extends ConsumerWidget {
     final content = RefreshIndicator(
         color: AppColors.text,
         onRefresh: () async { ref.invalidate(leagueListProvider); ref.invalidate(discoverTeasersProvider); await ref.read(leagueListProvider.future).catchError((_) => <LeagueSummary>[]); },
-        child: ListView(padding: EdgeInsets.fromLTRB(20, embedded ? 18 : 26, 20, 130), children: [
+        child: ListView(padding: EdgeInsets.fromLTRB(20, embedded ? 18 : 26, 20, AppInsets.tabBarClearance(context)), children: [
           // .lgh
           Row(crossAxisAlignment: embedded ? CrossAxisAlignment.center : CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -42,9 +42,11 @@ class LeaguesScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 30),
           // .sec «Mis ligas» + .sbtn «Crear liga»
+          // Un solo «Crear liga»: aquí si ya tienes ligas; si no, en la tarjeta vacía (antes había dos botones a la vez).
           Row(children: [
             Expanded(child: Semantics(header: true, child: const Text('Mis ligas', style: PlobbyText.t2))),
-            PlobbyButton(label: 'Crear liga', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/leagues/new')),
+            if (mine.valueOrNull?.isNotEmpty ?? false)
+              PlobbyButton(label: 'Crear liga', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/leagues/new')),
           ]),
           const SizedBox(height: 12),
           mine.when(
@@ -56,7 +58,6 @@ class LeaguesScreen extends ConsumerWidget {
                     primary: 'Crear liga', onPrimary: () => context.push('/leagues/new'), secondary: 'Descubrir ligas', onSecondary: () => context.push('/leagues/discover'))
                 : Column(children: [
                     for (var i = 0; i < l.length; i++) Padding(padding: const EdgeInsets.only(bottom: 14), child: AppearOnce(animationKey: 'lg:${l[i].id}', index: i, child: MyLeagueCard(league: l[i]))),
-                    _AddLeagueButton(onTap: () => context.push('/leagues/new')),
                   ]),
           ),
           const SizedBox(height: 34),
@@ -116,19 +117,6 @@ class _Overview extends StatelessWidget {
   }
 }
 
-/// `.addc`: «Crear una liga nueva», 58 px, borde interior 1.5 px, Inter 14/700.
-class _AddLeagueButton extends StatelessWidget {
-  const _AddLeagueButton({required this.onTap});
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => Semantics(button: true, label: 'Crear una liga nueva', excludeSemantics: true, child: Material(
-        color: Colors.transparent, shape: const RoundedRectangleBorder(borderRadius: AppRadius.rMd, side: BorderSide(color: AppColors.borderStrong, width: 1.5)),
-        child: InkWell(borderRadius: AppRadius.rMd, onTap: onTap, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 58), child: const Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          PlobbyIcon(PlobbyIcons.plus, size: 18, strokeWidth: 2.2), SizedBox(width: 8),
-          Flexible(child: Text('Crear una liga nueva', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
-        ])))),
-      ));
-}
 
 class _TeaserCard extends ConsumerStatefulWidget {
   const _TeaserCard({required this.league});
