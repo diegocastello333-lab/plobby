@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import '../../../core/share/image_actions.dart';
 import '../../../core/share/image_io.dart';
 import 'dart:typed_data';
@@ -126,17 +127,25 @@ class _Preview extends StatelessWidget {
   final RecapData d; final RecapTemplate tpl; final RecapFormat fmt; final RecapOptions opts; final RecapImages images; final bool busy;
   @override
   Widget build(BuildContext context) {
-    final ar = fmt.width / fmt.height, maxH = MediaQuery.of(context).size.height * .5;
+    // Tamaño con la proporción EXACTA del formato y dentro del ancho disponible: el pintor escala ancho y alto por
+    // separado, así que un recuadro con otra proporción deformaba la vista previa (cuadrado en móviles estrechos).
+    return LayoutBuilder(builder: (context, c) {
+    final ar = fmt.width / fmt.height, maxH = MediaQuery.sizeOf(context).height * .5;
+    final w = math.min(c.maxWidth, maxH * ar), h = w / ar;
     return Center(child: AnimatedContainer(
       duration: AppAnimations.scaled(context, AppAnimations.tab), curve: AppAnimations.standard,
-      constraints: BoxConstraints(maxHeight: maxH), height: maxH, width: maxH * ar,
+      height: h, width: w,
       child: Stack(fit: StackFit.expand, children: [
         DecoratedBox(decoration: BoxDecoration(borderRadius: AppRadius.rMd, boxShadow: AppShadows.pop),
+          // El Stack interno de AnimatedSwitcher deja a sus hijos sueltos: un CustomPaint sin hijo medía 0×0 y la vista
+          // previa salía vacía (solo el marco). Con StackFit.expand + tamaño infinito ocupa todo el recuadro.
           child: ClipRRect(borderRadius: AppRadius.rMd, child: AnimatedSwitcher(duration: AppAnimations.scaled(context, AppAnimations.tab),
-              child: RepaintBoundary(key: ValueKey('${tpl.name}-${fmt.name}'), child: CustomPaint(painter: RecapPainter(d, tpl, fmt, opts: opts, images: images)))))),
+              layoutBuilder: (cur, prev) => Stack(fit: StackFit.expand, children: [...prev, if (cur != null) cur]),
+              child: RepaintBoundary(key: ValueKey('${tpl.name}-${fmt.name}'), child: CustomPaint(size: Size.infinite, painter: RecapPainter(d, tpl, fmt, opts: opts, images: images)))))),
         if (busy) const Positioned(right: 10, top: 10, child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4))),
       ]),
     ));
+    });
   }
 }
 

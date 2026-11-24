@@ -451,3 +451,11 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   en RecapPainter, gamification_share y ShareCardPainter (`verified`).
 - `NetImage.loadMissing()` en main: miniaturas inexistentes recordadas 24 h entre aperturas (seguían ~300 peticiones 400/6 h).
 - Duración < 60 s → «<1 min». Humo web: `scratchpad/perf/smoke.js` (23 rutas, 0 errores de consola).
+
+## Vista previa de Share Match (24 nov 2026, rama `share-preview`, PUBLICADA; anterior en `backup/web-v13-antes-de-share-preview`; APK 1.9.6)
+- CAUSA REAL de la vista previa en negro (app y web; guardar sí funcionaba): el `CustomPaint` sin hijo iba dentro de un
+  `AnimatedSwitcher`, cuyo Stack interno deja restricciones sueltas → medía 0×0. Ahora `layoutBuilder` con StackFit.expand +
+  `CustomPaint(size: Size.infinite)`. Además el recuadro no respetaba la proporción en móviles estrechos (cuadrado 422×350 →
+  imagen deformada): tamaño calculado con LayoutBuilder (min(ancho, alto·proporción)). Test `test/share_match_preview_test.dart`
+  (sin el arreglo da ancho 0). REGLA: nunca un CustomPaint sin hijo ni `size` dentro de AnimatedSwitcher/Stack suelto.
+- El lab `tool/recap_lab` con `?screen=1` monta la pantalla real con los datos del partido real.
