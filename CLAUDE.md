@@ -367,3 +367,15 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   luz, check en tinta; quieto con «reducir movimiento», `IdleMotion.loop` en web). Solo en la cabecera del perfil.
 - Quién: `profile/domain/verified_users.dart` (`verifiedUserIds`, por UUID; hoy solo la cuenta del dueño). Sin cambios en BD;
   si hay más verificados, pasar a columna del servidor. Tests `test/verified_badge_test.dart`. Total 454/454.
+
+## Rendimiento + premium (24 nov 2026, en curso; fases en ramas `perf`, `fixes`, `premium`)
+- Encargo en 4 fases (rendimiento, 9 fallos, diseño premium tipo Apple, verificación). Decisiones del usuario: miniaturas al
+  subir (Supabase no tiene transformaciones de imagen en este plan: 403), modo oscuro en fase propia al final, publicar tras
+  cada fase con su OK.
+- F1 (rama `perf`, informe `docs/rendimiento/fase1.md`): web `--wasm --enable-wasm-deferred-loading` (requirió
+  flutter_secure_storage 10, migra la sesión en Android), `DeferredScreen` + `deferredScreenLoaders` (precarga: móvil al
+  arrancar, web 4 s tras el primer fotograma, tests en flutter_test_config), Roboto → alias de Inter, sin Unbounded Medium,
+  splash ≤0,9 s y `GateCache` (con sesión validada no hay splash), `myRatingSummaryProvider` (20 filas), lectura compartida
+  de get_my_profile, `HomeSnapshot` (cabecera al instante), `NetImage`/`AvatarThumbs` (_t96/_t256), banners WebP,
+  caché `plobby-engine-<motor>` en sw.js, presencia con dispose. NO precargar main.dart.wasm desde HTML (doble descarga).
+- Medición: `tool/perf/*.js` (Playwright, 4G lento + CPU 4×) y `test/home_requests_test.dart` (peticiones del Inicio).
