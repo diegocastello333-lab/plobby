@@ -78,12 +78,13 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: 18),
           // FittedBox: la cifra gigante se reduce si no cabe (móvil estrecho o texto grande) en lugar de desbordar.
           Semantics(label: 'ELO ${d.elo}', excludeSemantics: true, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-            TweenAnimationBuilder<int>(
+            // La cifra llega volando desde la tarjeta de ELO del Inicio (transición compartida).
+            Hero(tag: 'elo-me', child: Material(type: MaterialType.transparency, child: TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: d.elo),
               duration: Motion.reduced(context) ? Duration.zero : Motion.celebrationLong,
               curve: Motion.enter,
-              builder: (_, v, __) => Text(_n(v), style: const TextStyle(fontFamily: AppTypography.displayFamily, color: AppColors.brand, fontSize: 64, height: 1, fontWeight: FontWeight.w700, letterSpacing: -2.56)),
-            ),
+              builder: (_, v, __) => Text(_n(v), style: const TextStyle(fontFamily: AppTypography.displayFamily, color: AppColors.brand, fontSize: 64, height: 1, fontWeight: FontWeight.w700, letterSpacing: -2.56, fontFeatures: PlobbyText.tabular)),
+            ))),
             const SizedBox(width: 8),
             Text('ELO', style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 1.08, color: soft)),
           ]))),

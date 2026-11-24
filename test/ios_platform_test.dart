@@ -30,9 +30,11 @@ Future<void> _settle(WidgetTester t, [int n = 6]) async { for (var i = 0; i < n;
 void main() {
   final ios = TargetPlatformVariant.only(TargetPlatform.iOS);
 
-  test('iOS usa la transición nativa (con gesto de volver); Android conserva la de Plobby', () {
-    expect(AppTransitions.theme.builders[TargetPlatform.iOS], isA<CupertinoPageTransitionsBuilder>());
-    expect(AppTransitions.theme.builders[TargetPlatform.android], isA<AppPageTransitionsBuilder>());
+  test('deslizamiento tipo iOS en todas las plataformas; en Android, además, el «atrás predictivo» del sistema', () {
+    final ios = AppTransitions.theme.builders[TargetPlatform.iOS]! as AppPageTransitionsBuilder;
+    final android = AppTransitions.theme.builders[TargetPlatform.android]! as AppPageTransitionsBuilder;
+    expect((ios.predictiveBack, android.predictiveBack), (false, true));
+    expect(AppTransitions.theme.builders[TargetPlatform.windows], isA<AppPageTransitionsBuilder>());
   });
 
   testWidgets('en iPhone, deslizar desde el borde izquierdo vuelve a la pantalla anterior', (t) async {

@@ -272,7 +272,7 @@ class _Counters extends ConsumerWidget {
       Expanded(child: _LiftedCard(
         label: c.elo == null ? 'ELO' : 'ELO ${c.elo}${delta == 0 ? '' : ', ${delta > 0 ? '+' : '−'}${delta.abs()} puntos en 30 días'}. Ver detalle',
         onTap: () => HomeNav.elo(context),
-        child: _StatText(value: c.elo == null ? '—' : '${c.elo}', number: c.elo, memoryKey: 'home:elo', label: 'ELO', trailing: delta == 0 ? null : Row(mainAxisSize: MainAxisSize.min, children: [
+        child: _StatText(value: c.elo == null ? '—' : '${c.elo}', number: c.elo, memoryKey: 'home:elo', label: 'ELO', heroTag: 'elo-me', trailing: delta == 0 ? null : Row(mainAxisSize: MainAxisSize.min, children: [
           Transform.rotate(angle: delta > 0 ? 0 : 1.5708, child: SvgPicture.string(
               '<svg viewBox="0 0 24 24" fill="none" stroke="${delta > 0 ? '#171C19' : '#C4282E'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
               width: 9, height: 9)),
@@ -317,22 +317,26 @@ class _LiftedCard extends StatelessWidget {
 }
 
 class _StatText extends StatelessWidget {
-  const _StatText({required this.value, required this.label, this.trailing, this.number, this.memoryKey});
+  const _StatText({required this.value, required this.label, this.trailing, this.number, this.memoryKey, this.heroTag});
   final String value, label; final Widget? trailing;
+  /// Transición compartida con la pantalla de destino (la cifra «vuela» hasta su sitio).
+  final String? heroTag;
   /// Si hay valor numérico real, se anima su cambio (LiveNumber); si no, se muestra [value] tal cual.
   final int? number; final String? memoryKey;
   @override
   // En pantallas estrechas (320 px) la cifra y la etiqueta se reducen en vez de desbordar la tarjeta.
   Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: number == null
+        FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: _hero(number == null
             ? Text(value, style: PlobbyText.stat)
-            : LiveNumber(value: number!, memoryKey: memoryKey ?? label, style: PlobbyText.stat)),
+            : LiveNumber(value: number!, memoryKey: memoryKey ?? label, style: PlobbyText.stat))),
         const SizedBox(height: 4),
         FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(label, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1, fontWeight: FontWeight.w500, letterSpacing: 0, color: AppColors.textMuted)),
           if (trailing != null) ...[const SizedBox(width: 6), trailing!],
         ])),
       ]);
+
+  Widget _hero(Widget w) => heroTag == null ? w : Hero(tag: heroTag!, child: Material(type: MaterialType.transparency, child: w));
 }
 
 // ─────────────────────── Últimas partidas de amigos ───────────────────────

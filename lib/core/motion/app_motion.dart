@@ -19,6 +19,8 @@ class Motion {
   // ── Duraciones ──
   /// Al pulsar: el elemento encoge (escala 0,97) en 100 ms.
   static const press = Duration(milliseconds: 100);
+  /// Los esqueletos de carga solo aparecen si la carga dura más que esto (evita parpadeos en cargas rápidas).
+  static const skeletonDelay = Duration(milliseconds: 300);
   /// Taps, toggles, cambios de estado pequeños.
   static const fast = Duration(milliseconds: 150);
   /// Transiciones y entradas de elementos.
@@ -213,31 +215,35 @@ class AppCardStyles {
 }
 
 /// Transiciones de página para el `PageTransitionsTheme`. No sustituye al GoRouter: solo la animación.
+///
+/// - Todas las plataformas: deslizamiento tipo iOS (la pantalla nueva entra desde la derecha y la anterior se desplaza
+///   un poco detrás), con el gesto de «deslizar desde el borde para volver».
+/// - Android: «atrás predictivo» del sistema (Android 14+: al deslizar se ve la pantalla de destino antes de soltar);
+///   requiere `android:enableOnBackInvokedCallback="true"` en el AndroidManifest.
+/// - Con «reducir movimiento»: fundido corto, sin desplazamientos.
 class AppTransitions {
   AppTransitions._();
   static const duration = Motion.normal;
   static const reverse = Motion.normal;
-  static const slide = 0.04; // desplazamiento horizontal discreto (fracción del ancho)
-  /// iOS usa la transición nativa de Apple: es la que trae el gesto de «deslizar desde el borde para volver», que los
-  /// usuarios de iPhone esperan en todas las apps. El resto de plataformas (Android incluido) mantiene la de Plobby.
   static const theme = PageTransitionsTheme(builders: {
-    TargetPlatform.android: AppPageTransitionsBuilder(),
-    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    TargetPlatform.android: AppPageTransitionsBuilder(predictiveBack: true),
+    TargetPlatform.iOS: AppPageTransitionsBuilder(),
     TargetPlatform.macOS: AppPageTransitionsBuilder(),
     TargetPlatform.windows: AppPageTransitionsBuilder(),
     TargetPlatform.linux: AppPageTransitionsBuilder(),
+    TargetPlatform.fuchsia: AppPageTransitionsBuilder(),
   });
 }
 
 class AppPageTransitionsBuilder extends PageTransitionsBuilder {
-  const AppPageTransitionsBuilder();
+  const AppPageTransitionsBuilder({this.predictiveBack = false});
+  final bool predictiveBack;
+  static const _ios = CupertinoPageTransitionsBuilder();
+  static const _android = PredictiveBackPageTransitionsBuilder();
   @override
   Widget buildTransitions<T>(PageRoute<T> route, BuildContext context, Animation<double> a, Animation<double> sa, Widget child) {
     if (AppAnimations.reduceMotion(context)) return FadeTransition(opacity: a, child: child);
-    final curved = CurvedAnimation(parent: a, curve: Motion.enter, reverseCurve: Motion.exit);
-    return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(position: Tween(begin: const Offset(AppTransitions.slide, 0), end: Offset.zero).animate(curved), child: child));
+    return (predictiveBack ? _android : _ios).buildTransitions(route, context, a, sa, child);
   }
 }
 

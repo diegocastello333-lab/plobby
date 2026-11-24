@@ -13,6 +13,7 @@ import '../../social/presentation/friends_screen.dart' show FriendPick, pickFrie
 import '../domain/match_models.dart';
 import '../domain/match_defaults.dart';
 import '../../../core/errors/failure.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../clubs/presentation/club_search_sheet.dart' show pickClub, clubRemoved;
 import '../../profile/application/profile_providers.dart' show profileProvider;
 
@@ -76,6 +77,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
     try {
       await ref.read(matchRepositoryProvider).create(d);
       if (!mounted) return;
+      AppHaptics.success();   // acción confirmada: vibración suave (se puede desactivar en Ajustes)
       ref.invalidate(upcomingMatchesProvider);   // el nuevo partido aparece en «Próximos partidos» sin esperar a Realtime
       showPlobbySnack(context, d.sets.isEmpty ? 'Partido creado.' : 'Resultado enviado. Pendiente de confirmación.');
       context.pop();

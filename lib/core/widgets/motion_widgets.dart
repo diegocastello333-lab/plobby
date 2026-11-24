@@ -109,6 +109,14 @@ class SkeletonBox extends StatefulWidget {
 class _SkeletonBoxState extends State<SkeletonBox> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this, duration: AppAnimations.shimmer);
   bool _started = false;
+  /// El esqueleto solo aparece si la carga dura más de [Motion.skeletonDelay]: una carga rápida no «parpadea».
+  bool _visible = false;
+  Timer? _delay;
+  @override
+  void initState() {
+    super.initState();
+    _delay = Timer(Motion.skeletonDelay, () { if (mounted) setState(() => _visible = true); });
+  }
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -116,9 +124,11 @@ class _SkeletonBoxState extends State<SkeletonBox> with SingleTickerProviderStat
     if (reduce) { _c.stop(); _started = false; } else if (!_started) { _c.repeat(); _started = true; }
   }
   @override
-  void dispose() { _c.dispose(); super.dispose(); }
+  void dispose() { _delay?.cancel(); _c.dispose(); super.dispose(); }
   @override
-  Widget build(BuildContext context) => ExcludeSemantics(child: RepaintBoundary(child: AnimatedBuilder(
+  Widget build(BuildContext context) => AnimatedOpacity(opacity: _visible ? 1 : 0, duration: Motion.normal, child: _bones());
+
+  Widget _bones() => ExcludeSemantics(child: RepaintBoundary(child: AnimatedBuilder(
       animation: _c,
       builder: (_, __) => Container(width: widget.width, height: widget.height, decoration: BoxDecoration(
           borderRadius: widget.radius,
