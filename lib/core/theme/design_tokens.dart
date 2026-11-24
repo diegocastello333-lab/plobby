@@ -44,8 +44,9 @@ class AppMaterials {
   AppMaterials._();
   /// Fondo de barra fija sobre contenido (marfil al 85 %): se intuye lo de debajo, el texto sigue legible.
   static const bar = Color(0xD9F6F8F1);
-  /// Barra de pestañas: blanco al 80 % sobre el contenido que pasa por debajo.
-  static const tabBar = Color(0xCCFFFFFF);
+  /// Barra de pestañas: blanco al 90 % sobre el contenido que pasa por debajo. Con 80 % las etiquetas grises bajaban a
+  /// 3,9:1 sobre una tarjeta oscura; al 90 % el peor caso es 4,86:1 (AA).
+  static const tabBar = Color(0xE6FFFFFF);
   /// Desenfoque de las barras translúcidas (sigma).
   static const barBlur = 20.0;
   /// Línea divisoria de 0,5 px bajo una barra cuando hay contenido debajo.

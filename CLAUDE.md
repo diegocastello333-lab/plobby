@@ -384,3 +384,10 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   nivel único `StatsCalculator.levelLabel` («Nivel con el que empezaste» secundario), `leagueCoverSvg(aspect:)`,
   `match_defaults.dart` (hora por defecto, hora habitual, sugeridos), `shortName`, semántica web por defecto, tema de tooltips.
   NO poner LayoutBuilder dentro de IntrinsicHeight (Inicio). `find.byTooltip` necesita la semántica del tooltip.
+- F3 (rama `premium`, informe `docs/rendimiento/fase3.md`): «+» = pestaña central `PlusSquare` (cuadrado lima 44, sin
+  etiqueta; elección del usuario: opción A sin «Nuevo»); `PlobbyText` escala iOS (Unbounded solo títulos grandes y cifras;
+  `sec`/`t2` en Inter); `AppRadius` 12/16/24 + `AppShapes` (RoundedSuperellipseBorder); una sombra; márgenes 20; barra
+  translúcida `AppMaterials.tabBar` (90 %: AA); iconos rellenos en pestaña activa (`PlobbyIcon(filled:)`); transición tipo
+  iOS en todo + atrás predictivo Android; `Motion.press` 100 ms y `Motion.skeletonDelay` 300 ms; Hero solo del ELO
+  ('elo-me'; avatares/partidos se repiten en pantalla); perfil con cabecera clara; feed con `groupFeed` (logros) y
+  reacciones discretas; crear partido con botón fijo; Competiciones con la liga activa primero.
