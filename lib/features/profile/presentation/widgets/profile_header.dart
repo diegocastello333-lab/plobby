@@ -29,7 +29,7 @@ class ProfileHeader extends ConsumerWidget {
   /// se muestra el nivel con el que empezó, rotulado como tal.
   final String? level;
 
-  static const _soft = Color(0xB8F6F8F1);   // rgba(246,248,241,.72)
+  static const _soft = AppColors.textMuted;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,16 +38,16 @@ class ProfileHeader extends ConsumerWidget {
     // al aceptar, cancelar o eliminar (aquí o en el otro dispositivo, vía Realtime).
     final rel = isOwner ? RelationState.none : ref.watch(relationProvider(p.id));
     final count = ref.watch(friendCountOfProvider(isOwner ? 'me' : p.id)).valueOrNull;
+    // Cabecera clara y compacta (antes un gran bloque negro): en el perfil el único elemento oscuro es la tarjeta de ELO.
     return Container(
-      color: AppColors.ink900,
-      padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 16, 20, 22),
+      padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 12, 20, 18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          if (isOwner) Text('MI PERFIL', style: PlobbyText.eb.copyWith(color: const Color(0x99F6F8F1)))
-          else IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', glass: true, onPressed: () => context.pop()),
+          if (isOwner) Text('MI PERFIL', style: PlobbyText.eb)
+          else IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: () => context.pop()),
           const Spacer(),
-          IconSquareButton(icon: PlobbyIcons.share, tooltip: 'Compartir perfil', glass: true, onPressed: () => Share.share('https://plobby.app/@${p.username}')),
-          if (isOwner) ...[const SizedBox(width: 8), IconSquareButton(icon: PlobbyIcons.sliders, tooltip: 'Ajustes del perfil', glass: true, onPressed: () => context.push('/profile/edit'))],
+          IconSquareButton(icon: PlobbyIcons.share, tooltip: 'Compartir perfil', onPressed: () => Share.share('https://plobby.app/@${p.username}')),
+          if (isOwner) ...[const SizedBox(width: 8), IconSquareButton(icon: PlobbyIcons.sliders, tooltip: 'Ajustes del perfil', onPressed: () => context.push('/profile/edit'))],
         ]),
         const SizedBox(height: 14),
         Row(children: [
@@ -63,7 +63,7 @@ class ProfileHeader extends ConsumerWidget {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Flexible(child: Text(p.fullName, maxLines: 2, overflow: TextOverflow.ellipsis,   // 2 líneas: con texto grande no se corta
-                  style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink50, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
+                  style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.text, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
               if (p.verified) const Padding(padding: EdgeInsets.only(left: 7), child: VerifiedBadge(size: 22)),
             ]),
             const SizedBox(height: 3),
@@ -72,7 +72,7 @@ class ProfileHeader extends ConsumerWidget {
               if (count != null) Semantics(button: isOwner, label: '$count ${count == 1 ? 'amigo' : 'amigos'}', excludeSemantics: true, child: GestureDetector(
                 onTap: isOwner ? () => context.push('/friends') : null,
                 child: Text.rich(TextSpan(text: '  ·  ', children: [
-                  TextSpan(text: '$count', style: const TextStyle(color: AppColors.lime300, fontWeight: FontWeight.w800)),
+                  TextSpan(text: '$count', style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w800)),
                   TextSpan(text: count == 1 ? ' amigo' : ' amigos'),
                 ]), style: const TextStyle(fontFamily: AppTypography.sansFamily, color: _soft, fontSize: 14, letterSpacing: 0)),
               )),
@@ -87,7 +87,7 @@ class ProfileHeader extends ConsumerWidget {
           ])),
         ]),
         if (p.bio.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 16), child: Text(p.bio,
-            style: const TextStyle(fontFamily: AppTypography.sansFamily, color: Color(0xEBF6F8F1), fontSize: 14, height: 1.5, letterSpacing: 0))),
+            style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink700, fontSize: 14, height: 1.5, letterSpacing: 0))),
         const SizedBox(height: 12),
         Wrap(spacing: 6, runSpacing: 6, children: [
           level != null ? _Chip('Nivel', level!) : _Chip('Nivel inicial', p.declaredLevel), _Chip('Posición', p.limited ? '—' : (p.side == PlaySide.right ? 'Derecha' : 'Izquierda')), _Chip('Mano', p.limited ? '—' : p.dominantHand),
@@ -158,9 +158,9 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
       height: 26, padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(color: const Color(0x1FF6F8F1), borderRadius: BorderRadius.circular(7)),
-      child: Center(widthFactor: 1, child: Text.rich(TextSpan(text: '$k ', style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink50, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0),
-          children: [TextSpan(text: v, style: const TextStyle(color: AppColors.lime300, fontWeight: FontWeight.w800))]))));
+      decoration: const BoxDecoration(color: AppColors.surfaceSunken, borderRadius: AppRadius.rSm),
+      child: Center(widthFactor: 1, child: Text.rich(TextSpan(text: '$k ', style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.textMuted, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0),
+          children: [TextSpan(text: v, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w800))]))));
 }
 
 /// `.ph .acts button`: 44 px, radio 11, Inter 14/700; `.g` marfil .14 · `.l` lima.
@@ -169,10 +169,11 @@ class _Btn extends StatelessWidget {
   final String t; final PlobbyIcons i; final bool hi; final VoidCallback f;
   @override
   Widget build(BuildContext context) {
-    final fg = hi ? AppColors.ink900 : AppColors.ink50;
+    const fg = AppColors.text;
+    final shape = AppShapes.of(AppRadius.sm, side: hi ? BorderSide.none : const BorderSide(color: AppColors.border));
     return Semantics(button: true, label: t, excludeSemantics: true, child: Pressable(child: Material(
-      color: hi ? AppColors.lime300 : const Color(0x24F6F8F1), borderRadius: BorderRadius.circular(11),
-      child: InkWell(borderRadius: BorderRadius.circular(11), onTap: f, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44), child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      color: hi ? AppColors.lime300 : AppColors.surface, shape: shape,
+      child: InkWell(customBorder: shape, onTap: f, child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 44), child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         PlobbyIcon(i, size: 16, color: fg), const SizedBox(width: 7),
         Flexible(child: Text(t, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0, color: fg))),
       ])))),

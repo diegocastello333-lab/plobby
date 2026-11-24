@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -107,7 +108,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
     final hasSets = _scores.isNotEmpty;
     String p2(int n) => n.toString().padLeft(2, '0');
     return Scaffold(
-      body: SafeArea(child: ListView(padding: const EdgeInsets.fromLTRB(20, 14, 20, 28), children: [
+      body: SafeArea(bottom: false, child: ListView(padding: const EdgeInsets.fromLTRB(20, 14, 20, 28), children: [
         // .hr: etiqueta del tipo (.mtag), «Crear partido» y cerrar
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -210,15 +211,21 @@ class _S extends ConsumerState<CreateMatchScreen> {
           ]),
         ),
         const SizedBox(height: 6),
-        if (_error != null) Padding(padding: const EdgeInsets.only(top: 4), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Padding(padding: EdgeInsets.only(top: 1, right: 6), child: PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger)),
-          Expanded(child: Text(_error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
-        ])),
         const SizedBox(height: 6),
         Text(_friendly ? 'Un amistoso no pertenece a ninguna liga.' : 'El partido quedará vinculado a la liga elegida.', style: PlobbyText.help.copyWith(fontSize: 12)),
-        const SizedBox(height: 14),
-        PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(habitual)),
       ])),
+      // Acción principal fija abajo (siempre a mano, sobre material translúcido), con el error justo encima.
+      bottomNavigationBar: ClipRect(child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: AppMaterials.barBlur, sigmaY: AppMaterials.barBlur), child: Container(
+        decoration: const BoxDecoration(color: AppMaterials.bar, border: Border(top: BorderSide(width: .5, color: AppMaterials.hairline))),
+        padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.paddingOf(context).bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Padding(padding: EdgeInsets.only(top: 1, right: 6), child: PlobbyIcon(PlobbyIcons.alert, size: 14, color: AppColors.danger)),
+            Expanded(child: Text(_error!, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0, color: AppColors.danger))),
+          ])),
+          PlobbyButton(label: hasSets ? 'Enviar resultado' : 'Crear partido', busy: _busy, onPressed: () => _submit(habitual)),
+        ]),
+      ))),
     );
   }
 

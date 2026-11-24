@@ -44,8 +44,9 @@ class ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => switch (post.payload) {
         MatchPayload p => _Shell(post: post, sub: p.venue, child: _Match(post: post, p: p)),
-        AchievementPayload p => _Shell(post: post, dark: true, child: _Achievement(post: post, p: p)),
-        StreakPayload p => _Shell(post: post, dark: true, child: _Streak(p: p, own: post.author.id == 'me')),
+        // Formato compacto y claro; el grande y oscuro queda para los momentos especiales (campeón de torneo).
+        AchievementPayload p => _Shell(post: post, child: _Achievement(post: post, p: p)),
+        StreakPayload p => _Shell(post: post, child: _Streak(p: p, own: post.author.id == 'me')),
         EloPayload p => _Shell(post: post, child: _Elo(post: post, p: p)),
         LeaguePayload p => _Shell(post: post, child: _League(post: post, p: p)),
         TournamentPayload p => _Shell(post: post, dark: true, child: _Champion(post: post, p: p)),
@@ -154,32 +155,26 @@ class _AchievementState extends State<_Achievement> with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    return Column(children: [
-      const SizedBox(height: 12),
-      Align(alignment: Alignment.centerLeft, child: Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink50, fontSize: 13.5, height: 1.4, letterSpacing: 0), children: [
-        TextSpan(text: widget.post.author.name.split(' ').first, style: const TextStyle(fontWeight: FontWeight.w700)),
-        const TextSpan(text: ' acaba de desbloquear un nuevo logro'),
+    // Compacta: insignia de 52 px + título y descripción a su lado. Un toque abre el detalle del logro.
+    return InkWell(
+      borderRadius: AppRadius.rMd,
+      onTap: () => showPlobbySheet(context, (_) => Padding(padding: const EdgeInsets.fromLTRB(4, 0, 4, 12), child: Column(mainAxisSize: MainAxisSize.min, children: [
+        _Disc(size: 92, id: p.achievementId), const SizedBox(height: 14),
+        Text(p.title, textAlign: TextAlign.center, style: PlobbyText.sec),
+        const SizedBox(height: 6), Text(p.description, textAlign: TextAlign.center, style: PlobbyText.sub),
       ]))),
-      InkWell(
-        onTap: () => showPlobbySheet(context, (_) => Padding(padding: const EdgeInsets.fromLTRB(4, 0, 4, 12), child: Column(mainAxisSize: MainAxisSize.min, children: [
-          _Disc(size: 92, id: p.achievementId), const SizedBox(height: 14),
-          Text(p.title.toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: 1, color: AppColors.text)),
-          const SizedBox(height: 6), Text(p.description, textAlign: TextAlign.center, style: PlobbyText.sub),
-        ]))),
-        child: Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Center(child: Column(children: [
-          // insignia: disco lima dentro de un aro tinta con borde lima tenue (como en el HTML)
-          ScaleTransition(scale: CurvedAnimation(parent: c, curve: Motion.reduced(context) ? Motion.linear : Motion.springBounce), child: AnimatedBuilder(animation: c, builder: (_, child) => Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.ink800, border: Border.all(color: const Color(0x40D2F548), width: 1.5),
-                  boxShadow: [BoxShadow(color: AppColors.brand.withValues(alpha: .35 * (1 - c.value) + .12), blurRadius: 24, spreadRadius: 4)]), child: child), child: _Disc(size: 104, id: p.achievementId))),
-          const SizedBox(height: 14),
-          Text(p.title.toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.displayFamily, color: AppColors.ink50, fontSize: 22, height: 1.1, fontWeight: FontWeight.w700, letterSpacing: -0.22)),
-          const SizedBox(height: 6),
-          Text(p.description, textAlign: TextAlign.center, style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13.5, letterSpacing: 0, color: Color(0xC7F6F8F1))),
-          if (p.milestone != null) Padding(padding: const EdgeInsets.only(top: 10), child: Pill(p.milestone!, tone: PillTone.lime)),
-        ]))),
-      ),
-    ]);
+      child: Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
+        ScaleTransition(scale: CurvedAnimation(parent: c, curve: Motion.reduced(context) ? Motion.linear : Motion.springBounce), child: _Disc(size: 52, id: p.achievementId)),
+        const SizedBox(width: 14),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Nuevo logro', style: PlobbyText.footnote),
+          Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: PlobbyText.headline),
+          const SizedBox(height: 2),
+          Text(p.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: PlobbyText.footnote.copyWith(color: AppColors.ink700)),
+        ])),
+        if (p.milestone != null) Padding(padding: const EdgeInsets.only(left: 8), child: Pill(p.milestone!, tone: PillTone.lime)),
+      ])),
+    );
   }
 }
 
@@ -197,12 +192,12 @@ class _Streak extends StatelessWidget {
   final StreakPayload p; final bool own;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(top: 12), child: Row(children: [
-        WinStreakBadge(streak: p.count, size: 56, showNumber: false), const SizedBox(width: 14),
-        Text('${p.count}', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 60, fontWeight: FontWeight.w700, letterSpacing: -1.8, color: AppColors.brand, height: 1)),
-        const SizedBox(width: 14),
-        Expanded(child: Text.rich(TextSpan(style: const TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.ink50, fontSize: 14, height: 1.35, letterSpacing: 0), children: [
+        WinStreakBadge(streak: p.count, size: 40, showNumber: false), const SizedBox(width: 12),
+        Text('${p.count}', style: const TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.8, color: AppColors.text, height: 1, fontFeatures: PlobbyText.tabular)),
+        const SizedBox(width: 12),
+        Expanded(child: Text.rich(TextSpan(style: PlobbyText.subhead, children: [
           TextSpan(text: own ? 'Estás' : 'Está', style: const TextStyle(fontWeight: FontWeight.w700)),
-          TextSpan(text: ' en racha\n${p.count} victorias seguidas${p.count >= 7 ? ' · ¡a por las 10!' : ''}'),
+          TextSpan(text: ' en racha\n${p.count} victorias seguidas${p.count >= 7 ? ' · ¡a por las 10!' : ''}', style: PlobbyText.footnote.copyWith(color: AppColors.ink700)),
         ]))),
       ]));
 }

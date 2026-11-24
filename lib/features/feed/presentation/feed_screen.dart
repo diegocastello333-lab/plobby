@@ -14,6 +14,8 @@ import '../../profile/application/profile_providers.dart';
 import '../application/feed_providers.dart';
 import '../domain/feed_models.dart';
 import 'widgets/activity_cards.dart';
+import 'widgets/achievement_group_card.dart';
+import '../domain/feed_grouping.dart';
 import '../../../core/widgets/net_image.dart';
 
 const _filters = {FeedFilter.all: 'Todo', FeedFilter.friends: 'Amigos', FeedFilter.matches: 'Partidos', FeedFilter.achievements: 'Logros', FeedFilter.leagues: 'Competiciones'};
@@ -51,12 +53,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
             error: (e, _) => [SliverFillRemaining(hasScrollBody: false, child: _ErrorView(error: e, onRetry: () => ref.invalidate(feedControllerProvider)))],
             data: (s) => s.posts.isEmpty ? [SliverFillRemaining(hasScrollBody: false, child: _Empty(filter: filter))] : [
               if (s.pendingNew.isNotEmpty) SliverToBoxAdapter(child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 8), child: PlobbyButton(kind: PlobbyButtonKind.small, icon: PlobbyIcons.arrup, label: '${s.pendingNew.length} actividad nueva', onPressed: ref.read(feedControllerProvider.notifier).showPending)))),
-              SliverPadding(padding: const EdgeInsets.symmetric(horizontal: 20), sliver: SliverList.builder(
-                itemCount: s.posts.length + 1,  // padding superior de .fl2: 4
-                itemBuilder: (_, i) => i < s.posts.length
-                    ? RepaintBoundary(child: ActivityCard(key: ValueKey(s.posts[i].id), post: s.posts[i]))
+              // Logros seguidos agrupados en una tarjeta compacta (se despliega con un toque).
+              SliverPadding(padding: const EdgeInsets.symmetric(horizontal: 20), sliver: Builder(builder: (_) {
+                final items = groupFeed(s.posts);
+                return SliverList.builder(
+                itemCount: items.length + 1,
+                itemBuilder: (_, i) => i < items.length
+                    ? RepaintBoundary(child: switch (items[i]) {
+                        SinglePost(:final post) => ActivityCard(key: ValueKey(post.id), post: post),
+                        final AchievementGroup g => AchievementGroupCard(key: ValueKey(g.key), group: g),
+                      })
                     : (s.loadingMore ? const _Skeleton() : Padding(padding: const EdgeInsets.symmetric(vertical: 24), child: Center(child: Text(s.hasMore ? '' : 'Estás al día ✓', style: PlobbyText.sub)))),
-              )),
+              );
+              })),
               SliverToBoxAdapter(child: SizedBox(height: AppInsets.tabBarClearance(context))),
             ],
           ),

@@ -38,7 +38,8 @@ void main() {
     await t.tap(find.bySemanticsLabel('Logros'));
     await _settle(t);
     expect(find.text('VICTORIA'), findsNothing);
-    expect(find.textContaining('acaba de desbloquear'), findsWidgets);
+    // Logros seguidos agrupados («… han desbloqueado logros») o sueltos («Nuevo logro»).
+    expect(find.textContaining(RegExp('desbloqueado|Nuevo logro')), findsWidgets);
     await t.tap(find.bySemanticsLabel('Todo'));
     await _settle(t);
     expect(find.text('VICTORIA'), findsWidgets);
