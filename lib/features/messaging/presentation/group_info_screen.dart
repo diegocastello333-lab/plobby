@@ -56,7 +56,7 @@ class GroupInfoScreen extends ConsumerWidget {
           ]))),
           const SizedBox(height: 14),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Flexible(child: Semantics(header: true, child: Text(conv.title, textAlign: TextAlign.center,
+            Flexible(child: Semantics(header: true, container: true, child: Text(conv.title, textAlign: TextAlign.center,
                 style: TextStyle(fontFamily: AppTypography.displayFamily, fontSize: 20, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.text)))),
             if (perms.canEdit) ...[const SizedBox(width: 8), IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Cambiar nombre', size: 32, onPressed: () => _rename(context, ref, repo, conv.title))],
           ]),

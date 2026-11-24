@@ -30,7 +30,7 @@ class _S extends ConsumerState<CommentsSheet> {
   Widget build(BuildContext context) {
     final async = ref.watch(commentsProvider(widget.postId));
     final me = ref.read(feedRepositoryProvider).me;
-    Widget small(PlobbyIcons i, String tip, VoidCallback f) => Tooltip(message: tip, child: Semantics(button: true, label: tip, excludeSemantics: true,
+    Widget small(PlobbyIcons i, String tip, VoidCallback f) => Tooltip(message: tip, excludeFromSemantics: true, child: Semantics(button: true, label: tip, excludeSemantics: true,
         child: InkResponse(onTap: f, radius: 20, child: SizedBox(width: 36, height: 36, child: Center(child: PlobbyIcon(i, size: 17, color: AppColors.textMuted))))));
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .7),

@@ -80,7 +80,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               decoration: BoxDecoration(color: AppColors.brandSoft, borderRadius: BorderRadius.circular(14)),
               child: PlobbyIcon(PlobbyIcons.shield, size: 24, color: AppColors.text))),
           const SizedBox(height: 18),
-          Semantics(header: true, child: Text(update ? 'Hemos actualizado nuestras condiciones' : 'Antes de empezar', style: PlobbyText.t1)),
+          Semantics(header: true, container: true, child: Text(update ? 'Hemos actualizado nuestras condiciones' : 'Antes de empezar', style: PlobbyText.t1)),
           const SizedBox(height: 8),
           Text(update
               ? 'Para seguir usando Plobby, revisa y acepta la nueva versión de los documentos.'

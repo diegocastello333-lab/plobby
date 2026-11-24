@@ -99,7 +99,8 @@ class IconSquareButton extends StatelessWidget {
   final double size;
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: tooltip,
+        // El nombre ya lo da la etiqueta semántica: sin esto el lector leía «Volver Volver».
+        message: tooltip, excludeFromSemantics: true,
         child: Semantics(button: true, label: tooltip, excludeSemantics: true, child: Pressable(child: Container(
           width: size, height: size,
           decoration: BoxDecoration(color: glass ? AppColors.inkA(0x73) : AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: glass ? null : AppShadows.card),
@@ -325,7 +326,8 @@ class MiniAction extends StatelessWidget {
   final VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: tooltip,
+        // El nombre ya lo da la etiqueta semántica: sin esto el lector leía «Volver Volver».
+        message: tooltip, excludeFromSemantics: true,
         child: Semantics(button: true, label: tooltip, excludeSemantics: true, child: Pressable(child: Material(
           color: approve ? AppColors.inverse : Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),
@@ -354,7 +356,7 @@ class PlobbyHeaderBar extends StatelessWidget {
         child: Row(children: [
           IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: onBack ?? () => Navigator.of(context).maybePop()),
           const SizedBox(width: 12),
-          Expanded(child: Semantics(header: true, child: Text(title, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle))),
+          Expanded(child: Semantics(header: true, container: true, child: Text(title, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle))),
           const SizedBox(width: 12),
           trailing ?? const SizedBox(width: 40),
         ]),
@@ -373,7 +375,7 @@ class SheetHeader extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Semantics(header: true, child: Text(title, style: PlobbyText.t2)),
+            Semantics(header: true, container: true, child: Text(title, style: PlobbyText.t2)),
             if (subtitle != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(subtitle!, style: PlobbyText.sub)),
           ])),
           const SizedBox(width: 12),

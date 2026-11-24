@@ -55,7 +55,7 @@ class _Body extends StatelessWidget {
             if (c.pending) const _DarkTag('Pendiente de revisión'),
           ]),
           const SizedBox(height: 12),
-          Semantics(header: true, child: Text(c.name, style: PlobbyText.t1.copyWith(color: AppColors.brand))),
+          Semantics(header: true, container: true, child: Text(c.name, style: PlobbyText.t1.copyWith(color: AppColors.brand))),
           if (place.isNotEmpty) ...[const SizedBox(height: 6), Text(place, style: PlobbyText.sub.copyWith(color: const Color(0xD9FFFFFF)))],
           if ((c.address ?? '').isNotEmpty) ...[
             const SizedBox(height: 4),

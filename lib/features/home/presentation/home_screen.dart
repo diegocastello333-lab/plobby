@@ -126,7 +126,7 @@ class _SecHead extends StatelessWidget {
   @override
   // Mínimo 28 px; si el título ocupa dos líneas (pantallas estrechas), la fila crece como en el HTML.
   Widget build(BuildContext context) => ConstrainedBox(constraints: const BoxConstraints(minHeight: 28), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Expanded(child: Semantics(header: true, child: Text(title, style: PlobbyText.sec, maxLines: 2, overflow: TextOverflow.ellipsis))),
+        Expanded(child: Semantics(header: true, container: true, child: Text(title, style: PlobbyText.sec, maxLines: 2, overflow: TextOverflow.ellipsis))),
         // 28 px en el layout y 44 px de zona táctil (el CSS usa min-height 44 con margin −8px 0).
         if (action != null) SizedBox(width: 96, height: 28, child: OverflowBox(alignment: Alignment.centerRight, minHeight: 44, maxHeight: 44, maxWidth: 96,
             child: SectionLink(label: action!, onTap: onAction))),

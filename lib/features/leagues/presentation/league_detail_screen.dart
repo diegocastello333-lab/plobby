@@ -342,7 +342,7 @@ class _Header extends StatelessWidget {
           if (l.status == LeagueStatus.open) const LeagueChip('Inscripción abierta', tone: ChipTone.lime),
         ]),
         const SizedBox(height: 8),
-        Semantics(header: true, child: Text(l.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis,
+        Semantics(header: true, container: true, child: Text(l.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: .72, color: Colors.white))),
       ])),
     ]));

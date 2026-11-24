@@ -29,7 +29,7 @@ class LeaguesScreen extends ConsumerWidget {
           // .lgh
           Row(crossAxisAlignment: embedded ? CrossAxisAlignment.center : CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              if (!embedded) ...[Semantics(header: true, child: Text('Ligas', style: PlobbyText.t1)), const SizedBox(height: 6)],
+              if (!embedded) ...[Semantics(header: true, container: true, child: Text('Ligas', style: PlobbyText.t1)), const SizedBox(height: 6)],
               Text('Compite con tu comunidad.', style: PlobbyText.sub),
             ])),
             IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
@@ -38,7 +38,7 @@ class LeaguesScreen extends ConsumerWidget {
           // .sec «Mis ligas» + .sbtn «Crear liga»
           // Un solo «Crear liga»: aquí si ya tienes ligas; si no, en la tarjeta vacía (antes había dos botones a la vez).
           Row(children: [
-            Expanded(child: Semantics(header: true, child: Text('Mis ligas', style: PlobbyText.t2))),
+            Expanded(child: Semantics(header: true, container: true, child: Text('Mis ligas', style: PlobbyText.t2))),
             if (mine.valueOrNull?.isNotEmpty ?? false)
               PlobbyButton(label: 'Crear liga', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/leagues/new')),
           ]),
@@ -58,7 +58,7 @@ class LeaguesScreen extends ConsumerWidget {
           // posición y tu progreso.
           if (mine.valueOrNull?.isNotEmpty ?? false) ...[const SizedBox(height: 20), _Overview(leagues: mine.value!)],
           const SizedBox(height: 34),
-          Semantics(header: true, child: Text('Descubrir ligas', style: PlobbyText.t2)),
+          Semantics(header: true, container: true, child: Text('Descubrir ligas', style: PlobbyText.t2)),
           const SizedBox(height: 4),
           Text('Encuentra tu próxima competición.', style: PlobbyText.subhead.copyWith(color: AppColors.textMuted)),
           const SizedBox(height: 12),

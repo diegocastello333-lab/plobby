@@ -41,7 +41,7 @@ class _DiscoverLeaguesScreenState extends ConsumerState<DiscoverLeaguesScreen> {
           IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
         ]),
         const SizedBox(height: 20),
-        Semantics(header: true, child: Text('Descubrir ligas', style: PlobbyText.t1)),
+        Semantics(header: true, container: true, child: Text('Descubrir ligas', style: PlobbyText.t1)),
         const SizedBox(height: 6),
         Text('Encuentra tu próxima competición.', style: PlobbyText.sub),
         const SizedBox(height: 16),

@@ -72,7 +72,7 @@ class _BodyState extends ConsumerState<_Body> {
         margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Row(children: [Flexible(child: Semantics(header: true, child: Text(title, style: PlobbyText.cardTitle))),
+          Row(children: [Flexible(child: Semantics(header: true, container: true, child: Text(title, style: PlobbyText.cardTitle))),
             if (badge != null && badge > 0) ...[const SizedBox(width: 8), Container(height: 20, constraints: const BoxConstraints(minWidth: 20), padding: const EdgeInsets.symmetric(horizontal: 6), alignment: Alignment.center,
                 decoration: const BoxDecoration(color: AppColors.brand, borderRadius: AppRadius.rPill),
                 child: Text('$badge', style: const TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0, color: AppColors.brandInk)))]]),
@@ -89,7 +89,7 @@ class _BodyState extends ConsumerState<_Body> {
     final muted = TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, letterSpacing: 0, color: AppColors.textMuted);
 
     return ListView(padding: EdgeInsets.fromLTRB(20, 16, 20, 40 + MediaQuery.paddingOf(context).bottom), children: [
-      Semantics(header: true, child: Text('Gestión', style: PlobbyText.t1)),
+      Semantics(header: true, container: true, child: Text('Gestión', style: PlobbyText.t1)),
       const SizedBox(height: 6),
       Text(l.name.toUpperCase(), style: PlobbyText.sub),
       const SizedBox(height: 16),

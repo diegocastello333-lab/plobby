@@ -52,7 +52,7 @@ class NotificationsScreen extends ConsumerWidget {
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Row(children: [
           IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: () => context.pop()),
           const SizedBox(width: 14),
-          Expanded(child: Semantics(header: true, child: Text('Notificaciones', maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle))),
+          Expanded(child: Semantics(header: true, container: true, child: Text('Notificaciones', maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle))),
           if (unread > 0) PlobbyButton(label: 'Marcar leídas', kind: PlobbyButtonKind.smallOutline, onPressed: () => n.markRead()),
         ])),
         Expanded(child: async.when(
@@ -73,7 +73,7 @@ class NotificationsScreen extends ConsumerWidget {
               itemCount: rows.length,
               itemBuilder: (_, i) {
                 final x = rows[i];
-                if (x is String) return Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 10), child: Semantics(header: true, child: Text(x.toUpperCase(), style: PlobbyText.eb)));
+                if (x is String) return Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 10), child: Semantics(header: true, container: true, child: Text(x.toUpperCase(), style: PlobbyText.eb)));
                 // Entrada escalonada UNA vez por aviso (al llegar uno nuevo, solo ese aparece animado).
                 return AppearOnce(animationKey: 'ntf:${(x as AppNotification).id}', index: i, child: _Row(n: x, onTap: () { n.markRead(x.id); context.push(x.type.route(x)); }, onRespond: (ok) => n.respond(x.id, ok)));
               },

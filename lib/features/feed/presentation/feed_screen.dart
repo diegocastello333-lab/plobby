@@ -90,7 +90,7 @@ class _Header extends ConsumerWidget {
         // «PLOBBY» lima sobre marfil (≈1,2:1 de contraste) que repetía la marca ya presente en Inicio (HIG › Branding:
         // «Resist the temptation to display your logo throughout your app»).
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Expanded(child: Semantics(header: true, child: Text('Feed', style: PlobbyText.t1))),
+          Expanded(child: Semantics(header: true, container: true, child: Text('Feed', style: PlobbyText.t1))),
           Stack(clipBehavior: Clip.none, children: [
             IconSquareButton(icon: PlobbyIcons.bell, tooltip: unread > 0 ? 'Notificaciones, $unread sin leer' : 'Notificaciones', onPressed: () => context.push('/notifications')),
             if (unread > 0) Positioned(right: -5, top: -5, child: IgnorePointer(child: Container(

@@ -75,7 +75,7 @@ Future<bool?> showLogoutDialog(BuildContext context) => showDialog<bool>(
           Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(color: AppColors.dangerSoft, borderRadius: BorderRadius.circular(12)),
               child: PlobbyIcon(PlobbyIcons.logout, size: 20, color: AppColors.danger)),
           const SizedBox(height: 14),
-          Semantics(header: true, child: Text('¿Estás seguro de que quieres cerrar sesión?', style: PlobbyText.t2)),
+          Semantics(header: true, container: true, child: Text('¿Estás seguro de que quieres cerrar sesión?', style: PlobbyText.t2)),
           const SizedBox(height: 6),
           Text('Tu cuenta, tus amigos y tus partidos se mantienen. Podrás volver a entrar cuando quieras.', style: PlobbyText.sub),
           const SizedBox(height: 20),

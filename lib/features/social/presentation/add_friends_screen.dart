@@ -73,7 +73,7 @@ class _Header extends StatelessWidget {
   final String t; final int? n;
   @override
   Widget build(BuildContext c) => Padding(padding: const EdgeInsets.fromLTRB(0, 24, 0, 10), child: Row(children: [
-        Expanded(child: Semantics(header: true, child: Text(t.toUpperCase(), style: PlobbyText.eb))),
+        Expanded(child: Semantics(header: true, container: true, child: Text(t.toUpperCase(), style: PlobbyText.eb))),
         if (n != null) Text('$n', style: PlobbyText.eb),
       ]));
 }

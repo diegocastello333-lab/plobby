@@ -76,7 +76,7 @@ class _SS extends ConsumerState<_Sheet> {
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Pill(league ? 'Partido de liga' : 'Partido amistoso', tone: PillTone.neutral, icon: league ? PlobbyIcons.trophy : PlobbyIcons.racket),
           const SizedBox(height: 8),
-          Semantics(header: true, child: Text('Editar partido', style: PlobbyText.t2)),
+          Semantics(header: true, container: true, child: Text('Editar partido', style: PlobbyText.t2)),
           if (m.leagueName != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(m.leagueName!, style: PlobbyText.sub)),
         ])),
         const SizedBox(width: 12),

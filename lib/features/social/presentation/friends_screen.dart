@@ -66,7 +66,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
     final count = ref.watch(friendCountProvider);
     final header = Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Row(children: [
       IconSquareButton(icon: pick == null ? PlobbyIcons.back : PlobbyIcons.close, tooltip: pick == null ? 'Volver' : 'Cancelar', onPressed: () => context.pop()),
-      Expanded(child: Semantics(header: true, child: pick != null
+      Expanded(child: Semantics(header: true, container: true, child: pick != null
           ? Text(pick.title, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: PlobbyHeaderBar.titleStyle)
           : Text.rich(TextSpan(children: [
               const TextSpan(text: 'Amigos '),
@@ -210,7 +210,7 @@ class _Header extends StatelessWidget {
   final String t; final int? n;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-        Expanded(child: Semantics(header: true, child: Text(t.toUpperCase(), style: PlobbyText.eb))),
+        Expanded(child: Semantics(header: true, container: true, child: Text(t.toUpperCase(), style: PlobbyText.eb))),
         if (n != null) Text('$n', style: PlobbyText.eb),
       ]));
 }
@@ -273,7 +273,7 @@ class _FriendTile extends ConsumerWidget {
           Text('ELO', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, letterSpacing: 0, color: AppColors.textMuted)),
         ]),
         const SizedBox(width: 4),
-        Tooltip(message: 'Opciones de ${p.name}', child: Semantics(button: true, label: 'Opciones de ${p.name}', excludeSemantics: true, child: InkResponse(
+        Tooltip(message: 'Opciones de ${p.name}', excludeFromSemantics: true, child: Semantics(button: true, label: 'Opciones de ${p.name}', excludeSemantics: true, child: InkResponse(
             onTap: () => _options(context, ref), radius: 22,
             child: const SizedBox(width: 40, height: 44, child: Center(child: PlobbyIcon(PlobbyIcons.more, size: 20)))))),
       ]),

@@ -43,7 +43,7 @@ class _S extends ConsumerState<WelcomeScreen> {
         SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(24, 18, 24, 22), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const PlobbyLogo(markHeight: 42),
           const Spacer(),
-          Semantics(header: true, child: const Text('Tu comunidad de pádel, en un solo sitio.',
+          Semantics(header: true, container: true, child: const Text('Tu comunidad de pádel, en un solo sitio.',
               style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 28, height: 1.12, letterSpacing: -0.56, color: Colors.white))),
           const SizedBox(height: 14),
           const Text('Organiza partidos, sigue tu ELO y compite con tus amigos y tus ligas.',

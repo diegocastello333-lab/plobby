@@ -27,7 +27,7 @@ class ConversationsScreen extends ConsumerWidget {
         Padding(padding: const EdgeInsets.fromLTRB(20, 14, 20, 0), child: Row(children: [
           IconSquareButton(icon: PlobbyIcons.back, tooltip: 'Volver', onPressed: () => context.pop()),
           const SizedBox(width: 12),
-          Expanded(child: Semantics(header: true, child: Text('Mensajes', textAlign: TextAlign.center, style: PlobbyHeaderBar.titleStyle))),
+          Expanded(child: Semantics(header: true, container: true, child: Text('Mensajes', textAlign: TextAlign.center, style: PlobbyHeaderBar.titleStyle))),
           IconSquareButton(icon: PlobbyIcons.userplus, tooltip: 'Nuevo grupo', onPressed: () => context.push('/messages/group/new')),
           const SizedBox(width: 8),
           IconSquareButton(icon: PlobbyIcons.edit, tooltip: 'Nuevo mensaje', onPressed: () => context.push('/friends')),

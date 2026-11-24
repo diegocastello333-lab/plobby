@@ -186,7 +186,7 @@ class _Card extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(20, 24, 20, 0), padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
         decoration: BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.rMd, boxShadow: AppShadows.card),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Semantics(header: true, child: Text(title, style: PlobbyText.cardTitle)), const SizedBox(height: 10), child,
+          Semantics(header: true, container: true, child: Text(title, style: PlobbyText.cardTitle)), const SizedBox(height: 10), child,
         ]),
       );
 }

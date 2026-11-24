@@ -41,7 +41,7 @@ class _CollapsingTitleScaffoldState extends State<CollapsingTitleScaffold> {
         return Padding(
           padding: EdgeInsets.fromLTRB(20, 26 - 16 * t, 20, 0),
           child: Align(alignment: Alignment.lerp(Alignment.centerLeft, Alignment.center, t)!,
-              child: Semantics(header: true, child: Text(widget.title, style: style, maxLines: 1))),
+              child: Semantics(header: true, container: true, child: Text(widget.title, style: style, maxLines: 1))),
         );
       }),
       if (widget.below != null) widget.below!,

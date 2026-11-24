@@ -132,7 +132,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             Expanded(child: TextField(controller: _c, maxLength: 500, style: PlobbyText.input, cursorColor: AppColors.text, textInputAction: TextInputAction.send, onSubmitted: (_) => _send(),
                 decoration: plobbyInputDecoration(hint: 'Escribe un mensaje', radius: 22, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12)))),
             const SizedBox(width: 8),
-            Tooltip(message: 'Enviar', child: Semantics(button: true, label: 'Enviar', excludeSemantics: true, child: Material(color: AppColors.brand, shape: const CircleBorder(),
+            Tooltip(message: 'Enviar', excludeFromSemantics: true, child: Semantics(button: true, label: 'Enviar', excludeSemantics: true, child: Material(color: AppColors.brand, shape: const CircleBorder(),
                 child: InkWell(customBorder: const CircleBorder(), onTap: _send, child: const SizedBox(width: 44, height: 44, child: Center(child: PlobbyIcon(PlobbyIcons.plane, size: 18, color: AppColors.brandInk))))))),
           ]),
         ),

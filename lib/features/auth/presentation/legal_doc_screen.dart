@@ -47,9 +47,9 @@ List<Widget> renderLegalMarkdown(String md) {
     final line = raw.trimRight();
     if (line.isEmpty) continue;
     if (line.startsWith('# ')) {
-      out.add(Padding(padding: const EdgeInsets.only(bottom: 6), child: Semantics(header: true, child: Text(line.substring(2), style: PlobbyText.t1))));
+      out.add(Padding(padding: const EdgeInsets.only(bottom: 6), child: Semantics(header: true, container: true, child: Text(line.substring(2), style: PlobbyText.t1))));
     } else if (line.startsWith('## ')) {
-      out.add(Padding(padding: const EdgeInsets.only(top: 18, bottom: 6), child: Semantics(header: true, child: Text(line.substring(3), style: PlobbyText.sec))));
+      out.add(Padding(padding: const EdgeInsets.only(top: 18, bottom: 6), child: Semantics(header: true, container: true, child: Text(line.substring(3), style: PlobbyText.sec))));
     } else if (line.startsWith('> ')) {
       out.add(Container(
         margin: const EdgeInsets.symmetric(vertical: 8), padding: const EdgeInsets.all(12),

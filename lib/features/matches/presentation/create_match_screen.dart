@@ -114,7 +114,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _TypeTag(friendly: _friendly),
             const SizedBox(height: 20),
-            Semantics(header: true, child: Text('Crear partido', style: PlobbyText.t2)),
+            Semantics(header: true, container: true, child: Text('Crear partido', style: PlobbyText.t2)),
           ])),
           const SizedBox(width: 12),
           IconSquareButton(icon: PlobbyIcons.close, tooltip: 'Cerrar', onPressed: () => context.pop()),
@@ -275,7 +275,7 @@ class _S extends ConsumerState<CreateMatchScreen> {
               const SizedBox(width: 10),
               Expanded(child: Text(_names[id] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
               TextButton(onPressed: () => _pickSlot(i, label), child: Text('Cambiar', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.text))),
-              Tooltip(message: 'Quitar a ${_names[id]}', child: Semantics(button: true, label: 'Quitar a ${_names[id]}', excludeSemantics: true, child: InkResponse(radius: 20,
+              Tooltip(message: 'Quitar a ${_names[id]}', excludeFromSemantics: true, child: Semantics(button: true, label: 'Quitar a ${_names[id]}', excludeSemantics: true, child: InkResponse(radius: 20,
                   onTap: () => setState(() => _setSlot(i, null)), child: SizedBox(width: 36, height: 44, child: Center(child: PlobbyIcon(PlobbyIcons.close, size: 16, color: AppColors.textMuted)))))),
             ]),
           ));

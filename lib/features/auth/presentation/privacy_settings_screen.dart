@@ -244,7 +244,7 @@ class _PlobbyDialog extends StatelessWidget {
           Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(color: AppColors.dangerSoft, borderRadius: BorderRadius.circular(12)),
               child: PlobbyIcon(icon, size: 20, color: AppColors.danger)),
           const SizedBox(height: 14),
-          Semantics(header: true, child: Text(title, style: PlobbyText.t2)),
+          Semantics(header: true, container: true, child: Text(title, style: PlobbyText.t2)),
           const SizedBox(height: 6),
           Text(text, style: PlobbyText.sub),
           if (extra != null) ...[const SizedBox(height: 14), extra!],
@@ -259,7 +259,7 @@ class _SectionTitle extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Semantics(header: true, child: Text(text.toUpperCase(), style: PlobbyText.eb)));
+      child: Semantics(header: true, container: true, child: Text(text.toUpperCase(), style: PlobbyText.eb)));
 }
 
 class _Group extends StatelessWidget {

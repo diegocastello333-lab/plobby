@@ -31,7 +31,7 @@ class EmptyStateCard extends StatelessWidget {
                 child: ExcludeSemantics(child: Icon(icon, size: 28, color: AppColors.brandText))),
           ),
           const SizedBox(height: 16),
-          Semantics(header: true, child: Text(title, textAlign: TextAlign.center, style: PlobbyText.cardTitle.copyWith(fontSize: 17, height: 1.25))),
+          Semantics(header: true, container: true, child: Text(title, textAlign: TextAlign.center, style: PlobbyText.cardTitle.copyWith(fontSize: 17, height: 1.25))),
           const SizedBox(height: 6),
           Text(text, textAlign: TextAlign.center, style: PlobbyText.sub),
           if (primary != null || secondary != null) const SizedBox(height: 20),

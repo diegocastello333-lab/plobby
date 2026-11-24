@@ -118,7 +118,7 @@ class TournamentsTab extends ConsumerWidget {
           PlobbyButton(label: 'Crear torneo', icon: PlobbyIcons.plus, kind: PlobbyButtonKind.small, onPressed: () => context.push('/tournaments/new')),
         ]),
         const SizedBox(height: 22),
-        Semantics(header: true, child: Text('Mis torneos', style: PlobbyText.t2)),
+        Semantics(header: true, container: true, child: Text('Mis torneos', style: PlobbyText.t2)),
         const SizedBox(height: 12),
         mine.when(
           loading: () => const Column(children: [LoadingBlock(height: 250, radius: AppRadius.md), SizedBox(height: 14), LoadingBlock(height: 250, radius: AppRadius.md)]),

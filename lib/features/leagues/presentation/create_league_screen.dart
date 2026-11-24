@@ -42,7 +42,7 @@ class CreateLeagueScreen extends ConsumerWidget {
           ])),
           Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0), child: StepBar(step: s.step, total: 5)),
           Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(20, 30, 20, 24), children: [
-            Semantics(header: true, child: Text(_titles[s.step - 1], style: PlobbyText.t1)),
+            Semantics(header: true, container: true, child: Text(_titles[s.step - 1], style: PlobbyText.t1)),
             const SizedBox(height: 6),
             Text(_subtitles[s.step - 1], style: PlobbyText.sub),
             const SizedBox(height: 22),

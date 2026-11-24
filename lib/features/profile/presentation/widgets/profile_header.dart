@@ -62,8 +62,8 @@ class ProfileHeader extends ConsumerWidget {
           const SizedBox(width: 16),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Flexible(child: Text(p.fullName, maxLines: 2, overflow: TextOverflow.ellipsis,   // 2 líneas: con texto grande no se corta
-                  style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.text, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48))),
+              Flexible(child: Semantics(header: true, container: true, child: Text(p.fullName, maxLines: 2, overflow: TextOverflow.ellipsis,   // 2 líneas: con texto grande no se corta
+                  style: TextStyle(fontFamily: AppTypography.sansFamily, color: AppColors.text, fontSize: 24, height: 1.1, fontWeight: FontWeight.w800, letterSpacing: -0.48)))),
               if (p.verified) const Padding(padding: EdgeInsets.only(left: 7), child: VerifiedBadge(size: 22)),
             ]),
             const SizedBox(height: 3),

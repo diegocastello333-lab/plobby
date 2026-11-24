@@ -56,7 +56,7 @@ class OnboardingScreen extends ConsumerWidget {
 
 /// `.ob-t` (Unbounded 23/600) + subtítulo.
 Widget _title(String t, String s) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Semantics(header: true, child: Text(t, style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, height: 1.15, letterSpacing: -0.46, color: AppColors.text))),
+      Semantics(header: true, container: true, child: Text(t, style: TextStyle(fontFamily: AppTypography.displayFamily, fontWeight: FontWeight.w600, fontSize: 23, height: 1.15, letterSpacing: -0.46, color: AppColors.text))),
       const SizedBox(height: 8), Text(s, style: PlobbyText.sub.copyWith(height: 1.5)), const SizedBox(height: 22)]);
 
 /// `.ob-c`: opción en píldora de 42 px con borde 1.5; seleccionada en lima.
