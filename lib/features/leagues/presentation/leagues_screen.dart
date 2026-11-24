@@ -35,12 +35,6 @@ class LeaguesScreen extends ConsumerWidget {
             IconSquareButton(icon: PlobbyIcons.link, tooltip: 'Unirme con código', onPressed: () => showJoinByCodeSheet(context)),
           ]),
           const SizedBox(height: 22),
-          mine.when(
-            loading: () => const LoadingBlock(height: 119, radius: AppRadius.md),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (l) => _Overview(leagues: l),
-          ),
-          const SizedBox(height: 30),
           // .sec «Mis ligas» + .sbtn «Crear liga»
           // Un solo «Crear liga»: aquí si ya tienes ligas; si no, en la tarjeta vacía (antes había dos botones a la vez).
           Row(children: [
@@ -60,6 +54,9 @@ class LeaguesScreen extends ConsumerWidget {
                     for (var i = 0; i < l.length; i++) Padding(padding: const EdgeInsets.only(bottom: 14), child: AppearOnce(animationKey: 'lg:${l[i].id}', index: i, child: MyLeagueCard(league: l[i]))),
                   ]),
           ),
+          // Resumen (ligas activas, partidos, títulos) DESPUÉS de tus ligas: lo primero que se ve es tu liga activa, con tu
+          // posición y tu progreso.
+          if (mine.valueOrNull?.isNotEmpty ?? false) ...[const SizedBox(height: 20), _Overview(leagues: mine.value!)],
           const SizedBox(height: 34),
           Semantics(header: true, child: const Text('Descubrir ligas', style: PlobbyText.t2)),
           const SizedBox(height: 4),

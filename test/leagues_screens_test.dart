@@ -36,8 +36,10 @@ void main() {
     await t.tap(find.bySemanticsLabel('Competiciones').last);   // la pestaña «Ligas» ahora es «Competiciones» (abre Ligas por defecto)
     await _settle(t, 8);
     expect(find.text('Compite con tu comunidad.'), findsOneWidget);
-    expect(find.text('ACTIVAS'), findsOneWidget);
+    // Lo primero es tu liga activa (posición y progreso); el resumen va después de tus ligas.
     expect(find.text('TU POSICIÓN'), findsWidgets);
+    expect(find.text('ACTIVAS', skipOffstage: false), findsOneWidget);
+    expect(t.getTopLeft(find.byType(MyLeagueCard).first).dy, lessThan(t.getTopLeft(find.text('ACTIVAS', skipOffstage: false)).dy));
     expect(find.byType(MyLeagueCard), findsWidgets);
     await t.tap(find.text('BÜNKER PADEL LEAGUE'));
     await _settle(t, 8);
