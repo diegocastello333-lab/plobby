@@ -122,7 +122,7 @@ RecapData recapFromServerJson(Map<String, dynamic> j, {String? sharerId}) {
 
 String recapDuration(int seconds) {
   final h = seconds ~/ 3600, mn = (seconds ~/ 60) % 60;
-  return h > 0 ? '$h h ${mn.toString().padLeft(2, '0')} min' : '$mn min';
+  return h > 0 ? '$h h ${mn.toString().padLeft(2, '0')} min' : seconds < 60 ? '<1 min' : '$mn min';
 }
 
 String recapDate(DateTime d) {

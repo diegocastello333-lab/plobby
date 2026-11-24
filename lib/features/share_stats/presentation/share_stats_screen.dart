@@ -55,7 +55,7 @@ class _State extends ConsumerState<ShareStatsScreen> {
       last: calc.confirmed(d.matches).take(10).map((m) => m.won).toList(),
       club: showClub ? p.club?.name : null,
       partner: showPartner && p.partner?.status == PartnerStatus.accepted ? p.partner!.name : null,
-      avatar: _photo, avatarId: p.avatarId,
+      avatar: _photo, avatarId: p.avatarId, verified: p.verified,
     );
   }
 

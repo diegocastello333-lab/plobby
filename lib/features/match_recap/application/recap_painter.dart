@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+import '../../profile/domain/verified_users.dart';
+import '../../../core/share/verified_mark.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -130,6 +132,7 @@ class RecapPainter extends CustomPainter {
     }
     c.restore();
     c.drawCircle(center, size / 2 + ringW / 2, Paint()..color = ring..style = PaintingStyle.stroke..strokeWidth = ringW..isAntiAlias = true);
+    if (isVerifiedUser(p.id)) paintVerifiedMark(c, r.inflate(ringW / 2));
     _st.obstacle(Rect.fromCircle(center: center, radius: size / 2 + ringW), 'avatar ${p.first}');
   }
 

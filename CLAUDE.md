@@ -442,3 +442,12 @@ Resumen de las sesiones de integración (11–12 nov 2026). Léelo antes de toca
   y escucha `ThemePrefs.notifier`. Selector «Apariencia» en Perfil → Ajustes y privacidad (también en la web).
 - Web: `index.html` oscuro por defecto (#0D110F, un solo theme-color); `app_boot.js` lee `flutter.plobby.theme` y pone
   `html.light` + theme-color claro si toca. Tests: `flutter_test_config` fija `ThemePref.system`; `test/theme_pref_test.dart`.
+
+## Share Match en iPhone + sello en imágenes (24 nov 2026, rama `share-verificado`, PUBLICADA; anterior en `backup/web-v12-antes-de-share-verificado`; APK 1.9.5)
+- Vista previa de Share Match en blanco en Safari (iPhone): pintaba solo el fondo. El pintor funciona en Chromium con los dos
+  motores (lab `tool/recap_lab/main.dart`), así que se atribuye a las fotos decodificadas por el navegador en Safari. En la web
+  `fetchUiImage` decodifica en Dart (`core/net/pixel_decode.dart`, `image` diferido) → `decodeImageFromPixels`. NO verificado en Safari real.
+- Sello de verificado en todas las imágenes para compartir: `core/share/verified_mark.dart` (roseta en la esquina de la foto)
+  en RecapPainter, gamification_share y ShareCardPainter (`verified`).
+- `NetImage.loadMissing()` en main: miniaturas inexistentes recordadas 24 h entre aperturas (seguían ~300 peticiones 400/6 h).
+- Duración < 60 s → «<1 min». Humo web: `scratchpad/perf/smoke.js` (23 rutas, 0 errores de consola).

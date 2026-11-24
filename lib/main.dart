@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'core/a11y/web_a11y.dart';
 import 'core/theme/theme_pref.dart';
+import 'core/widgets/net_image.dart';
 import 'core/widgets/loading_bar.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,8 @@ Future<void> main() async {
   AppErrors.install();
   await Future.wait([
     AppHaptics.load(),   // preferencia «Vibración» de Ajustes, antes del primer toque
-    ThemePrefs.load(),   // apariencia (oscuro por defecto) antes del primer fotograma: sin destello claro
+    ThemePrefs.load(),
+    NetImage.loadMissing(),   // miniaturas que no existen: no volver a pedirlas en cada apertura   // apariencia (oscuro por defecto) antes del primer fotograma: sin destello claro
     GateCache.load(),
     HomeSnapshotStore.load(),   // cabecera del Inicio al instante (stale-while-revalidate)
     ThumbsHealed.load(),

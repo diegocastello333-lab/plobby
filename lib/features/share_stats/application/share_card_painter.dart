@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../../../core/share/verified_mark.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
@@ -18,7 +19,7 @@ extension ShareFormatX on ShareFormat {
 class ShareCardData {
   const ShareCardData({required this.name, required this.username, required this.elo, required this.eloDelta, required this.category,
     required this.played, required this.winRate, required this.wins, required this.losses, required this.streak, required this.bestStreak,
-    required this.periodLabel, required this.last, this.club, this.partner, this.avatar, this.avatarId});
+    required this.periodLabel, required this.last, this.club, this.partner, this.avatar, this.avatarId, this.verified = false});
   final String name, username, category, periodLabel;
   final int elo, eloDelta, played, winRate, wins, losses, streak, bestStreak;
   final List<bool> last; // últimos resultados, más reciente primero
@@ -26,6 +27,8 @@ class ShareCardData {
   final ui.Image? avatar;
   /// Avatar de Plobby (`a1`…`a12`) si no hay foto descargada; si tampoco, iniciales.
   final String? avatarId;
+  /// Perfil verificado: sello lima en la esquina de la foto.
+  final bool verified;
   String get initials {
     final w = name.trim().split(RegExp(r'\s+')).where((x) => x.isNotEmpty).toList();
     return w.isEmpty ? '?' : w.take(2).map((x) => x[0]).join().toUpperCase();
@@ -101,6 +104,7 @@ class ShareCardPainter extends CustomPainter {
       c.restore();
     }
     c.restore();
+    if (d.verified) paintVerifiedMark(c, Rect.fromCircle(center: Offset(acx, acy), radius: r + 8));
     t.obstacle(Rect.fromCircle(center: Offset(acx, acy), radius: r + 8), 'avatar');
     final nx = _m + r * 2 + 44, nW = W - _m - nx;
     t.draw(d.name, nx, acy - 18, 68, _ivory, v: VAnchor.baseline, maxWidth: nW, minFontSize: 46, weight: FontWeight.w800, label: 'nombre');
