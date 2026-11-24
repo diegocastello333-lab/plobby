@@ -58,7 +58,7 @@ class LeagueChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
       ChipTone.lime => (AppColors.brand, AppColors.brandInk),
-      ChipTone.glass => (AppColors.inkA(0x8C), Colors.white),
+      ChipTone.glass => (const Color(0x8C171C19), Colors.white),   // sobre la portada: siempre oscuro
       ChipTone.dark => (AppColors.inverse, AppColors.onInverse),
       ChipTone.neutral => (AppColors.surfaceSunken, AppColors.text),
     };

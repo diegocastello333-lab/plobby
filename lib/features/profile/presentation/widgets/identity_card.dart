@@ -53,7 +53,7 @@ class IdentityCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Material(
-        color: Colors.white, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
+        color: AppColors.surface, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
         child: Column(children: [for (var i = 0; i < rows.length; i++) ...[if (i > 0) const Divider(height: 1), rows[i]]]),
       ),
     );
@@ -81,7 +81,7 @@ class _Row extends StatelessWidget {
       leading: avatar != null
           ? ClipOval(child: SizedBox(width: 34, height: 34, child: avatarUrl != null && avatarUrl!.isNotEmpty
               ? NetImage(avatarUrl!, fit: BoxFit.cover, cacheWidth: 102, errorBuilder: (_, __, ___) => avatar!) : avatar))
-          : Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.ink900))),
+          : Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceSunken, borderRadius: BorderRadius.circular(9)), child: Center(child: PlobbyIcon(icon, size: 18, color: AppColors.text))),
       title: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: PlobbyColors.mute)),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: PlobbyColors.charcoal)),

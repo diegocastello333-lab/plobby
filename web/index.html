@@ -9,8 +9,9 @@
   <meta name="description" content="Plobby: tu pádel con amigos. Partidos, ligas, torneos, ranking y estadísticas.">
   <!-- Fase de pruebas privada: que no aparezca en buscadores (también se envía como cabecera X-Robots-Tag). -->
   <meta name="robots" content="noindex, nofollow">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#F6F8F1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F6F8F1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0D110F" media="(prefers-color-scheme: dark)">
   <meta name="format-detection" content="telephone=no">
 
   <!-- iPhone: «Añadir a pantalla de inicio» → app a pantalla completa, con nombre e icono de Plobby. -->
@@ -62,6 +63,8 @@
       background: #D2F548; color: #171C19; font: 700 14px -apple-system, system-ui, sans-serif;
     }
     #plobby-noscript { font: 16px -apple-system, system-ui, sans-serif; padding: 24px; color: #171C19; }
+    /* Modo oscuro del sistema: fondo oscuro desde el primer instante (sin destello blanco antes de que cargue Flutter). */
+    @media (prefers-color-scheme: dark) { html, body { background: #0D110F; } #plobby-noscript { color: #F2F5EF; } }
   </style>
 </head>
 <body>

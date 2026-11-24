@@ -385,7 +385,7 @@ class _Story extends StatelessWidget {
     final first = user.name.split(' ').first;
     return Semantics(button: true, selected: selected, label: 'Ver el partido de $first', excludeSemantics: true, child: GestureDetector(onTap: onTap, child: SizedBox(width: 68, child: Column(children: [
       AnimatedContainer(duration: Motion.normal, width: 66, height: 66, padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.ink900, width: 2), color: selected ? AppColors.ink900 : Colors.transparent),
+          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.text, width: 2), color: selected ? AppColors.text : Colors.transparent),
           child: ClipOval(child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
               ? NetImage(user.avatarUrl!, fit: BoxFit.cover, cacheWidth: 168, errorBuilder: (_, __, ___) => SilhouetteAvatar(seed: user.id, size: 56))
               : SilhouetteAvatar(seed: user.id, size: 56))),
@@ -427,7 +427,7 @@ class _FriendMatchPanel extends StatelessWidget {
         row(m.teamB, !m.won, false),
         const SizedBox(height: 16),
         // Botón oscuro 46 px del HTML. Acción existente: abre el feed, donde está la publicación del partido.
-        Semantics(button: true, label: 'Ver partido', excludeSemantics: true, child: Pressable(child: Material(color: AppColors.ink900, borderRadius: AppRadius.rMd,
+        Semantics(button: true, label: 'Ver partido', excludeSemantics: true, child: Pressable(child: Material(color: AppColors.inverse, borderRadius: AppRadius.rMd,
             child: InkWell(borderRadius: AppRadius.rMd, onTap: () => HomeNav.seeAllFriendMatches(context), child: const SizedBox(height: 46, child: Center(child: Text('Ver partido',
                 style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0, color: AppColors.ink50)))))))),
       ]),
@@ -454,7 +454,7 @@ class _PlayedCard extends StatelessWidget {
           decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.all(Radius.circular(20)), boxShadow: AppShadows.card),
           child: Material(type: MaterialType.transparency, borderRadius: const BorderRadius.all(Radius.circular(20)), clipBehavior: Clip.antiAlias, child: InkWell(onTap: onTap,
             child: Stack(children: [
-              Positioned(left: 0, top: 16, bottom: 16, child: Container(width: 4, decoration: BoxDecoration(color: win ? AppColors.ink900 : const Color(0x665C6660),
+              Positioned(left: 0, top: 16, bottom: 16, child: Container(width: 4, decoration: BoxDecoration(color: win ? AppColors.text : const Color(0x665C6660),
                   borderRadius: const BorderRadius.horizontal(right: Radius.circular(4))))),
               Padding(padding: const EdgeInsets.fromLTRB(20, 14, 16, 14), child: Row(children: [
                 SizedBox(width: 44, height: 44, child: ClipOval(child: avatar)),
@@ -469,7 +469,7 @@ class _PlayedCard extends StatelessWidget {
                 ])),
                 const SizedBox(width: 12),
                 Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4), decoration: BoxDecoration(color: win ? AppColors.ink900 : const Color(0x245C6660), borderRadius: AppRadius.rPill),
+                  Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4), decoration: BoxDecoration(color: win ? AppColors.inverse : const Color(0x245C6660), borderRadius: AppRadius.rPill),
                       child: Text(win ? 'Victoria' : 'Derrota', style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 11, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: .44, color: win ? AppColors.ink50 : AppColors.textMuted))),
                   const SizedBox(height: 8),
                   Text(m.sets.map((s) => '${s.$1}-${s.$2}').join(' '), style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 16, height: 1, fontWeight: FontWeight.w700, letterSpacing: 0, color: fg)),

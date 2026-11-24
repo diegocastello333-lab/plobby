@@ -72,7 +72,7 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
       constraints: const BoxConstraints(minHeight: 48), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14)),
       child: Row(children: [
         Expanded(child: Text(label, style: TextStyle(fontFamily: AppTypography.sansFamily, fontSize: 12, height: 1.25, color: PlobbyColors.mute, fontWeight: FontWeight.w600, letterSpacing: 0))),
         const SizedBox(width: 8),

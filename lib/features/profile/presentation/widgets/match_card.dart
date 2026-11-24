@@ -15,7 +15,7 @@ class MatchCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: Colors.white, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
+        color: AppColors.surface, borderRadius: BorderRadius.circular(14), clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Container(

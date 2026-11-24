@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/collapsing_title.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/motion/app_motion.dart';
@@ -56,19 +57,19 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
     ref.listen<int>(competitionsTabProvider, (_, i) { if (_fromSwipe) { _fromSwipe = false; } else { _goTo(i); } });
     return Scaffold(
       backgroundColor: Colors.transparent,   // fondo vivo de la barra inferior
-      body: SafeArea(bottom: false, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Padding(padding: const EdgeInsets.fromLTRB(20, 26, 20, 0), child: Semantics(header: true, child: Text('Competiciones', style: PlobbyText.t1))),
-        Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      // Título grande que se encoge al desplazar la lista (como iOS); las pestañas quedan fijas debajo.
+      body: SafeArea(bottom: false, child: CollapsingTitleScaffold(title: 'Competiciones',
+        below: Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: ScrollLinkedTabs(labels: const ['Ligas', 'Torneos'], controller: _pc, onTap: (i) {
               AppHaptics.light();
               if (ref.read(competitionsTabProvider) == i) { _goTo(i); } else { ref.read(competitionsTabProvider.notifier).state = i; }
             })),
         // Cada sección conserva su desplazamiento y sus datos al cambiar de una a otra (keep-alive).
-        Expanded(child: PageView(controller: _pc, onPageChanged: (i) { if (ref.read(competitionsTabProvider) != i) { _fromSwipe = true; ref.read(competitionsTabProvider.notifier).state = i; } }, children: [
+        child: PageView(controller: _pc, onPageChanged: (i) { if (ref.read(competitionsTabProvider) != i) { _fromSwipe = true; ref.read(competitionsTabProvider.notifier).state = i; } }, children: [
           _DepthPage(controller: _pc, index: 0, child: const LeaguesScreen(embedded: true)),
           _DepthPage(controller: _pc, index: 1, child: const TournamentsTab()),
-        ])),
-      ])),
+        ]),
+      )),
     );
   }
 }
